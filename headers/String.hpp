@@ -1,12 +1,12 @@
-#ifndef MY_STLIB_STRING_HPP
-#define MY_STLIB_STRING_HPP
+#ifndef MLIB_STRING_HPP
+#define MLIB_STRING_HPP
 
 #include <iostream>
 #include <cstring>
 #include "Utils.hpp"
 
-namespace mlib
-{
+namespace mlib {
+
 template<size_t DefaultCapacity, size_t GrowFactor>
 class StringBuffer final
 {
@@ -141,10 +141,8 @@ private:
     }
 };
 
-#endif
-
 template<size_t DefaultCapacity = 8, size_t GrowFactor = 2>
-class String
+class String final
 {
 private:
     StringBuffer<DefaultCapacity, GrowFactor> m_buf;
@@ -202,3 +200,5 @@ public:
 };
 
 } // namespace mlib
+
+#endif

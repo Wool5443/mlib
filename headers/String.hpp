@@ -7,13 +7,15 @@
 
 namespace mlib
 {
-template<size_t DefCapacity, size_t GrowFactor>
+template<size_t DefaultCapacity, size_t GrowFactor>
 class StringBuffer final
 {
 private:
     char*  m_buf;
     size_t m_capacity;
 public:
+    char*        RawPtr()       noexcept { return m_buf; }
+    const char*  RawPtr() const noexcept { return m_buf; }
     size_t       Length;
     Utils::Error Error = Utils::Error();
 private:
@@ -26,10 +28,10 @@ private:
             std::memcpy(m_buf, buf, length);
     }
 public:
-    StringBuffer(const char* buf = nullptr)
-        : StringBuffer(DefCapacity, 0, buf) {}
+    explicit StringBuffer(const char* buf = nullptr)
+        : StringBuffer(DefaultCapacity, 0, buf) {}
 
-    StringBuffer(size_t hintLength, const char* buf = nullptr)
+    explicit StringBuffer(size_t hintLength, const char* buf = nullptr)
         : StringBuffer(StringBuffer::calculateCapacity(hintLength), hintLength, buf) {}
 public:
     StringBuffer(const StringBuffer& other)
@@ -40,7 +42,7 @@ public:
         std::memcpy(m_buf, other.m_buf, Length);
     }
 
-    StringBuffer(StringBuffer&& other)
+    StringBuffer(StringBuffer&& other) noexcept
         : m_buf(other.m_buf), m_capacity(other.m_capacity),
           Length(other.Length)
     {
@@ -68,7 +70,7 @@ public:
         Error      = Utils::Error();
     }
 
-    StringBuffer& operator=(StringBuffer&& other)
+    StringBuffer& operator=(StringBuffer&& other) noexcept
     {
         std::swap(m_buf, other.m_buf);
         m_capacity = other.m_capacity;
@@ -112,12 +114,12 @@ public:
         delete[] m_buf;
     }
 public:
-    char& operator[](size_t index) &
+    char& operator[](size_t index) & noexcept
     {
         return m_buf[index];
     }
 
-    const char& operator[](size_t index) const &
+    const char& operator[](size_t index) const & noexcept
     {
         return m_buf[index];
     }
@@ -128,9 +130,9 @@ public:
         return out;
     }
 private:
-    static inline size_t calculateCapacity(size_t hintLength)
+    static inline size_t calculateCapacity(size_t hintLength) noexcept
     {
-        size_t capacity = DefCapacity;
+        size_t capacity = DefaultCapacity;
 
         while (capacity <= hintLength)
             capacity *= GrowFactor;
@@ -141,11 +143,11 @@ private:
 
 #endif
 
-template<size_t DefCapacity = 8, size_t GrowFactor = 2>
+template<size_t DefaultCapacity = 8, size_t GrowFactor = 2>
 class String
 {
 private:
-    StringBuffer<DefCapacity, GrowFactor> m_buf;
+    StringBuffer<DefaultCapacity, GrowFactor> m_buf;
 public:
     size_t       Length() { return m_buf.Length; }
     Utils::Error Error()  { return m_buf.Error;  }
@@ -163,6 +165,36 @@ public:
         : String(string, strlen(string)) {}
 
 public:
+    char& operator[](size_t index) &
+    {
+        return m_buf[index];
+    }
+
+    const char& operator[](size_t index) const &
+    {
+        return m_buf[index];
+    }
+
+    String& operator+=(const String& other)
+    {
+        std::size_t newLength = this->Length() + other.Length();
+
+        m_buf.Realloc(newLength);
+        if (Error()) return *this;
+
+        std::memcpy(m_buf.RawPtr() + this->Length(), other.m_buf.RawPtr(), other.Length());
+
+        return *this;
+    }
+
+    friend String operator+(const String& lhs, const String& rhs)
+    {
+        String<DefaultCapacity, GrowFactor> result = lhs;
+        lhs += rhs;
+
+        return result;
+    }
+
     friend std::ostream& operator<<(std::ostream& out, const String& string)
     {
         return out << string.m_buf;

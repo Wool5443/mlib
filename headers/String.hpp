@@ -12,11 +12,12 @@ template<size_t DefaultCapacity = 8, size_t GrowFactor = 2>
 class String final
 {
 private:
-    // StringBuffer<DefaultCapacity, GrowFactor> m_buf;
     Buffer<char, DefaultCapacity, GrowFactor> m_buf;
 public:
     size_t       Length() const noexcept { return m_buf.Length; }
     Utils::Error Error()  const noexcept { return m_buf.Error;  }
+    char*        RawPtr()       noexcept { return static_cast<char*>(*this);       }
+    const char*  RawPtr() const noexcept { return static_cast<const char*>(*this); }
 public:
     String()
         : m_buf() {}
@@ -29,7 +30,6 @@ public:
 
     String(const char* string)
         : String(string, strlen(string)) {}
-
 public:
     operator char*()             noexcept { return m_buf.RawPtr(); }
     operator const char*() const noexcept { return m_buf.RawPtr(); }
@@ -44,17 +44,35 @@ public:
     {
         return m_buf[index];
     }
-
-    String& operator+=(const String& other)
+private:
+    String& append(const char* string, size_t length)
     {
-        std::size_t newLength = this->Length() + other.Length();
+        size_t newLength = this->Length() + length;
 
         m_buf.Realloc(newLength);
         if (Error()) return *this;
 
-        std::memcpy(m_buf.RawPtr() + this->Length(), other.m_buf.RawPtr(), other.Length());
+        std::memcpy(m_buf.RawPtr() + this->Length(), string, length);
 
         return *this;
+    }
+public:
+    String& operator+=(const char* other)
+    {
+        return append(other, strlen(other));
+    }
+
+    String& operator+=(const String& other)
+    {
+        return append(other.m_buf.RawPtr(), other.Length());
+    }
+
+    friend String operator+(const String& lhs, const char* rhs)
+    {
+        String<DefaultCapacity, GrowFactor> result = lhs;
+        lhs += rhs;
+
+        return result;
     }
 
     friend String operator+(const String& lhs, const String& rhs)

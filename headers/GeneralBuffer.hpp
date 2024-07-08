@@ -17,6 +17,7 @@ public:
     T*           RawPtr()       noexcept { return m_buf; }
     const T*     RawPtr() const noexcept { return m_buf; }
     size_t       Length;
+    size_t       GetCapacity() const noexcept { return m_capacity; }
     Utils::Error Error = Utils::Error();
 private:
     Buffer(size_t capacity, size_t length, const char* buf)

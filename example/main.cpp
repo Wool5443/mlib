@@ -20,15 +20,18 @@ int main()
 
     std::cout << a << '\n' << b << '\n';
 
-    Vector<int> vec1(8);
+
+    size_t n = 10;
+
+    Vector<int> vec1;
+
+    for (size_t i = 0; i < n; i++)
+        vec1.PushBack(i);
+
+    Vector<int> vec2 = vec1;
 
     for (size_t i = 0; i < vec1.Length(); i++)
-        vec1[i] = i;
-
-    Vector<int> vec2(vec1);
-
-    for (size_t i = 0; i < vec1.Length(); i++)
-        vec1[i] = i * i;
+        vec1[i] *= vec1[i];
 
     PrintVector<int>(vec1);
     PrintVector<int>(vec2);

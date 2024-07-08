@@ -115,10 +115,10 @@ public:
         for (size_t i = 0; i < Length; i++)
             newBuf[i] = m_buf[i];
 
+        delete[] m_buf;
+
         m_buf      = newBuf;
         m_capacity = newCapacity;
-
-        delete[] m_buf;
     }
 public:
     T& operator[](size_t index) & noexcept

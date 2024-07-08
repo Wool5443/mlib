@@ -15,8 +15,8 @@ private:
     // StringBuffer<DefaultCapacity, GrowFactor> m_buf;
     Buffer<char, DefaultCapacity, GrowFactor> m_buf;
 public:
-    size_t       Length() { return m_buf.Length; }
-    Utils::Error Error()  { return m_buf.Error;  }
+    size_t       Length() const noexcept { return m_buf.Length; }
+    Utils::Error Error()  const noexcept { return m_buf.Error;  }
 public:
     String()
         : m_buf() {}
@@ -31,12 +31,12 @@ public:
         : String(string, strlen(string)) {}
 
 public:
-    char& operator[](size_t index) &
+    char& operator[](size_t index) & noexcept
     {
         return m_buf[index];
     }
 
-    const char& operator[](size_t index) const &
+    const char& operator[](size_t index) const & noexcept
     {
         return m_buf[index];
     }

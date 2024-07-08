@@ -161,6 +161,12 @@ public:
 
     String(const char* string)
         : String(string, strlen(string)) {}
+
+public:
+    friend std::ostream& operator<<(std::ostream& out, const String& string)
+    {
+        return out << string.m_buf;
+    }
 };
 
 } // namespace mlib

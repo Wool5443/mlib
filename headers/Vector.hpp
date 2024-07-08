@@ -8,13 +8,27 @@ namespace mlib {
 template<typename T, size_t DefaultCapacity = 8, size_t GrowFactor = 2>
 class Vector final
 {
+private:
     Buffer<T, DefaultCapacity, GrowFactor> m_buf;
-
+public:
+    size_t       Length() const noexcept  { return m_buf.Length; }
+    Utils::Error Error()  const noexcept  { return m_buf.Error;  }
 public:
     Vector()
         : m_buf() {}
     Vector(size_t hintLength)
         : m_buf(hintLength) {}
+
+public:
+    T& operator[](size_t index) & noexcept
+    {
+        return m_buf[index];
+    }
+
+    const T& operator[](size_t index) const & noexcept
+    {
+        return m_buf[index];
+    }
 };
 
 } //namespace mlib

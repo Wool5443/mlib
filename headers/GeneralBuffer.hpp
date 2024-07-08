@@ -10,7 +10,7 @@ namespace mlib {
 template<typename T, size_t DefaultCapacity, size_t GrowFactor>
 class Buffer final
 {
-protected:
+private:
     T*     m_buf;
     size_t m_capacity;
 public:

@@ -14,8 +14,8 @@ protected:
     T*     m_buf;
     size_t m_capacity;
 public:
-    char*        RawPtr()       noexcept { return m_buf; }
-    const char*  RawPtr() const noexcept { return m_buf; }
+    T*           RawPtr()       noexcept { return m_buf; }
+    const T*     RawPtr() const noexcept { return m_buf; }
     size_t       Length;
     Utils::Error Error = Utils::Error();
 private:
@@ -121,12 +121,12 @@ public:
         delete[] m_buf;
     }
 public:
-    char& operator[](size_t index) & noexcept
+    T& operator[](size_t index) & noexcept
     {
         return m_buf[index];
     }
 
-    const char& operator[](size_t index) const & noexcept
+    const T& operator[](size_t index) const & noexcept
     {
         return m_buf[index];
     }

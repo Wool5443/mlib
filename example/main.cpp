@@ -1,6 +1,7 @@
 #include <cassert>
 #include "String.hpp"
 #include "Vector.hpp"
+#include "LinkedList.hpp"
 
 template<typename T>
 void PrintVector(mlib::Vector<int>& vec)
@@ -45,6 +46,8 @@ int main()
     for (size_t i = 0; i < words.Length(); i++)
         std::cout << words[i] << ' ';
     std::cout << '\n';
+
+    LinkedList<int> list;
 
     return 0;
 }

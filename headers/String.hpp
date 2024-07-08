@@ -17,19 +17,21 @@ public:
     size_t       Length;
     Utils::Error Error = Utils::Error();
 private:
-    StringBuffer(size_t capacity, size_t length)
+    StringBuffer(size_t capacity, size_t length, const char* buf)
         : m_buf(new char[capacity]{}), m_capacity(capacity), Length(length)
     {
         if (!m_buf)
             Error = CREATE_ERROR(Utils::ErrorCode::ERROR_NO_MEMORY);
+        if (buf)
+            std::memcpy(m_buf, buf, length);
     }
 public:
-    StringBuffer()
-        : StringBuffer(DefCapacity, 0) {}
+    StringBuffer(const char* buf = nullptr)
+        : StringBuffer(DefCapacity, 0, buf) {}
 
-    StringBuffer(size_t hintLength)
-        : StringBuffer(StringBuffer::calculateCapacity(hintLength), hintLength) {}
-
+    StringBuffer(size_t hintLength, const char* buf = nullptr)
+        : StringBuffer(StringBuffer::calculateCapacity(hintLength), hintLength, buf) {}
+public:
     StringBuffer(const StringBuffer& other)
         : StringBuffer(other.m_capacity, other.Length)
     {
@@ -136,6 +138,29 @@ private:
         return capacity;
     }
 };
-}
 
 #endif
+
+template<size_t DefCapacity = 8, size_t GrowFactor = 2>
+class String
+{
+private:
+    StringBuffer<DefCapacity, GrowFactor> m_buf;
+public:
+    size_t       Length() { return m_buf.Length; }
+    Utils::Error Error()  { return m_buf.Error;  }
+public:
+    String()
+        : m_buf() {}
+
+    String(size_t hintLength)
+        : m_buf(hintLength) {}
+
+    String(const char* string, size_t length)
+        : m_buf(length, string) {}
+
+    String(const char* string)
+        : String(string, strlen(string)) {}
+};
+
+} // namespace mlib

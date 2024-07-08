@@ -69,7 +69,7 @@ public:
 
     #define OPERATOR_PLUS_CODE                              \
     {                                                       \
-        String<DefaultCapacity, GrowFactor> result(lhs);    \
+        String<DefaultCapacity, GrowFactor> result{lhs};    \
         lhs += rhs;                                         \
         return result;                                      \
     }

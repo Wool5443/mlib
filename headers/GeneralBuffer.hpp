@@ -8,10 +8,10 @@
 namespace mlib {
 
 template<typename T, size_t DefaultCapacity, size_t GrowFactor>
-class Buffer
+class Buffer final
 {
 protected:
-    char*  m_buf;
+    T*     m_buf;
     size_t m_capacity;
 public:
     char*        RawPtr()       noexcept { return m_buf; }
@@ -40,7 +40,11 @@ public:
         : Buffer(Buffer::calculateCapacity(hintLength), hintLength, buf) {}
 public:
     Buffer(const Buffer& other)
-        : Buffer(other.m_capacity, other.Length, other.m_buf) {}
+        : Buffer(other.m_capacity, other.Length, nullptr)
+    {
+        for (size_t i = 0; i < other.Length; i++)
+            m_buf[i] = other[i];
+    }
 
     Buffer(Buffer&& other) noexcept
         : m_buf(other.m_buf), m_capacity(other.m_capacity),
@@ -62,7 +66,7 @@ public:
         }
 
         for (size_t i = 0; i < other.Length; i++)
-            newBuf[i] = other.m_buf[i];
+            newBuf[i] = other[i];
 
         delete[] m_buf;
 
@@ -109,7 +113,7 @@ public:
         }
 
         for (size_t i = 0; i < Length; i++)
-            newBuf[i] = m_buf;
+            newBuf[i] = m_buf[i];
 
         m_buf      = newBuf;
         m_capacity = newCapacity;

@@ -30,7 +30,7 @@ private:
             return;
         }
         if (buf)
-            std::memcpy(m_buf, buf, length);
+            std::memcpy((char*)m_buf, buf, length);
     }
 public:
     explicit Buffer(const char* buf = nullptr)
@@ -74,6 +74,8 @@ public:
         m_capacity = other.m_capacity;
         Length     = other.Length;
         Error      = Utils::Error();
+
+        return *this;
     }
 
     Buffer& operator=(Buffer&& other) noexcept

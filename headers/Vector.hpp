@@ -16,7 +16,7 @@ public:
 public:
     Vector()
         : m_buf() {}
-    Vector(size_t hintLength)
+    explicit Vector(size_t hintLength)
         : m_buf(hintLength) {}
 public:
     void PushBack(const T& element)

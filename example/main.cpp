@@ -36,5 +36,15 @@ int main()
     PrintVector<int>(vec1);
     PrintVector<int>(vec2);
 
+    String string = "Hello my\ndear friends!";
+
+    Vector<String<>> words = string.Split();
+
+    std::cout << string << '\n';
+
+    for (size_t i = 0; i < words.Length(); i++)
+        std::cout << words[i] << ' ';
+    std::cout << '\n';
+
     return 0;
 }

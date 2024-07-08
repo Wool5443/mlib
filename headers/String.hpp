@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include "Utils.hpp"
-#include "GeneralBuffer.hpp"
+#include "Vector.hpp"
 
 namespace mlib {
 
@@ -31,6 +31,10 @@ public:
         : String(string, strlen(string)) {}
 
 public:
+    operator char*()             noexcept { return m_buf.RawPtr(); }
+    operator const char*() const noexcept { return m_buf.RawPtr(); }
+    operator bool()        const noexcept { return Error();        }
+
     char& operator[](size_t index) & noexcept
     {
         return m_buf[index];
@@ -64,6 +68,39 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const String& string)
     {
         return out << string.m_buf.RawPtr();
+    }
+public:
+    static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
+
+    Vector<String> Split()
+    {
+        return Split(SPACE_CHARS);
+    }
+
+    Vector<String> Split(const String& delimeters)
+    {
+        return Split(delimeters.m_buf.RawPtr());
+    }
+
+    Vector<String> Split(const char* delimiters)
+    {
+        char* buf = strdup(m_buf.RawPtr());
+
+        Vector<String> words;
+
+        const char* token = strtok(buf, delimiters);
+
+        std::size_t i = 0;
+
+        while (token)
+        {
+            words.PushBack(token);
+            token = strtok(nullptr, delimiters);
+        }
+
+        free(buf);
+
+        return words;
     }
 };
 

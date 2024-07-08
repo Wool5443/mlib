@@ -67,21 +67,19 @@ public:
         return append(other.m_buf.RawPtr(), other.Length());
     }
 
+    #define OPERATOR_PLUS_CODE                              \
+    {                                                       \
+        String<DefaultCapacity, GrowFactor> result(lhs);    \
+        lhs += rhs;                                         \
+        return result;                                      \
+    }
+    friend String operator+(const char* lhs, const String& rhs)
+    OPERATOR_PLUS_CODE
     friend String operator+(const String& lhs, const char* rhs)
-    {
-        String<DefaultCapacity, GrowFactor> result = lhs;
-        lhs += rhs;
-
-        return result;
-    }
-
+    OPERATOR_PLUS_CODE
     friend String operator+(const String& lhs, const String& rhs)
-    {
-        String<DefaultCapacity, GrowFactor> result = lhs;
-        lhs += rhs;
-
-        return result;
-    }
+    OPERATOR_PLUS_CODE
+    #undef OPERATOR_PLUS_CODE
 
     friend std::ostream& operator<<(std::ostream& out, const String& string)
     {

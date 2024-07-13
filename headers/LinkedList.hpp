@@ -64,9 +64,8 @@ public:
 
     void EndLogging() noexcept
     {
+        sm_htmlLogFile << "</div>\n</body>\n";
         sm_htmlLogFile.close();
-
-        return Error();
     }
 
     #define FONT_SIZE "10"
@@ -78,7 +77,7 @@ public:
     #define ROOT_COLOR "\"#c95b90\""
     #define FREE_HEAD_COLOR "\"#b9e793\""
     
-    constexpr size_t FREE_ELEM = Utils::SIZET_POISON;
+    constexpr static size_t FREE_ELEM = Utils::SIZET_POISON;
 
     Utils::Error Dump() const noexcept
     {
@@ -191,16 +190,17 @@ private:
         if (!outGraphFile)
             return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_FILE);
 
+        size_t head = Head(), tail = Tail();
+
         outGraphFile <<
         "digraph\n"
         "{\n"
         "rankdir = LR;\n"
         "node[shape = record, color = " NODE_FRAME_COLOR ", fontname = " FONT_NAME ", fontsize = " FONT_SIZE "];\n"
         "bgcolor = " BACK_GROUND_COLOR ";\n"
-
         "ROOT[style = \"filled\", fillcolor = " ROOT_COLOR ", "
-        "label = \"ROOT|{<head>head = " << Head() << "|<tail>tail = " <<
-        Tail() << "}\"];\n"
+        "label = \"ROOT|{<head>head = " << head << "|<tail>tail = " <<
+        tail << "}\"];\n"
         "FREE_HEAD[style = \"filled\", fillcolor = " FREE_HEAD_COLOR ", "
         "label = \"FREE HEAD|<freeHead>freeHead = " << m_freeHead << "\"];\n";
         
@@ -223,36 +223,36 @@ private:
                 outGraphFile << "{next = " << m_next[i] << "|";
         }
 
-        fprintf(outGraphFile, "ROOT->CELL_1");
-        for (size_t i = 2; i < list->capacity; i++)
-            fprintf(outGraphFile, "->CELL_%zu", i);
+        outGraphFile << "ROOT->CELL_1";
+        for (size_t i = 2, end = m_data.GetCapacity(); i < end; i++)
+            outGraphFile << "->CELL_" << i;
 
-        fprintf(outGraphFile, " [weight = 1000000000, color = " BACK_GROUND_COLOR "];\n");
+        outGraphFile << " [weight = 1000000000, color = " BACK_GROUND_COLOR "];\n";
         
-        if (*list->head)
-            fprintf(outGraphFile, "ROOT:head->CELL_%zu [style = \"bold\", color = white];\n", *list->head);
+        if (head)
+            outGraphFile << "ROOT:head->CELL_" << head << " [style = \"bold\", color = white];\n";
         
-        if (*list->tail)
-            fprintf(outGraphFile, "ROOT:tail->CELL_%zu [style = \"bold\", color = white];\n", *list->tail);
+        if (tail)
+            outGraphFile << "ROOT:tail->CELL_" << tail << " [style = \"bold\", color = white];\n";
 
-        if (*list->head != *list->tail)
+        if (head != tail)
         {
-            fprintf(outGraphFile, "CELL_%zu", *list->head);
-            size_t index = list->next[*list->head];
+            outGraphFile << "CELL_" << head;
+            size_t index = m_next[head];
             while (index != 0)
             {
-                fprintf(outGraphFile, "->CELL_%zu", index);
-                index = list->next[index];
+                outGraphFile << "->CELL_" << index;
+                index = m_next[index];
             }
-            fprintf(outGraphFile, "[style = \"bold\", color = white];\n");
+            outGraphFile << "[style = \"bold\", color = white];\n";
         }
 
-        if (list->freeHead)
-            fprintf(outGraphFile, "FREE_HEAD:freeHead->CELL_%zu[style = \"bold\", color = white];\n", list->freeHead);
+        if (m_freeHead)
+            outGraphFile << "FREE_HEAD:freeHead->CELL_" << m_freeHead << "[style = \"bold\", color = white];\n";
 
-        fprintf(outGraphFile, "}\n");
+        outGraphFile << "}\n";
 
-        fclose(outGraphFile);
+        outGraphFile.close();
 
         return Error();
     }

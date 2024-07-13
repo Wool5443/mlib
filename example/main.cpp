@@ -49,5 +49,9 @@ int main()
 
     LinkedList<int> list;
 
+    list.StartLogging("log");
+
+    list.EndLogging();
+
     return 0;
 }

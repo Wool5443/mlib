@@ -14,11 +14,12 @@ private:
     T*     m_buf;
     size_t m_capacity;
 public:
-    inline T*           RawPtr()       noexcept { return m_buf; }
-    inline const T*     RawPtr() const noexcept { return m_buf; }
     size_t       Length;
-    inline size_t       GetCapacity() const noexcept { return m_capacity; }
     Utils::Error Error = Utils::Error();
+public:
+    inline T*       RawPtr()            noexcept { return m_buf;      }
+    inline const T* RawPtr()      const noexcept { return m_buf;      }
+    inline size_t   GetCapacity() const noexcept { return m_capacity; }
 private:
     Buffer(size_t capacity, size_t length, const char* buf)
         : m_buf(new T[capacity]{}), m_capacity(capacity), Length(length)

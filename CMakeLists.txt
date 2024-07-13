@@ -12,6 +12,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "-march=native -mavx512f -O3 -DNDEBUG")
 FILE(GLOB SOURCES_CPP src/*.cpp Utils/*.cpp example/main.cpp)
 FILE(GLOB SOURCES_HPP headers/*.hpp Utils/*.hpp)
 
+file(MAKE_DIRECTORY "log")
+file(MAKE_DIRECTORY "log/txt")
+file(MAKE_DIRECTORY "log/dot")
+file(MAKE_DIRECTORY "log/img")
+
 set(SOURCES
     ${SOURCES_CPP}
     ${SOURCES_HPP}

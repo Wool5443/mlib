@@ -49,7 +49,9 @@ int main()
 
     LinkedList<int> list;
 
-    list.StartLogging("log");
+    list.StartLogging("../log");
+
+    list.Dump().Print();
 
     list.EndLogging();
 

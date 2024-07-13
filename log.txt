@@ -1,0 +1,10 @@
+digraph
+{
+rankdir = LR;
+node[shape = record, color = "#000000", fontname = "Fira Code Bold", fontsize = 10];
+bgcolor = "#de97d4";
+ROOT[style = "filled", fillcolor = "#c95b90", label = "ROOT|{<head>head = 0|<tail>tail = 0}"];
+FREE_HEAD[style = "filled", fillcolor = "#b9e793", label = "FREE HEAD|<freeHead>freeHead = 1"];
+CELL_1[style = "filled", fillcolor = "#fae1f6", label = "index = 1|value\n0|{prev = 0|{next = 0|CELL_2[style = "filled", fillcolor = "#fae1f6", label = "index = 2|value\n0|{prev = 0|{next = 0|CELL_3[style = "filled", fillcolor = "#fae1f6", label = "index = 3|value\n0|{prev = 0|{next = 0|CELL_4[style = "filled", fillcolor = "#fae1f6", label = "index = 4|value\n0|{prev = 0|{next = 0|CELL_5[style = "filled", fillcolor = "#fae1f6", label = "index = 5|value\n0|{prev = 0|{next = 0|CELL_6[style = "filled", fillcolor = "#fae1f6", label = "index = 6|value\n0|{prev = 0|{next = 0|CELL_7[style = "filled", fillcolor = "#fae1f6", label = "index = 7|value\n0|{prev = 0|{next = 0|ROOT->CELL_1->CELL_2->CELL_3->CELL_4->CELL_5->CELL_6->CELL_7 [weight = 1000000000, color = "#de97d4"];
+FREE_HEAD:freeHead->CELL_1[style = "bold", color = white];
+}

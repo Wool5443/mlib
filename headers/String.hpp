@@ -69,8 +69,8 @@ public:
 
     #define OPERATOR_PLUS_CODE                              \
     {                                                       \
-        String<DefaultCapacity, GrowFactor> result{lhs};    \
-        lhs += rhs;                                         \
+        String<> result{lhs};                               \
+        result += rhs;                                      \
         return result;                                      \
     }
     friend String operator+(const char* lhs, const String& rhs)

@@ -16,8 +16,8 @@ private:
     Buffer<size_t, DefaultCapacity, GrowFactor> m_prev;
     size_t m_freeHead;
 
-    static String        sm_logFolder;
-    static std::ofstream sm_htmlLogFile;
+    String<>      sm_logFolder{};
+    std::ofstream sm_htmlLogFile{};
 public:
     inline size_t Head() const noexcept { return m_next[0]; }
     inline size_t Tail() const noexcept { return m_prev[0]; }
@@ -79,7 +79,7 @@ public:
     
     constexpr static size_t FREE_ELEM = Utils::SIZET_POISON;
 
-    Utils::Error Dump() const noexcept
+    Utils::Error Dump() noexcept
     {
         static const size_t NUM_STR_MAX_LENGTH = 21;
         static size_t       dumpIteration      = 0;
@@ -97,11 +97,11 @@ public:
 
         sm_htmlLogFile << "<h1>Iteration" << iterString << "</h1>\n<pre>\n";
 
-        RETURN_ERROR(_dumpListText(this, error, outTextPath));
+        RETURN_ERROR(dumpListText(outTextPath, error));
 
         sm_htmlLogFile << "</pre>\n";
 
-        RETURN_ERROR(_dumpListGraph(this, outGraphPath));
+        RETURN_ERROR(dumpListGraph(outGraphPath));
 
         String outImgPath = sm_logFolder + "/img/iter" + iterString
                              + ".png";
@@ -136,16 +136,16 @@ private:
                    static_cast<int>(error) << "]\n");
 
         PRINT_LOG("{\n");
-        PRINT_LOG("    length = " << Length << "\n");
+        PRINT_LOG("    length = " << Length() << "\n");
         PRINT_LOG("    capacity = " << m_data.GetCapacity() << "\n");
         PRINT_LOG("    head = " << Head() << "\n");
         PRINT_LOG("    tail = " << Tail() << "\n");
         PRINT_LOG("    free head = " << m_freeHead << "\n");
-        PRINT_LOG("    list:\n", "");
+        PRINT_LOG("    list:\n");
         {
             size_t curEl = Head();
             size_t index = 1;
-            while (curEl != 0 && index <= Length * 2)
+            while (curEl != 0 && index <= Length() * 2)
             {
                 PRINT_LOG("    *[" << index << "] = " << m_data[curEl] << "\n");
                 curEl = m_next[curEl];
@@ -153,13 +153,13 @@ private:
             }
         }
 
-        PRINT_LOG("\n    data[" << m_data << "]\n");
+        PRINT_LOG("\n    data[" << m_data.RawPtr() << "]\n");
         for (size_t i = 0, end = m_data.GetCapacity(); i < end; i++)
         {
             PRINT_LOG("    *[" << i << "] = " << m_data[i] << "\n");
         }
 
-        PRINT_LOG("\n    prev[" << m_prev << "]\n");
+        PRINT_LOG("\n    prev[" << m_prev.RawPtr() << "]\n");
         for (size_t i = 0, end = m_prev.GetCapacity(); i < end; i++)
         {
             if (m_prev[i] != FREE_ELEM)
@@ -168,7 +168,7 @@ private:
                 PRINT_LOG("     [" << i << "] = FREE\n");
         }
 
-        PRINT_LOG("\n    next[" << m_next << "]\n");
+        PRINT_LOG("\n    next[" << m_next.RawPtr() << "]\n");
         for (size_t i = 0, end = m_next.GetCapacity(); i < end; i++)
         {
             if (m_next[i] != FREE_ELEM)
@@ -207,7 +207,7 @@ private:
         for (size_t i = 1, end = m_data.GetCapacity(); i < end; i++)
         {
             outGraphFile <<
-            "CELL_%zu[style = \"filled\", fillcolor = " NODE_COLOR ", ", i;
+            "CELL_" << i << "[style = \"filled\", fillcolor = " NODE_COLOR ", ";
             outGraphFile << "label = \"index = " << i << "|";
 
             outGraphFile << "value\\n" << m_data[i] << "|";

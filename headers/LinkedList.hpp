@@ -35,7 +35,13 @@ public:
 
     LinkedList(size_t hintLength)
         : m_data(hintLength), m_next(hintLength), m_prev(hintLength),
-          m_freeHead(1) {}
+          m_freeHead(1)
+    {
+        for (size_t i = 1, end = m_next.GetCapacity() - 1; i < end; i++)
+            m_next[i] = i + 1;
+        for (size_t i = 1, end = m_prev.GetCapacity(); i < end; i++)
+            m_prev[i] = FREE_ELEM;
+    }
 
           T& operator[](size_t index)       & noexcept { return m_data[index]; }
     const T& operator[](size_t index) const & noexcept { return m_data[index]; }
@@ -89,11 +95,15 @@ public:
 
         Utils::Error error = Error();
 
-        String outTextPath = sm_logFolder + "/txt/iter" + iterString
-                             + ".txt";
+        String outTextPath = sm_logFolder;
+        outTextPath += "/txt/iter";
+        outTextPath += iterString;
+        outTextPath += ".txt";
 
-        String outGraphPath = sm_logFolder + "/dot/iter" + iterString
-                             + ".txt";
+        String outGraphPath = sm_logFolder;
+        outGraphPath += "/dot/iter";
+        outGraphPath += iterString;
+        outGraphPath += ".dot";
 
         sm_htmlLogFile << "<h1>Iteration" << iterString << "</h1>\n<pre>\n";
 
@@ -218,9 +228,9 @@ private:
                 outGraphFile << "{prev = " << m_prev[i] << "|";
 
             if (m_next[i] == FREE_ELEM)
-                outGraphFile << "{next = BAD|";
+                outGraphFile << "next = BAD}\"];\n";
             else
-                outGraphFile << "{next = " << m_next[i] << "|";
+                outGraphFile << "next = " << m_next[i] << "}\"];\n";
         }
 
         outGraphFile << "ROOT->CELL_1";
@@ -239,7 +249,7 @@ private:
         {
             outGraphFile << "CELL_" << head;
             size_t index = m_next[head];
-            while (index != 0)
+            while (index)
             {
                 outGraphFile << "->CELL_" << index;
                 index = m_next[index];

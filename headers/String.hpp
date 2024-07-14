@@ -54,6 +54,8 @@ private:
 
         std::memcpy(m_buf.RawPtr() + this->Length(), string, length);
 
+        m_buf.Length = newLength;
+
         return *this;
     }
 public:

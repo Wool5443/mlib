@@ -16,8 +16,10 @@ struct BinaryTreeNode
     std::size_t     id = getNewId();
 
     BinaryTreeNode() noexcept {}
+
     BinaryTreeNode(const T& value) noexcept
         : Value(value) {}
+
     BinaryTreeNode(const T& value,
                    BinaryTreeNode* left, BinaryTreeNode* right) noexcept
         : Value(value), Left(left), Right(right)
@@ -26,6 +28,26 @@ struct BinaryTreeNode
             left->Parent  = this;
         if (right)
             right->Parent = this;
+    }
+
+    BinaryTreeNode(const BinaryTreeNode& other) = delete;
+
+    BinaryTreeNode(BinaryTreeNode&& other)
+        : Value(std::move(other.Value)),
+          Left(other.Left), Right(other.Right),
+          Parent(other.Parent),
+          id(other.id) {}
+
+    BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
+    BinaryTreeNode& operator=(BinaryTreeNode&& other)
+    {
+        Value  = std::move(other.Value);
+        Left   = other.Left;
+        Right  = other.Right;
+        Parent = other.Parent;
+        id     = other.id;
+
+        return *this;
     }
 
     Utils::Error SetLeft(BinaryTreeNode* node)
@@ -71,6 +93,14 @@ private:
 
     static const std::size_t BAD_ID = Utils::SIZET_POISON;
 public:
+    BinaryTree() noexcept {}
+
+    BinaryTree(const BinaryTreeNode<T>& root) noexcept
+        : Root(root) {}
+
+    BinaryTree(BinaryTreeNode<T>&& root) noexcept
+        : Root(root) {}
+
     ~BinaryTree()
     {
         Error = recDtor(Root.Left);

@@ -47,7 +47,7 @@ public:
           T& operator[](size_t index)       & noexcept { return m_data[index]; }
     const T& operator[](size_t index) const & noexcept { return m_data[index]; }
 public:
-    Utils::Error InsertAfter(T value, size_t index)
+    Utils::Error InsertAfter(const T& value, size_t index)
     {
         if (index >= m_data.GetCapacity())
             return CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS);
@@ -73,17 +73,17 @@ public:
         return Error();
     }
 
-    Utils::Error InsertBefore(T value, size_t index) noexcept
+    Utils::Error InsertBefore(const T& value, size_t index) noexcept
     {
         return InsertAfter(value, m_prev[index]);
     }
 
-    Utils::Error PushBack(T value) noexcept
+    Utils::Error PushBack(const T& value) noexcept
     {
         return InsertAfter(value, Tail());
     }
 
-    Utils::Error PushFront(T value) noexcept
+    Utils::Error PushFront(const T& value) noexcept
     {
         return InsertBefore(value, Head());
     }

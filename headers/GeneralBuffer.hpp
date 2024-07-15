@@ -95,19 +95,16 @@ public:
         delete[] m_buf;
     }
 public:
-    void Realloc(size_t newLength)
+    Utils::Error Realloc(size_t newLength)
     {
         if (Error)
-        {
-            Error.Print();
-            return;
-        }
+            return Error;
 
         size_t oldLength = Length;
-        Length = newLength;
+        Length           = newLength;
 
         if (newLength < m_capacity)
-            return;
+            return Utils::Error();
 
         size_t newCapacity = calculateCapacity(newLength);
 
@@ -116,7 +113,7 @@ public:
         if (!newBuf)
         {
             Error = CREATE_ERROR(Utils::ErrorCode::ERROR_NO_MEMORY);
-            return;
+            return Error;
         }
 
         for (size_t i = 0; i < oldLength; i++)
@@ -126,6 +123,8 @@ public:
 
         m_buf      = newBuf;
         m_capacity = newCapacity;
+
+        return Utils::Error();
     }
 public:
     T& operator[](size_t index) & noexcept

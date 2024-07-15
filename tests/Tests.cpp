@@ -31,6 +31,26 @@ Utils::Error Tests::TestString(size_t n)
         return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
     }
 
+    String wordsStr =
+    "Hello, dear readers of this code " // 6
+    "I know this is some cursed C++, though, " // 8
+    "don't be to critical."; // 4
+    size_t wordsNum = 18;
+
+    auto words = wordsStr.Split();
+    RETURN_ERROR(words);
+
+    for (size_t i = 0, end = words.value.Length(); i < end; i++)
+        std::cout << words.value[i] << ' ';
+
+    std::cout << '\n';
+
+    if (words.value.Length() != wordsNum)
+    {
+        std::cout << "Got: " << words.value.Length() << ", expected: " << wordsNum << '\n';
+        return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
+    }
+
     return Utils::Error();
 }
 

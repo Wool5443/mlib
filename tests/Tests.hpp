@@ -5,11 +5,12 @@
 #include "Vector.hpp"
 #include "LinkedList.hpp"
 
-namespace Tests
-{
-Utils::Error TestString();
-Utils::Error TestVector(size_t size);
-Utils::Error TestList  (size_t size);
+namespace Tests {
+
+Utils::Error TestString(size_t n);
+Utils::Error TestVector(size_t n);
+Utils::Error TestList  (size_t n);
+
 } // namespace Test
 
 #endif

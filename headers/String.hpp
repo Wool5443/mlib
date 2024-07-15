@@ -22,7 +22,7 @@ public:
     String()
         : m_buf() {}
 
-    String(size_t hintLength)
+    explicit String(size_t hintLength)
         : m_buf(hintLength) {}
 
     String(const char* string, size_t length)
@@ -58,6 +58,17 @@ private:
         return *this;
     }
 public:
+    bool operator==(const String& other)
+    {
+        return strncmp(m_buf.RawPtr(), other.m_buf.RawPtr(),
+                       std::min(Length(), other.Length())) == 0;
+    }
+
+    bool operator!=(const String& other)
+    {
+        return !operator==(other);
+    }
+
     String& operator+=(const char* other)
     {
         return append(other, strlen(other));
@@ -87,6 +98,42 @@ public:
         return out << string.m_buf.RawPtr();
     }
 public:
+    Utils::Result<size_t> Count(char chr) const noexcept
+    {
+        RETURN_ERROR_RESULT(Error(), Utils::SIZET_POISON);
+
+        size_t count = 0;
+
+        for (size_t i = 0; i < Length(); i++)
+            if (m_buf[i] == chr)
+                count++;
+
+        return { count, Utils::Error() };
+    }
+
+    Utils::Result<size_t> Count(const char* string) const noexcept
+    {
+        if (!string)
+            return { Utils::SIZET_POISON,
+                     CREATE_ERROR(Utils::ErrorCode::ERROR_NULLPTR) };
+
+        size_t      count = 0;
+        const char* found = strstr(m_buf.RawPtr(), string);
+
+        while (found)
+        {
+            count++;
+            found = strstr(found + 1, string);
+        }
+
+        return { count, Utils::Error() };
+    }
+
+    Utils::Result<size_t> Count(const String& string) const noexcept
+    {
+        return Count(string.m_buf.RawPtr());
+    }
+
     static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
 
     Utils::Result<Vector<String>> Split() const noexcept

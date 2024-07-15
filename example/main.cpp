@@ -2,7 +2,7 @@
 
 int main()
 {
-    Tests::TestString().Print();
+    Tests::TestString(100).Print();
     Tests::TestVector(25).Print();
     Tests::TestList(25).Print();
     return 0;

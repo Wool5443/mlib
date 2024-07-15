@@ -108,3 +108,10 @@ Utils::Error Tests::TestList(size_t n)
 
     return Utils::Error();
 }
+
+Utils::Error Tests::TestBTree(size_t n)
+{
+    BinaryTreeNode<int> node;
+
+    return Utils::Error();
+}

@@ -89,21 +89,25 @@ public:
 public:
     static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
 
-    Vector<String> Split()
+    Utils::Result<Vector<String>> Split() const noexcept
     {
         return Split(SPACE_CHARS);
     }
 
-    Vector<String> Split(const String& delimeters)
+    Utils::Result<Vector<String>> Split(const String& delimeters) const noexcept
     {
         return Split(delimeters.m_buf.RawPtr());
     }
 
-    Vector<String> Split(const char* delimiters)
+    Utils::Result<Vector<String>> Split(const char* delimiters) const noexcept
     {
         char* buf = strdup(m_buf.RawPtr());
 
+        if (!buf)
+            return { {}, CREATE_ERROR(Utils::ErrorCode::ERROR_NO_MEMORY) };
+
         Vector<String> words;
+        RETURN_ERROR_RESULT(words.Error(), {});
 
         const char* token = strtok(buf, delimiters);
 

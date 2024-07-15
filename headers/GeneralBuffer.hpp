@@ -39,7 +39,7 @@ public:
         : Buffer(DefaultCapacity, 0, buf) {}
 
     explicit Buffer(size_t hintLength, const char* buf = nullptr)
-        : Buffer(Buffer::calculateCapacity(hintLength), hintLength, buf) {}
+        : Buffer(Buffer::calculateCapacity(hintLength), 0, buf) {}
 public:
     Buffer(const Buffer& other)
         : Buffer(other.m_capacity, other.Length, nullptr)

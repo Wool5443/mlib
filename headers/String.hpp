@@ -16,8 +16,8 @@ private:
 public:
     size_t       Length() const noexcept { return m_buf.Length; }
     Utils::Error Error()  const noexcept { return m_buf.Error;  }
-    char*        RawPtr()       noexcept { return static_cast<char*>(*this);       }
-    const char*  RawPtr() const noexcept { return static_cast<const char*>(*this); }
+    char*        RawPtr()       noexcept { return m_buf.RawPtr(); }
+    const char*  RawPtr() const noexcept { return m_buf.RawPtr(); }
 public:
     String()
         : m_buf() {}
@@ -98,6 +98,30 @@ public:
         return out << string.m_buf.RawPtr();
     }
 public:
+    Utils::Result<size_t> Find(char chr) const noexcept
+    {
+        const char* buf   = RawPtr();
+        const char* found = strchr(buf, chr);
+        if (!found)
+            return {
+                Utils::SIZET_POISON, CREATE_ERROR(Utils::ERROR_NOT_FOUND)
+            };
+        return found - buf;
+    }
+
+    Utils::Result<size_t> Find(const char* string) const noexcept
+    {
+        SoftAssertResult(string, Utils::SIZET_POISON, Utils::ERROR_NULLPTR);
+
+        const char* buf   = RawPtr();
+        const char* found = strstr(buf, string);
+
+        if (!found)
+            return { Utils::SIZET_POISON, CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
+
+        return { found - buf, Utils::Error() };
+    }
+
     Utils::Result<size_t> Count(char chr) const noexcept
     {
         RETURN_ERROR_RESULT(Error(), Utils::SIZET_POISON);
@@ -115,7 +139,7 @@ public:
     {
         if (!string)
             return { Utils::SIZET_POISON,
-                     CREATE_ERROR(Utils::ErrorCode::ERROR_NULLPTR) };
+                     CREATE_ERROR(Utils::ERROR_NULLPTR) };
 
         size_t      count = 0;
         const char* found = strstr(m_buf.RawPtr(), string);
@@ -151,7 +175,7 @@ public:
         char* buf = strdup(m_buf.RawPtr());
 
         if (!buf)
-            return { {}, CREATE_ERROR(Utils::ErrorCode::ERROR_NO_MEMORY) };
+            return { {}, CREATE_ERROR(Utils::ERROR_NO_MEMORY) };
 
         Vector<String> words;
         RETURN_ERROR_RESULT(words.Error(), {});

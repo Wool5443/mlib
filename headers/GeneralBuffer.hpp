@@ -24,11 +24,11 @@ private:
     Buffer(size_t capacity, size_t length, const char* buf)
         : m_buf(new T[capacity]{}), m_capacity(capacity), Length(length)
     {
-        HardAssert(length < capacity, Utils::ErrorCode::ERROR_BAD_NUMBER);
+        HardAssert(length < capacity, Utils::ERROR_BAD_NUMBER);
 
         if (!m_buf)
         {
-            Error = CREATE_ERROR(Utils::ErrorCode::ERROR_NO_MEMORY);
+            Error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
             return;
         }
         if (buf)
@@ -63,7 +63,7 @@ public:
 
         if (!newBuf)
         {
-            Error = CREATE_ERROR(Utils::ErrorCode::ERROR_NO_MEMORY);
+            Error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
             return *this;
         }
 
@@ -112,7 +112,7 @@ public:
 
         if (!newBuf)
         {
-            Error = CREATE_ERROR(Utils::ErrorCode::ERROR_NO_MEMORY);
+            Error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
             return Error;
         }
 

@@ -50,9 +50,9 @@ public:
     Utils::Error InsertAfter(T value, size_t index)
     {
         if (index >= m_data.GetCapacity())
-            return CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS);
+            return CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS);
         if (m_prev[index] == FREE_ELEM)
-            return CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS);
+            return CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS);
 
         if (!m_freeHead)
             RETURN_ERROR(realloc(Length() + 1));
@@ -92,7 +92,7 @@ public:
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            return { {}, CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS) };
+            return { {}, CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS) };
 
         const T& value = m_data[index];
 
@@ -115,7 +115,7 @@ public:
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            return { FREE_ELEM, CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS) };
+            return { FREE_ELEM, CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS) };
 
         ERR_DUMP_RET_RES(this, 0);
         
@@ -128,12 +128,12 @@ public:
             i++;
         }
 
-        return { curEl, curEl ? Error() : CREATE_ERROR(Utils::ErrorCode::ERROR_NOT_FOUND) };
+        return { curEl, curEl ? Error() : CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
     }
 public:
     void StartLogging(const char* logFolder) noexcept
     {
-        HardAssert(logFolder, Utils::ErrorCode::ERROR_BAD_FILE);
+        HardAssert(logFolder, Utils::ERROR_BAD_FILE);
         sm_logFolder = logFolder;
 
         String htmlFilePath = logFolder;
@@ -250,7 +250,7 @@ private:
     {
         std::ofstream outTextFile{outTextPath};
         if (!outTextFile)
-            return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_FILE);
+            return CREATE_ERROR(Utils::ERROR_BAD_FILE);
 
         PRINT_LOG("List[" << this << "]\n");
         PRINT_LOG("List condition - " << error.GetErrorName() << "[" <<
@@ -309,7 +309,7 @@ private:
     {
         std::ofstream outGraphFile{outGraphPath};
         if (!outGraphFile)
-            return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_FILE);
+            return CREATE_ERROR(Utils::ERROR_BAD_FILE);
 
         size_t head = Head(), tail = Tail();
 

@@ -135,7 +135,7 @@ public:
 
     Utils::Result<T> Pop() noexcept
     {
-        Pop(Tail());
+        return Pop(Tail());
     }
 
     Utils::Result<T> GetValueByItsOrderInTheList(size_t index)

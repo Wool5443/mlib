@@ -31,8 +31,8 @@ public:
     String(const char* string)
         : String(string, strlen(string)) {}
 public:
-    operator char*()             noexcept { return m_buf.RawPtr(); }
-    operator const char*() const noexcept { return m_buf.RawPtr(); }
+    operator char*()             noexcept { return RawPtr(); }
+    operator const char*() const noexcept { return RawPtr(); }
     operator bool()        const noexcept { return Error();        }
 
     char& operator[](size_t index) & noexcept
@@ -53,14 +53,14 @@ private:
         m_buf.Realloc(newLength);
         if (Error()) return *this;
 
-        std::memcpy(m_buf.RawPtr() + oldLength, string, length);
+        std::memcpy(RawPtr() + oldLength, string, length);
 
         return *this;
     }
 public:
     bool operator==(const String& other)
     {
-        return strncmp(m_buf.RawPtr(), other.m_buf.RawPtr(),
+        return strncmp(RawPtr(), other.m_buf.RawPtr(),
                        std::min(Length(), other.Length())) == 0;
     }
 
@@ -76,7 +76,7 @@ public:
 
     String& operator+=(const String& other)
     {
-        return append(other.m_buf.RawPtr(), other.Length());
+        return append(other.RawPtr(), other.Length());
     }
 
     #define OPERATOR_PLUS_CODE                              \
@@ -95,7 +95,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const String& string)
     {
-        return out << string.m_buf.RawPtr();
+        return out << string.RawPtr();
     }
 public:
     Utils::Result<size_t> Find(char chr) const noexcept
@@ -142,7 +142,7 @@ public:
                      CREATE_ERROR(Utils::ERROR_NULLPTR) };
 
         size_t      count = 0;
-        const char* found = strstr(m_buf.RawPtr(), string);
+        const char* found = strstr(RawPtr(), string);
 
         while (found)
         {
@@ -155,7 +155,7 @@ public:
 
     Utils::Result<size_t> Count(const String& string) const noexcept
     {
-        return Count(string.m_buf.RawPtr());
+        return Count(string.RawPtr());
     }
 
     static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
@@ -167,12 +167,12 @@ public:
 
     Utils::Result<Vector<String>> Split(const String& delimeters) const noexcept
     {
-        return Split(delimeters.m_buf.RawPtr());
+        return Split(delimeters.RawPtr());
     }
 
     Utils::Result<Vector<String>> Split(const char* delimiters) const noexcept
     {
-        char* buf = strdup(m_buf.RawPtr());
+        char* buf = strdup(RawPtr());
 
         if (!buf)
             return { {}, CREATE_ERROR(Utils::ERROR_NO_MEMORY) };

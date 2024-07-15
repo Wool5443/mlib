@@ -7,21 +7,21 @@
 
 namespace mlib {
 
-template<typename T, size_t DefaultCapacity, size_t GrowFactor>
+template<typename T, std::size_t DefaultCapacity, std::size_t GrowFactor>
 class Buffer final
 {
 private:
     T*     m_buf;
-    size_t m_capacity;
+    std::size_t m_capacity;
 public:
-    size_t       Length;
+    std::size_t       Length;
     Utils::Error Error = Utils::Error();
 public:
     inline T*       RawPtr()            noexcept { return m_buf;      }
     inline const T* RawPtr()      const noexcept { return m_buf;      }
-    inline size_t   GetCapacity() const noexcept { return m_capacity; }
+    inline std::size_t   GetCapacity() const noexcept { return m_capacity; }
 private:
-    Buffer(size_t capacity, size_t length, const char* buf)
+    Buffer(std::size_t capacity, std::size_t length, const char* buf)
         : m_buf(new T[capacity]{}), m_capacity(capacity), Length(length)
     {
         HardAssert(length < capacity, Utils::ERROR_BAD_NUMBER);
@@ -38,13 +38,13 @@ public:
     explicit Buffer(const char* buf = nullptr)
         : Buffer(DefaultCapacity, 0, buf) {}
 
-    explicit Buffer(size_t hintLength, const char* buf = nullptr)
+    explicit Buffer(std::size_t hintLength, const char* buf = nullptr)
         : Buffer(Buffer::calculateCapacity(hintLength), buf ? hintLength : 0, buf) {}
 public:
     Buffer(const Buffer& other)
         : Buffer(other.m_capacity, other.Length, nullptr)
     {
-        for (size_t i = 0; i < other.Length; i++)
+        for (std::size_t i = 0; i < other.Length; i++)
             m_buf[i] = other[i];
     }
 
@@ -67,7 +67,7 @@ public:
             return *this;
         }
 
-        for (size_t i = 0; i < other.Length; i++)
+        for (std::size_t i = 0; i < other.Length; i++)
             newBuf[i] = other[i];
 
         delete[] m_buf;
@@ -95,18 +95,18 @@ public:
         delete[] m_buf;
     }
 public:
-    Utils::Error Realloc(size_t newLength)
+    Utils::Error Realloc(std::size_t newLength)
     {
         if (Error)
             return Error;
 
-        size_t oldLength = Length;
+        std::size_t oldLength = Length;
         Length           = newLength;
 
         if (newLength < m_capacity)
             return Utils::Error();
 
-        size_t newCapacity = calculateCapacity(newLength);
+        std::size_t newCapacity = calculateCapacity(newLength);
 
         T* newBuf = new T[newCapacity]{};
 
@@ -116,7 +116,7 @@ public:
             return Error;
         }
 
-        for (size_t i = 0; i <= oldLength; i++)
+        for (std::size_t i = 0; i <= oldLength; i++)
             newBuf[i] = m_buf[i];
 
         delete[] m_buf;
@@ -127,19 +127,19 @@ public:
         return Utils::Error();
     }
 public:
-    T& operator[](size_t index) & noexcept
+    T& operator[](std::size_t index) & noexcept
     {
         return m_buf[index];
     }
 
-    const T& operator[](size_t index) const & noexcept
+    const T& operator[](std::size_t index) const & noexcept
     {
         return m_buf[index];
     }
 private:
-    static inline size_t calculateCapacity(size_t hintLength) noexcept
+    static inline std::size_t calculateCapacity(std::size_t hintLength) noexcept
     {
-        size_t capacity = DefaultCapacity;
+        std::size_t capacity = DefaultCapacity;
 
         while (capacity <= hintLength)
             capacity *= GrowFactor;

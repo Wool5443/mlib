@@ -8,13 +8,13 @@
 
 namespace mlib {
 
-template<size_t DefaultCapacity = 8, size_t GrowFactor = 2>
+template<std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class String final
 {
 private:
     Buffer<char, DefaultCapacity, GrowFactor> m_buf;
 public:
-    size_t       Length() const noexcept { return m_buf.Length; }
+    std::size_t       Length() const noexcept { return m_buf.Length; }
     Utils::Error Error()  const noexcept { return m_buf.Error;  }
     char*        RawPtr()       noexcept { return m_buf.RawPtr(); }
     const char*  RawPtr() const noexcept { return m_buf.RawPtr(); }
@@ -22,10 +22,10 @@ public:
     String()
         : m_buf() {}
 
-    explicit String(size_t hintLength)
+    explicit String(std::size_t hintLength)
         : m_buf(hintLength) {}
 
-    String(const char* string, size_t length)
+    String(const char* string, std::size_t length)
         : m_buf(length, string) {}
 
     String(const char* string)
@@ -35,20 +35,20 @@ public:
     operator const char*() const noexcept { return RawPtr(); }
     operator bool()        const noexcept { return Error();        }
 
-    char& operator[](size_t index) & noexcept
+    char& operator[](std::size_t index) & noexcept
     {
         return m_buf[index];
     }
 
-    const char& operator[](size_t index) const & noexcept
+    const char& operator[](std::size_t index) const & noexcept
     {
         return m_buf[index];
     }
 private:
-    String& append(const char* string, size_t length)
+    String& append(const char* string, std::size_t length)
     {
-        size_t oldLength = Length();
-        size_t newLength = oldLength + length;
+        std::size_t oldLength = Length();
+        std::size_t newLength = oldLength + length;
 
         m_buf.Realloc(newLength);
         if (Error()) return *this;
@@ -98,7 +98,7 @@ public:
         return out << string.RawPtr();
     }
 public:
-    Utils::Result<size_t> Find(char chr) const noexcept
+    Utils::Result<std::size_t> Find(char chr) const noexcept
     {
         const char* buf   = RawPtr();
         const char* found = strchr(buf, chr);
@@ -109,7 +109,7 @@ public:
         return found - buf;
     }
 
-    Utils::Result<size_t> Find(const char* string) const noexcept
+    Utils::Result<std::size_t> Find(const char* string) const noexcept
     {
         SoftAssertResult(string, Utils::SIZET_POISON, Utils::ERROR_NULLPTR);
 
@@ -122,26 +122,26 @@ public:
         return { found - buf, Utils::Error() };
     }
 
-    Utils::Result<size_t> Count(char chr) const noexcept
+    Utils::Result<std::size_t> Count(char chr) const noexcept
     {
         RETURN_ERROR_RESULT(Error(), Utils::SIZET_POISON);
 
-        size_t count = 0;
+        std::size_t count = 0;
 
-        for (size_t i = 0; i < Length(); i++)
+        for (std::size_t i = 0; i < Length(); i++)
             if (m_buf[i] == chr)
                 count++;
 
         return { count, Utils::Error() };
     }
 
-    Utils::Result<size_t> Count(const char* string) const noexcept
+    Utils::Result<std::size_t> Count(const char* string) const noexcept
     {
         if (!string)
             return { Utils::SIZET_POISON,
                      CREATE_ERROR(Utils::ERROR_NULLPTR) };
 
-        size_t      count = 0;
+        std::size_t      count = 0;
         const char* found = strstr(RawPtr(), string);
 
         while (found)
@@ -153,7 +153,7 @@ public:
         return { count, Utils::Error() };
     }
 
-    Utils::Result<size_t> Count(const String& string) const noexcept
+    Utils::Result<std::size_t> Count(const String& string) const noexcept
     {
         return Count(string.RawPtr());
     }
@@ -182,7 +182,7 @@ public:
 
         const char* token = strtok(buf, delimiters);
 
-        std::size_t i = 0;
+        std::std::size_t i = 0;
 
         while (token)
         {

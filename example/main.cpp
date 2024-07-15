@@ -21,7 +21,6 @@ int main()
 
     std::cout << a << '\n' << b << '\n';
 
-
     size_t n = 10;
 
     Vector<int> vec1;
@@ -50,6 +49,13 @@ int main()
     LinkedList<int> list;
 
     list.StartLogging("../log");
+
+    list.InsertAfter(100, 0);
+    list.InsertAfter(200, 1);
+    list.InsertAfter(300, 2);
+
+    for (int i = 0; i < 10; i++)
+        list.PushBack(i * 100);
 
     list.Dump().Print();
 

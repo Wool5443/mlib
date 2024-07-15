@@ -47,14 +47,13 @@ public:
 private:
     String& append(const char* string, size_t length)
     {
-        size_t newLength = this->Length() + length;
+        size_t oldLength = Length();
+        size_t newLength = oldLength + length;
 
         m_buf.Realloc(newLength);
         if (Error()) return *this;
 
-        std::memcpy(m_buf.RawPtr() + this->Length(), string, length);
-
-        m_buf.Length = newLength;
+        std::memcpy(m_buf.RawPtr() + oldLength, string, length);
 
         return *this;
     }

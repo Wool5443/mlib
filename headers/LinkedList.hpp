@@ -46,6 +46,50 @@ public:
           T& operator[](size_t index)       & noexcept { return m_data[index]; }
     const T& operator[](size_t index) const & noexcept { return m_data[index]; }
 public:
+    Utils::Error InsertAfter(T value, size_t index)
+    {
+        if (index >= m_data.GetCapacity())
+            return CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS);
+        if (m_prev[index] == FREE_ELEM)
+            return CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS);
+
+        m_data.Realloc(Length() + 1);
+        RETURN_ERROR(m_data.Error);
+        m_next.Realloc(Length() + 1);
+        RETURN_ERROR(m_next.Error);
+        m_prev.Realloc(Length() + 1);
+        RETURN_ERROR(m_prev.Error);
+
+        size_t insertIndex    = m_freeHead;
+        m_freeHead            = m_next[m_freeHead];
+
+        m_data[insertIndex]   = value;
+
+        m_prev[insertIndex]   = index;
+        m_next[insertIndex]   = m_next[index];
+
+        m_prev[m_next[index]] = insertIndex;
+        m_next[index]         = insertIndex;
+
+        return Error();
+    }
+
+    Utils::Error InsertBefore(T value, size_t index) noexcept
+    {
+        return InsertAfter(value, m_prev[index]);
+    }
+
+    Utils::Error PushBack(T value) noexcept
+    {
+        return InsertAfter(value, Tail());
+    }
+
+    Utils::Error PushFront(T value) noexcept
+    {
+        return InsertBefore(value, Head());
+    }
+
+public:
     void StartLogging(const char* logFolder) noexcept
     {
         HardAssert(logFolder, Utils::ErrorCode::ERROR_BAD_FILE);

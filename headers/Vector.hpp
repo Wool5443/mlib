@@ -33,15 +33,10 @@ public:
 
     void PushBack(T&& element)
     {
-
-        size_t newLength = Length() + 1;
-
-        m_buf.Realloc(newLength);
+        m_buf.Realloc(Length() + 1);
         if (Error()) return;
 
         m_buf[Length()] = element;
-
-        m_buf.Length++;
     }
 public:
     T& operator[](size_t index) & noexcept

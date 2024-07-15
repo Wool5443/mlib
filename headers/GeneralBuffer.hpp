@@ -103,6 +103,9 @@ public:
             return;
         }
 
+        size_t oldLength = Length;
+        Length = newLength;
+
         if (newLength < m_capacity)
             return;
 
@@ -116,7 +119,7 @@ public:
             return;
         }
 
-        for (size_t i = 0; i < Length; i++)
+        for (size_t i = 0; i < oldLength; i++)
             newBuf[i] = m_buf[i];
 
         delete[] m_buf;

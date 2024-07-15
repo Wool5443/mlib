@@ -21,21 +21,6 @@ int main()
 
     std::cout << a << '\n' << b << '\n';
 
-    size_t n = 10;
-
-    Vector<int> vec1;
-
-    for (size_t i = 0; i < n; i++)
-        vec1.PushBack(i);
-
-    Vector<int> vec2 = vec1;
-
-    for (size_t i = 0; i < vec1.Length(); i++)
-        vec1[i] *= vec1[i];
-
-    PrintVector<int>(vec1);
-    PrintVector<int>(vec2);
-
     String string = "Hello my\ndear friends!";
 
     Vector<String<>> words = string.Split();
@@ -46,16 +31,43 @@ int main()
         std::cout << words[i] << ' ';
     std::cout << '\n';
 
+    for (int i = 0; i < 100; i++)
+    {
+        string += "bebra";
+    }
+
+    std::cout << string << '\n';
+
+    size_t n = 10;
+    Vector<int> vec1(n);
+
+    for (size_t i = 1; i < n; i++)
+        vec1.PushBack(i);
+
+    Vector<int> vec2 = vec1;
+
+    for (size_t i = 0; i < vec1.Length(); i++)
+        vec1[i] *= vec1[i];
+
+    PrintVector<int>(vec1);
+    PrintVector<int>(vec2);
+
     LinkedList<int> list;
 
     list.StartLogging("../log");
 
-    list.InsertAfter(100, 0);
-    list.InsertAfter(200, 1);
-    list.InsertAfter(300, 2);
+    list.PushBack(100);
+    list.Dump().Print();
+    list.PushBack(200);
+    list.Dump().Print();
+    list.PushBack(300);
+    list.Dump().Print();
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 5; i < 10; i++)
+    {
         list.PushBack(i * 100);
+        list.Dump().Print();
+    }
 
     list.Dump().Print();
 

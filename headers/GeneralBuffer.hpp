@@ -116,7 +116,7 @@ public:
             return Error;
         }
 
-        for (size_t i = 0; i < oldLength; i++)
+        for (size_t i = 0; i <= oldLength; i++)
             newBuf[i] = m_buf[i];
 
         delete[] m_buf;

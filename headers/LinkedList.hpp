@@ -40,9 +40,22 @@ private:
 
     inline Utils::Error realloc(size_t newLength)
     {
+        size_t oldCapacity = Capacity();
+
         RETURN_ERROR(m_data.Realloc(newLength));
         RETURN_ERROR(m_next.Realloc(newLength));
-        return m_prev.Realloc(newLength);
+        RETURN_ERROR(m_prev.Realloc(newLength));
+
+        size_t newCapcity = Capacity();
+
+        for (size_t i = oldCapacity; i < newCapcity - 1; i++)
+            m_next[i] = i + 1;
+        for (size_t i = oldCapacity; i < newCapcity; i++)
+            m_prev[i] = FREE_ELEM;
+
+        m_freeHead = oldCapacity;
+
+        return Utils::Error();
     }
 public:
     LinkedList()
@@ -68,7 +81,10 @@ public:
         if (m_prev[index] == FREE_ELEM)
             return CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS);
 
-        realloc(Length() + 1);
+        if (!m_freeHead)
+            RETURN_ERROR(realloc(Length() + 1));
+        else
+            updateLength(Length() + 1);
 
         size_t insertIndex    = m_freeHead;
         m_freeHead            = m_next[m_freeHead];

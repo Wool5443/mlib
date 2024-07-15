@@ -45,7 +45,7 @@ struct BinaryTreeNode
         auto node = new BinaryTreeNode(value);
 
         if (!node)
-            return { nullptr, Utils::ERROR_NO_MEMORY };
+            return { nullptr, CREATE_ERROR(Utils::ERROR_NO_MEMORY) };
         return { node, Utils::Error() };
     }
 private:
@@ -61,16 +61,15 @@ private:
 template<typename T>
 class BinaryTree
 {
-private:
-    BinaryTreeNode<T> root;
 public:
-    Utils::Error Error;
+    BinaryTreeNode<T> Root = {};
+    Utils::Error Error     = Utils::Error();
 public:
     ~BinaryTree()
     {
-        Error = recDtor(root.left);
+        Error = recDtor(Root.left);
         if (Error) return;
-        Error = recDtor(root.right);
+        Error = recDtor(Root.right);
     }
 private:
     static Utils::Error recDtor(BinaryTreeNode<T>* node)

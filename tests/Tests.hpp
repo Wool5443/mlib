@@ -11,7 +11,7 @@ namespace Tests {
 Utils::Error TestString(size_t n);
 Utils::Error TestVector(size_t n);
 Utils::Error TestList  (size_t n);
-Utils::Error TestBTree (size_t n);
+Utils::Error TestBTree ();
 
 } // namespace Test
 

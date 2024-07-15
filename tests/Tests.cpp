@@ -109,9 +109,14 @@ Utils::Error Tests::TestList(size_t n)
     return Utils::Error();
 }
 
-Utils::Error Tests::TestBTree(size_t n)
+Utils::Error Tests::TestBTree()
 {
-    BinaryTreeNode<int> node;
+    BinaryTree<int> tree;
+
+    BinaryTreeNode<int>& root = tree.Root;
+
+    root.SetLeft(BinaryTreeNode<int>::New(1).value);
+    root.SetRight(BinaryTreeNode<int>::New(2).value);
 
     return Utils::Error();
 }

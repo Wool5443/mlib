@@ -30,33 +30,6 @@ public:
         if (m_next.Error) return m_next.Error;
         return m_prev.Error;
     }
-private:
-    inline void updateLength(size_t newLength)
-    {
-        m_data.Length = newLength;
-        m_next.Length = newLength;
-        m_prev.Length = newLength;
-    }
-
-    inline Utils::Error realloc(size_t newLength)
-    {
-        size_t oldCapacity = Capacity();
-
-        RETURN_ERROR(m_data.Realloc(newLength));
-        RETURN_ERROR(m_next.Realloc(newLength));
-        RETURN_ERROR(m_prev.Realloc(newLength));
-
-        size_t newCapcity = Capacity();
-
-        for (size_t i = oldCapacity; i < newCapcity - 1; i++)
-            m_next[i] = i + 1;
-        for (size_t i = oldCapacity; i < newCapcity; i++)
-            m_prev[i] = FREE_ELEM;
-
-        m_freeHead = oldCapacity;
-
-        return Utils::Error();
-    }
 public:
     LinkedList()
         : LinkedList(0) {}
@@ -238,7 +211,33 @@ public:
 
         return Error();
     }
+private:
+    inline void updateLength(size_t newLength)
+    {
+        m_data.Length = newLength;
+        m_next.Length = newLength;
+        m_prev.Length = newLength;
+    }
 
+    inline Utils::Error realloc(size_t newLength)
+    {
+        size_t oldCapacity = Capacity();
+
+        RETURN_ERROR(m_data.Realloc(newLength));
+        RETURN_ERROR(m_next.Realloc(newLength));
+        RETURN_ERROR(m_prev.Realloc(newLength));
+
+        size_t newCapcity = Capacity();
+
+        for (size_t i = oldCapacity; i < newCapcity - 1; i++)
+            m_next[i] = i + 1;
+        for (size_t i = oldCapacity; i < newCapcity; i++)
+            m_prev[i] = FREE_ELEM;
+
+        m_freeHead = oldCapacity;
+
+        return Utils::Error();
+    }
 private:
     #define PRINT_LOG(...)                  \
     do                                      \

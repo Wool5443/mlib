@@ -19,24 +19,14 @@ public:
     explicit Vector(size_t hintLength)
         : m_buf(hintLength) {}
 public:
-    void PushBack(const T& element)
+    Utils::Error PushBack(const T& element)
     {
-        size_t newLength = Length() + 1;
+        size_t oldLength = Length();
+        RETURN_ERROR(m_buf.Realloc(oldLength + 1));
 
-        m_buf.Realloc(newLength);
-        if (Error()) return;
+        m_buf[oldLength] = element;
 
-        m_buf[Length()] = element;
-
-        m_buf.Length++;
-    }
-
-    void PushBack(T&& element)
-    {
-        m_buf.Realloc(Length() + 1);
-        if (Error()) return;
-
-        m_buf[Length()] = element;
+        return Utils::Error();
     }
 public:
     T& operator[](size_t index) & noexcept

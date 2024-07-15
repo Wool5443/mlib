@@ -197,8 +197,10 @@ public:
 
         RETURN_ERROR(dumpListGraph(outGraphPath));
 
-        String outImgPath = m_logFolder + "/img/iter" + iterString
-                             + ".png";
+        String outImgPath = m_logFolder;
+        outImgPath += "/img/iter";
+        outImgPath += iterString;
+        outImgPath += ".png";
 
         String command = "dot " + outGraphPath + " -T png -o" + outImgPath;
 

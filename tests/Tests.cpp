@@ -76,7 +76,7 @@ Utils::Error Tests::TestList(std::size_t n)
 {
     LinkedList<int> list;
 
-    list.StartLogging("../log");
+    list.StartLogging("../listLog");
 
     for (std::size_t i = 0; i < n; i++)
         list.PushBack((i + 1) * 10);
@@ -113,10 +113,16 @@ Utils::Error Tests::TestBTree()
 {
     BinaryTree<int> tree;
 
+    tree.StartLogging("../treeLog");
+
     BinaryTreeNode<int>& root = tree.Root;
 
     root.SetLeft(BinaryTreeNode<int>::New(1).value);
     root.SetRight(BinaryTreeNode<int>::New(2).value);
+
+    tree.Dump();
+
+    tree.EndLogging();
 
     return Utils::Error();
 }

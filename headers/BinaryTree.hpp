@@ -13,6 +13,7 @@ struct BinaryTreeNode
     BinaryTreeNode* Left   = nullptr;
     BinaryTreeNode* Right  = nullptr;
     BinaryTreeNode* Parent = nullptr;
+    std::size_t     id = getNewId();
 
     BinaryTreeNode() noexcept {}
     BinaryTreeNode(const T& value) noexcept
@@ -51,8 +52,6 @@ struct BinaryTreeNode
         return { node, Utils::Error() };
     }
 private:
-    std::size_t id = getNewId();
-
     inline std::size_t getNewId()
     {
         static std::size_t id = 1;
@@ -60,7 +59,7 @@ private:
     }
 };
 
-template<typename T, std::size_t MaxSize>
+template<typename T, std::size_t MaxSize = 1000>
 class BinaryTree
 {
 public:
@@ -69,6 +68,8 @@ public:
 private:
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
+
+    static const std::size_t BAD_ID = Utils::SIZET_POISON;
 public:
     ~BinaryTree()
     {
@@ -88,6 +89,34 @@ public:
 #define NODE_FRAME_COLOR "\"#000000\""
 #define ROOT_COLOR "\"#c95b90\""
 #define FREE_HEAD_COLOR "\"#b9e793\""
+    Utils::Error StartLogging(const char* logFolder)
+    {
+        SoftAssert(logFolder, Utils::ERROR_NULLPTR);
+
+        m_logFolder = logFolder;
+
+        m_htmlLogFile.open(m_logFolder + "/log.html");
+
+        m_htmlLogFile <<
+        "<style>\n"
+        ".content {\n"
+        "max-width: 500px;\n"
+        "margin: auto;\n"
+        "}\n"
+        "</style>,\n"
+        "<body>\n"
+        "<div class=\"content\">";
+
+        return Utils::Error();
+    }
+
+    Utils::Error EndLogging()
+    {
+        m_htmlLogFile << "</div>\n</body>\n";
+        m_htmlLogFile.close();
+
+        return Utils::Error();
+    }
 
     Utils::Error Dump()
     {
@@ -96,8 +125,6 @@ public:
 
         char iterString[NUM_STR_MAX_LENGTH] = "";
         sprintf(iterString, "%zu", dumpIteration);
-
-        SoftAssert(Root, Utils::ERROR_NO_ROOT);
 
         if (m_htmlLogFile)
             m_htmlLogFile <<
@@ -123,164 +150,103 @@ public:
         "node[shape = record, color = " NODE_FRAME_COLOR ", fontname = " FONT_NAME ", fontsize = " FONT_SIZE "];\n"
         "bgcolor = " BACK_GROUND_COLOR ";\n";
 
-        outGraphFile << "TREE[rank = \"min\", style = \"filled\", fillcolor = " TREE_COLOR ", "
+        outGraphFile <<
+        "TREE[rank = \"min\", style = \"filled\", fillcolor = " TREE_COLOR ", "
                         "label = \"{Tree|Error: " << Error.GetErrorName() << "|"
-                        "<root>Root}\"];";
+                        "<root>Root}\"];"
+        "\nNODE_" << &Root << "[style = \"filled\", "
+        "fillcolor = " NODE_COLOR ", "
+        "label = \"{Value:\\n|" << Root.Value <<
+        "|{<left>Left|<right>Right}}\"];\n";
 
-        outGraphFile << "\nNODE_" << &Root << "[style = \"filled\", "
-                        "fillcolor = " NODE_COLOR ", ";
+        std::size_t MAX_DEPTH = MaxSize;
 
-        outGraphFile << "label = \"{Value:\\n|" << Root.Value;
-        outGraphFile << "|{<left>Left|<right>Right}}\"];\n";
+        if (Root.Left)
+            RETURN_ERROR(recBuildCellTemplatesGraph(Root.Left,  outGraphFile, 0, MAX_DEPTH));
+        if (Root.Right)
+            RETURN_ERROR(recBuildCellTemplatesGraph(Root.Right, outGraphFile, 0, MAX_DEPTH));
 
-        std::size_t MAX_DEPTH = MAX_TREE_SIZE;
+        RETURN_ERROR(recDrawGraph(&Root, outGraphFile, 0, MAX_DEPTH));
+        outGraphFile << "\n"
+        << "TREE:root->NODE_" << &Root <<"\n"
+        << "}\n";
 
-        if (this->root->left)
-            RETURN_ERROR(_recBuildCellTemplatesGraph(this->root->left,  outGraphFile, 0, MAX_DEPTH));
-        if (this->root->right)
-            RETURN_ERROR(_recBuildCellTemplatesGraph(this->root->right, outGraphFile, 0, MAX_DEPTH));
+        outGraphFile.close();
 
-        RETURN_ERROR(_recDrawGraph(this->root, outGraphFile, 0, MAX_DEPTH));
-        fprintf(outGraphFile, "\n");
-        fprintf(outGraphFile, "TREE:root->NODE_%p\n", this->root);
+        String outImgPath = m_logFolder;
+        outImgPath += "/img/iter";
+        outImgPath += iterString;
+        outImgPath += ".png";
 
-        fprintf(outGraphFile, "}\n");
-        fclose(outGraphFile);
+        String command = "dot ";
+        command += outGraphPath;
+        command += " -T png -o ";
+        command += outImgPath;
 
-        char command[MAX_COMMAND_LENGTH] = "";
-        sprintf(command, "dot %s -T png -o %s/Iteration%zu.png", outGraphPath, IMG_FOLDER.buf, dumpIteration);
         system(command);
 
-        if (m_htmlLogFile)
-            fprintf(m_htmlLogFile, "<img src = \"%s/Iteration%zu.png\"/>\n", IMG_FOLDER.buf, dumpIteration);
+        m_htmlLogFile << "<img src = \"" << outImgPath << "\"/>\n";
 
         dumpIteration++;
 
-        return Error();
+        return Utils::Error();
     }
-
-    static Error _recBuildCellTemplatesGraph(TreeNode* node, FILE* outGraphFile,
-                                                std::size_t curDepth, const std::size_t maxDepth)
+private:
+    static Utils::Error recBuildCellTemplatesGraph(const BinaryTreeNode<T>* node,
+                                                   std::ofstream& outGraphFile,
+                                                   std::size_t curDepth,
+                                                   std::size_t maxDepth)
     {
-        SoftAssert(node, ERROR_NULLPTR);
-
         std::size_t nodeId = node->id;
         
         if (curDepth > maxDepth)
-            return Error();
+            return CREATE_ERROR(Utils::ERROR_BAD_TREE);
 
-        fprintf(outGraphFile, "\nNODE_%p[style = \"filled\", ", node);
-        switch (NODE_TYPE(node))
-        {
-            case OPERATION_TYPE:
-                fprintf(outGraphFile, "fillcolor = " NODE_COLOR_OP ", ");
-                break;
-            case NUMBER_TYPE:
-                fprintf(outGraphFile, "fillcolor = " NODE_COLOR_NUM ", ");
-                break;
-            case NAME_TYPE:
-                fprintf(outGraphFile, "fillcolor = " NODE_COLOR_VAR ", ");
-                break;
-            default:
-                return CREATE_ERROR(CREATE_ERROR(ERROR_BAD_VALUE));
-        }
-
-        fprintf(outGraphFile, "label = \"{Value:\\n");
-        RETURN_ERROR(_printTreeElement(outGraphFile, node->value));
-        fprintf(outGraphFile, "|id:\\n");
+        outGraphFile << "NODE_" << node << "[style = \"filled\", "
+        "fillcolor = " NODE_COLOR ", "
+        "label = \"{Value:\\n" << node->Value <<
+        "|id:\\n";
 
         if (node->id == BAD_ID)
-            fprintf(outGraphFile, "BAD_ID");
+            outGraphFile << "BAD_ID";
         else
-            fprintf(outGraphFile, "%zu", node->id);
+            outGraphFile << node->id;
 
-        #ifndef NDEBUG
-        fprintf(outGraphFile, "|node count:\\n%zu", node->nodeCount);
-        #endif
-        fprintf(outGraphFile, "|{<left>left|<right>right}}\"];\n");
+        outGraphFile << "|{<left>left|<right>right}}\"];\n";
         
-        if (node->left)
-            RETURN_ERROR(_recBuildCellTemplatesGraph(node->left,  outGraphFile, curDepth + 1, maxDepth));
-        if (node->right)
-            RETURN_ERROR(_recBuildCellTemplatesGraph(node->right, outGraphFile, curDepth + 1, maxDepth));
+        if (node->Left)
+            RETURN_ERROR(recBuildCellTemplatesGraph(
+                node->Left,  outGraphFile, curDepth + 1, maxDepth
+            ));
+        if (node->Right)
+            RETURN_ERROR(recBuildCellTemplatesGraph(
+                node->Right, outGraphFile, curDepth + 1, maxDepth
+            ));
 
-        return Error();
+        return Utils::Error();
     }
 
-    #undef FONT_SIZE
-    #undef FONT_NAME
-    #undef BACK_GROUND_COLOR
-    #undef NODE_COLOR
-    #undef NODE_FRAME_COLOR
-    #undef ROOT_COLOR
-    #undef FREE_HEAD_COLOR
-
-    static Error _recDrawGraph(TreeNode* node, FILE* outGraphFile, std::size_t curDepth, const std::size_t maxDepth)
+    static Utils::Error recDrawGraph(const BinaryTreeNode<T>* node,
+                                     std::ofstream& outGraphFile,
+                                     std::size_t curDepth,
+                                     std::size_t maxDepth)
     {
-        SoftAssert(node, ERROR_NULLPTR);
         if (curDepth > maxDepth)
-            return Error();
+            return CREATE_ERROR(Utils::ERROR_BAD_TREE);
 
-        if (node->left)
+        if (node->Left)
         {
-            fprintf(outGraphFile, "NODE_%p:left->NODE_%p;\n", node, node->left);
-            RETURN_ERROR(_recDrawGraph(node->left, outGraphFile, curDepth + 1, maxDepth));
+            outGraphFile << "NODE_" << node << ":left->NODE_" << node->Left << ";\n";
+            RETURN_ERROR(recDrawGraph(node->Left, outGraphFile, curDepth + 1, maxDepth));
         }
-        if (node->right)
+        if (node->Right)
         {
-            fprintf(outGraphFile, "NODE_%p:right->NODE_%p;\n", node, node->right);
-            RETURN_ERROR(_recDrawGraph(node->right, outGraphFile, curDepth + 1, maxDepth));
+            outGraphFile << "NODE_" << node << ":right->NODE_" << node->Right << ";\n";
+            RETURN_ERROR(recDrawGraph(node->Right, outGraphFile, curDepth + 1, maxDepth));
         }
-        return Error();
+
+        return Utils::Error();
     }
-
-    Error Tree::StartLogging(const char* logFolder)
-    {
-        SoftAssert(logFolder, ERROR_NULLPTR);
-
-        LOG_FOLDER.Create(logFolder);
-
-        DOT_FOLDER.Create(&LOG_FOLDER);
-        DOT_FOLDER.Append("/dot");
-
-        IMG_FOLDER.Create(&LOG_FOLDER);
-        IMG_FOLDER.Append("/img");
-
-        char m_htmlLogFile_PATH[MAX_PATH_LENGTH];
-        sprintf(m_htmlLogFile_PATH, "%s/log.html", logFolder);
-
-        m_htmlLogFile = fopen(HTML_FILE_PATH, "w");
-        SoftAssert(m_htmlLogFile, ERROR_BAD_FILE);
-
-        fprintf(m_htmlLogFile, 
-            "<style>\n"
-            ".content {\n"
-            "max-width: 500px;\n"
-            "margin: auto;\n"
-            "}\n"
-            "</style>,\n"
-            "<body>\n"
-            "<div class=\"content\">");
-
-        return Error();
-    }
-
-    Utils::Error EndLogging()
-    {
-        if (m_htmlLogFile)
-        {
-            fprintf(m_htmlLogFile, "</div>\n</body>\n");
-            fclose(m_htmlLogFile);
-        }
-        m_htmlLogFile = NULL;
-
-        LOG_FOLDER.Destructor();
-        DOT_FOLDER.Destructor();
-        IMG_FOLDER.Destructor();
-
-        return Error();
-    }
-
 #undef FONT_SIZE
 #undef FONT_NAME
 #undef NODE_COLOR_OP
@@ -295,10 +261,10 @@ public:
 private:
     static Utils::Error recDtor(BinaryTreeNode<T>* node)
     {
-        if (node->left)
-            RETURN_ERROR(recDtor(node->left));
-        if (node->right)
-            RETURN_ERROR(recDtor(node->right));
+        if (node->Left)
+            RETURN_ERROR(recDtor(node->Left));
+        if (node->Right)
+            RETURN_ERROR(recDtor(node->Right));
 
         delete node;
 

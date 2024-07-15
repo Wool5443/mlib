@@ -12,10 +12,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "-march=native -mavx512f -O3 -DNDEBUG")
 FILE(GLOB SOURCES_CPP src/*.cpp Utils/*.cpp example/main.cpp tests/Tests.cpp)
 FILE(GLOB SOURCES_HPP headers/*.hpp Utils/*.hpp tests/Tests.hpp)
 
-file(MAKE_DIRECTORY "log")
-file(MAKE_DIRECTORY "log/txt")
-file(MAKE_DIRECTORY "log/dot")
-file(MAKE_DIRECTORY "log/img")
+file(MAKE_DIRECTORY "listLog")
+file(MAKE_DIRECTORY "listLog/txt")
+file(MAKE_DIRECTORY "listLog/dot")
+file(MAKE_DIRECTORY "listLog/img")
+
+file(MAKE_DIRECTORY "treeLog")
+file(MAKE_DIRECTORY "treeLog/dot")
+file(MAKE_DIRECTORY "treeLog/img")
 
 set(SOURCES
     ${SOURCES_CPP}

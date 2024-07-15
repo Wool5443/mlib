@@ -182,7 +182,7 @@ public:
 
         const char* token = strtok(buf, delimiters);
 
-        std::std::size_t i = 0;
+        std::size_t i = 0;
 
         while (token)
         {

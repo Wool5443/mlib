@@ -22,12 +22,27 @@ public:
     inline size_t Head() const noexcept { return m_next[0]; }
     inline size_t Tail() const noexcept { return m_prev[0]; }
 public:
-    inline size_t       Length() const noexcept { return m_data.Length; }
-    inline Utils::Error Error()  const noexcept
+    inline size_t       Length()   const noexcept { return m_data.Length; }
+    inline size_t       Capacity() const noexcept { return m_data.GetCapacity(); }
+    inline Utils::Error Error()    const noexcept
     {
         if (m_data.Error) return m_data.Error;
         if (m_next.Error) return m_next.Error;
         return m_prev.Error;
+    }
+private:
+    inline void updateLength(size_t newLength)
+    {
+        m_data.Length = newLength;
+        m_next.Length = newLength;
+        m_prev.Length = newLength;
+    }
+
+    inline Utils::Error realloc(size_t newLength)
+    {
+        RETURN_ERROR(m_data.Realloc(newLength));
+        RETURN_ERROR(m_next.Realloc(newLength));
+        return m_prev.Realloc(newLength);
     }
 public:
     LinkedList()
@@ -53,12 +68,7 @@ public:
         if (m_prev[index] == FREE_ELEM)
             return CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS);
 
-        m_data.Realloc(Length() + 1);
-        RETURN_ERROR(m_data.Error);
-        m_next.Realloc(Length() + 1);
-        RETURN_ERROR(m_next.Error);
-        m_prev.Realloc(Length() + 1);
-        RETURN_ERROR(m_prev.Error);
+        realloc(Length() + 1);
 
         size_t insertIndex    = m_freeHead;
         m_freeHead            = m_next[m_freeHead];
@@ -89,6 +99,48 @@ public:
         return InsertBefore(value, Head());
     }
 
+    Utils::Result<T> Pop(size_t index) noexcept
+    {
+        if (index < 1 || index >= m_data.GetCapacity() ||
+            m_prev[index] == FREE_ELEM)
+            return { {}, CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS) };
+
+        const T& value = m_data[index];
+
+        m_next[m_prev[index]] = m_next[index];
+        m_prev[m_next[index]] = m_prev[index];
+
+        m_prev[index] = FREE_ELEM;
+        m_next[index] = m_freeHead;
+        m_freeHead    = index;
+
+        return { value, Error() };
+    }
+
+    Utils::Result<T> Pop() noexcept
+    {
+        Pop(Tail());
+    }
+
+    Utils::Result<T> GetValueByItsOrderInTheList(size_t index)
+    {
+        if (index < 1 || index >= m_data.GetCapacity() ||
+            m_prev[index] == FREE_ELEM)
+            return { FREE_ELEM, CREATE_ERROR(Utils::ErrorCode::ERROR_INDEX_OUT_OF_BOUNDS) };
+
+        ERR_DUMP_RET_RES(this, 0);
+        
+        size_t curEl = Head();
+        size_t i = 1;
+
+        while (i < index && curEl)
+        {
+            curEl = m_next[curEl];
+            i++;
+        }
+
+        return { curEl, curEl ? Error() : CREATE_ERROR(Utils::ErrorCode::ERROR_NOT_FOUND) };
+    }
 public:
     void StartLogging(const char* logFolder) noexcept
     {

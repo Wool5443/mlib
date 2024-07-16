@@ -1,27 +1,59 @@
 #ifndef MLIB_BINARY_TREE_HPP
 #define MLIB_BINARY_TREE_HPP
 
+//!@file
+/**
+ * @file BinaryTree.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief This file contains implementation of a binary
+ *        tree using templates
+ * @version 1.0
+ * @date 16-07-2024
+ * 
+ * @copyright Copyright (c) 2024
+ */
+
 #include <fstream>
 #include "Utils.hpp"
 #include "String.hpp"
 
 namespace mlib {
 
+/** @struct BinaryTreeNode
+ * @brief Represents a tree node
+ *
+ * @tparam T value type
+ */
 template<typename T>
 struct BinaryTreeNode
 {
     T               value{};
-    BinaryTreeNode* left   = nullptr;
-    BinaryTreeNode* right  = nullptr;
-    BinaryTreeNode* parent = nullptr;
-    std::size_t     id     = getNewId();
-    Utils::Error    error  = Utils::Error();
+    BinaryTreeNode* left   = nullptr; /**< ptr to left child */
+    BinaryTreeNode* right  = nullptr; /**< ptr to right child */
+    BinaryTreeNode* parent = nullptr; /**< ptr to parent */
+    std::size_t     id     = getNewId(); /** id of the node */
+    Utils::Error    error  = Utils::Error(); /** errors which may occur in ctor */
 
+    /**
+     * @brief Construct a new Binary Tree Node object
+     */
     BinaryTreeNode() noexcept {}
 
+    /**
+     * @brief Construct a new Binary Tree Node object
+     *
+     * @param [in] value init value
+     */
     BinaryTreeNode(const T& value) noexcept
         : value(value) {}
 
+    /**
+     * @brief Construct a new Binary Tree Node object
+     *
+     * @param [in] value init value
+     * @param [in] left left child
+     * @param [in] right right child
+     */
     BinaryTreeNode(const T& value,
                    BinaryTreeNode* left, BinaryTreeNode* right) noexcept
         : value(value), left(left), right(right)
@@ -32,6 +64,11 @@ struct BinaryTreeNode
             right->parent = this;
     }
 
+    /**
+     * @brief BinaryTreeNode copy constructore
+     *
+     * @param [in] other node to copy
+     */
     BinaryTreeNode(const BinaryTreeNode& other)
         : value(other.value)
     {
@@ -53,6 +90,11 @@ struct BinaryTreeNode
         right = right;
     }
 
+    /**
+     * @brief BinaryTreeNode move constructor
+     *
+     * @param [in] other node to move
+     */
     BinaryTreeNode(BinaryTreeNode&& other)
         : value(std::move(other.value)),
           left(other.left), right(other.right),
@@ -64,6 +106,12 @@ struct BinaryTreeNode
         other.parent = nullptr;
     }
 
+    /**
+     * @brief Copy assignment is forbidden
+     *
+     * @param [in] other node to copy
+     * @return BinaryTreeNode&
+     */
     BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
     BinaryTreeNode& operator=(BinaryTreeNode&& other)
     {
@@ -76,6 +124,12 @@ struct BinaryTreeNode
         return *this;
     }
 
+    /**
+     * @brief Set the left child
+     * 
+     * @param [in] node child
+     * @return Utils::Error 
+     */
     Utils::Error SetLeft(BinaryTreeNode* node)
     {
         left         = node;
@@ -83,6 +137,12 @@ struct BinaryTreeNode
 
         return Utils::Error();
     }
+    /**
+     * @brief Set the right child
+     * 
+     * @param [in] node child
+     * @return Utils::Error 
+     */
     Utils::Error SetRight(BinaryTreeNode* node)
     {
         right        = node;
@@ -91,6 +151,11 @@ struct BinaryTreeNode
         return Utils::Error();
     }
 
+    /**
+     * @brief Clone the node
+     * 
+     * @return Utils::Result<BinaryTreeNode*> copy
+     */
     Utils::Result<BinaryTreeNode*> Clone()
     {
         Utils::Result<BinaryTreeNode*> left  = {};
@@ -108,6 +173,14 @@ struct BinaryTreeNode
         return node;
     }
 
+    /**
+     * @brief Allocates memory for the node and returns a pointer
+     *
+     * @param [in] value init value
+     * @param [in] left left child
+     * @param [in] right right child
+     * @return Utils::Result<BinaryTreeNode*> new node
+     */
     static Utils::Result<BinaryTreeNode*> New(const T& value = {},
                                               BinaryTreeNode* left  = nullptr,
                                               BinaryTreeNode* right = nullptr)
@@ -144,23 +217,44 @@ private:
     }
 };
 
+/**
+ * @brief Represents a binary tree
+ * 
+ * @tparam T value type
+ * @tparam MaxSize max depth
+ */
 template<typename T, std::size_t MaxSize = 1000>
 class BinaryTree
 {
 public:
-    BinaryTreeNode<T>* root  = nullptr;
-    Utils::Error       error{};
+    BinaryTreeNode<T>* root  = nullptr; ///< root
+    Utils::Error       error{}; ///< error from the ctor
 private:
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
 
     static const std::size_t BAD_ID = Utils::SIZET_POISON;
 public:
+    /**
+     * @brief Construct a new Binary Tree object
+     * This ctor creates an empty Tree without a root
+     */
     BinaryTree() noexcept {}
 
+    /**
+     * @brief Construct a new Binary Tree object
+     * 
+     * @param [in] root 
+     */
     BinaryTree(BinaryTreeNode<T>* root) noexcept
         : root(root) {}
 
+    /**
+     * @brief Construct a new Binary Tree object
+     * This ctor creates a valid tree with a root
+     *
+     * @param [in] value root init value
+     */
     BinaryTree(const T& value)
     {
         auto _root = BinaryTreeNode<T>::New(value);
@@ -189,6 +283,13 @@ public:
 #define NODE_FRAME_COLOR "\"#000000\""
 #define ROOT_COLOR "\"#c95b90\""
 #define FREE_HEAD_COLOR "\"#b9e793\""
+
+    /**
+     * @brief Initializes log files and writes
+     * the header of the html log file
+     * 
+     * @param [in] logFolder where to put logs
+     */
     void StartLogging(const char* logFolder)
     {
         HardAssert(logFolder, Utils::ERROR_NULLPTR);
@@ -208,12 +309,21 @@ public:
         "<div class=\"content\">";
     }
 
+    /**
+     * @brief Ends logging
+     */
     void EndLogging()
     {
         m_htmlLogFile << "</div>\n</body>\n";
         m_htmlLogFile.close();
     }
 
+    /**
+     * @brief Call only after StartLogging
+     * Dumps a tree
+     *
+     * @return Utils::Error
+     */
     Utils::Error Dump()
     {
         static const std::size_t NUM_STR_MAX_LENGTH = 21;

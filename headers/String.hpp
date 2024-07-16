@@ -30,6 +30,11 @@ public:
 
     String(const char* string)
         : String(string, strlen(string)) {}
+    String(const char chr)
+        : String()
+    {
+        *this += chr;
+    }
 public:
     operator char*()             noexcept { return RawPtr(); }
     operator const char*() const noexcept { return RawPtr(); }

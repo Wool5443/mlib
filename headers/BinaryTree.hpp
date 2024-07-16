@@ -117,6 +117,11 @@ struct BinaryTreeNode
         if (!node)
             return { nullptr, CREATE_ERROR(Utils::ERROR_NO_MEMORY) };
 
+        if (left)
+            left->Parent  = node;
+        if (right)
+            right->Parent = node;
+
         return { node, Utils::Error() };
     }
 private:
@@ -163,7 +168,7 @@ public:
         delete Root;
     }
     BinaryTree(const BinaryTree& other)            = delete;
-    BinaryTree(BinaryTree&& other)                 = delete;
+    // BinaryTree(BinaryTree&& other)                 = delete;
     BinaryTree& operator=(const BinaryTree& other) = delete;
     BinaryTree& operator=(BinaryTree&& other)      = delete;
 public:

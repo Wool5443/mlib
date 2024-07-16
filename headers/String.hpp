@@ -63,13 +63,13 @@ private:
         return *this;
     }
 public:
-    bool operator==(const String& other)
+    bool operator==(const String& other) const noexcept
     {
         return strncmp(RawPtr(), other.m_buf.RawPtr(),
                        std::min(Length(), other.Length())) == 0;
     }
 
-    bool operator!=(const String& other)
+    bool operator!=(const String& other) const noexcept
     {
         return !operator==(other);
     }

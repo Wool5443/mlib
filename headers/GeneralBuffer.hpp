@@ -17,8 +17,8 @@ public:
     std::size_t       Length;
     Utils::Error Error = Utils::Error();
 public:
-    inline T*       RawPtr()            noexcept { return m_buf;      }
-    inline const T* RawPtr()      const noexcept { return m_buf;      }
+    inline T*            RawPtr()            noexcept { return m_buf;      }
+    inline const T*      RawPtr()      const noexcept { return m_buf;      }
     inline std::size_t   GetCapacity() const noexcept { return m_capacity; }
 private:
     Buffer(std::size_t capacity, std::size_t length, const char* buf)

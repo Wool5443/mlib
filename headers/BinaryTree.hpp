@@ -1,11 +1,10 @@
 #ifndef MLIB_BINARY_TREE_HPP
 #define MLIB_BINARY_TREE_HPP
 
-//!@file
 /**
  * @file BinaryTree.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
- * @brief This file contains implementation of a binary
+ * @brief This file contains the implementation of a binary
  *        tree using templates
  * @version 1.0
  * @date 16-07-2024
@@ -21,7 +20,7 @@ namespace mlib {
 
 /** @struct BinaryTreeNode
  * @brief Represents a tree node
- *
+ * 
  * @tparam T value type
  */
 template<typename T>
@@ -41,7 +40,7 @@ struct BinaryTreeNode
 
     /**
      * @brief Construct a new Binary Tree Node object
-     *
+     * 
      * @param [in] value init value
      */
     BinaryTreeNode(const T& value) noexcept
@@ -49,7 +48,7 @@ struct BinaryTreeNode
 
     /**
      * @brief Construct a new Binary Tree Node object
-     *
+     * 
      * @param [in] value init value
      * @param [in] left left child
      * @param [in] right right child
@@ -66,7 +65,7 @@ struct BinaryTreeNode
 
     /**
      * @brief BinaryTreeNode copy constructore
-     *
+     * 
      * @param [in] other node to copy
      */
     BinaryTreeNode(const BinaryTreeNode& other)
@@ -92,7 +91,7 @@ struct BinaryTreeNode
 
     /**
      * @brief BinaryTreeNode move constructor
-     *
+     * 
      * @param [in] other node to move
      */
     BinaryTreeNode(BinaryTreeNode&& other)
@@ -108,7 +107,7 @@ struct BinaryTreeNode
 
     /**
      * @brief Copy assignment is forbidden
-     *
+     * 
      * @param [in] other node to copy
      * @return BinaryTreeNode&
      */
@@ -175,7 +174,7 @@ struct BinaryTreeNode
 
     /**
      * @brief Allocates memory for the node and returns a pointer
-     *
+     * 
      * @param [in] value init value
      * @param [in] left left child
      * @param [in] right right child
@@ -198,6 +197,11 @@ struct BinaryTreeNode
         return { node, Utils::Error() };
     }
 
+    /**
+     * @brief Recursively deletes the node
+     * 
+     * @return Utils::Error 
+     */
     Utils::Error Delete()
     {
         if (this->left)
@@ -252,7 +256,7 @@ public:
     /**
      * @brief Construct a new Binary Tree object
      * This ctor creates a valid tree with a root
-     *
+     * 
      * @param [in] value root init value
      */
     BinaryTree(const T& value)
@@ -321,7 +325,7 @@ public:
     /**
      * @brief Call only after StartLogging
      * Dumps a tree
-     *
+     * 
      * @return Utils::Error
      */
     Utils::Error Dump()

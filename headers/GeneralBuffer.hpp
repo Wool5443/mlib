@@ -4,8 +4,9 @@
 /**
  * @file GeneralBuffer.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
- * @brief This file contains the implementation of a buffer
- * used in other containers.
+ * @brief This file contains the implementation of a templated
+ * buffer used in other containers
+ * 
  * @version 1.0
  * @date 16-07-2024
  * 

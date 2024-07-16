@@ -4,8 +4,9 @@
 /**
  * @file BinaryTree.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
- * @brief This file contains the implementation of a binary
- *        tree using templates
+ * @brief This file contains the implementation of a templated
+ * binary tree
+ * 
  * @version 1.0
  * @date 16-07-2024
  * 
@@ -24,7 +25,7 @@ namespace mlib {
  * @tparam T value type
  */
 template<typename T>
-struct BinaryTreeNode
+struct BinaryTreeNode final
 {
     T               value{};
     BinaryTreeNode* left   = nullptr; /**< ptr to left child */
@@ -228,7 +229,7 @@ private:
  * @tparam MaxSize max depth
  */
 template<typename T, std::size_t MaxSize = 1000>
-class BinaryTree
+class BinaryTree final
 {
 public:
     BinaryTreeNode<T>* root  = nullptr; ///< root

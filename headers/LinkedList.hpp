@@ -7,7 +7,7 @@
 namespace mlib {
 
 template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
-class LinkedList
+class LinkedList final
 {
 private:
     Buffer<T,      DefaultCapacity, GrowFactor> m_data;

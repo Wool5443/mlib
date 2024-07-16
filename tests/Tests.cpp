@@ -111,14 +111,14 @@ Utils::Error Tests::TestList(std::size_t n)
 
 Utils::Error Tests::TestBTree()
 {
-    BinaryTree<int> tree;
+    BinaryTree<int> tree(0);
 
     tree.StartLogging("../treeLog");
 
-    BinaryTreeNode<int>& root = tree.Root;
+    BinaryTreeNode<int>* root = tree.Root;
 
-    root.SetLeft(BinaryTreeNode<int>::New(1).value);
-    root.SetRight(BinaryTreeNode<int>::New(2).value);
+    root->SetLeft(BinaryTreeNode<int>::New(1).value);
+    root->SetRight(BinaryTreeNode<int>::New(2).value);
 
     tree.Dump();
 

@@ -160,7 +160,12 @@ public:
         Error = recDtor(Root->Left);
         if (Error) return;
         Error = recDtor(Root->Right);
+        delete Root;
     }
+    BinaryTree(const BinaryTree& other)            = delete;
+    BinaryTree(BinaryTree&& other)                 = delete;
+    BinaryTree& operator=(const BinaryTree& other) = delete;
+    BinaryTree& operator=(BinaryTree&& other)      = delete;
 public:
 #define FONT_SIZE "10"
 #define FONT_NAME "\"Fira Code Bold\""
@@ -237,9 +242,9 @@ public:
         "TREE[rank = \"min\", style = \"filled\", fillcolor = " TREE_COLOR ", "
                         "label = \"{Tree|Error: " << Error.GetErrorName() << "|"
                         "<root>Root}\"];"
-        "\nNODE_" << &Root << "[style = \"filled\", "
+        "\nNODE_" << Root << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
-        "label = \"{Value:\\n|" << Root.Value <<
+        "label = \"{Value:\\n|" << Root->Value <<
         "|{<left>Left|<right>Right}}\"];\n";
 
         std::size_t MAX_DEPTH = MaxSize;

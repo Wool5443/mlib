@@ -124,6 +124,18 @@ struct BinaryTreeNode
 
         return { node, Utils::Error() };
     }
+
+    Utils::Error Delete()
+    {
+        if (this->left)
+            RETURN_ERROR(this->left->Delete());
+        if (this->right)
+            RETURN_ERROR(this->right->Delete());
+
+        delete this;
+
+        return Utils::Error();
+    }
 private:
     inline std::size_t getNewId()
     {
@@ -158,10 +170,8 @@ public:
 
     ~BinaryTree()
     {
-        error = recDtor(root->left);
-        if (error) return;
-        error = recDtor(root->right);
-        delete root;
+        if (root)
+            error = root->Delete();
     }
     BinaryTree(const BinaryTree& other)            = delete;
     // BinaryTree(BinaryTree&& other)                 = delete;
@@ -343,18 +353,6 @@ private:
 #undef NODE_FRAME_COLOR
 #undef ROOT_COLOR
 #undef FREE_HEAD_COLOR
-private:
-    static Utils::Error recDtor(BinaryTreeNode<T>* node)
-    {
-        if (node->left)
-            RETURN_ERROR(recDtor(node->left));
-        if (node->right)
-            RETURN_ERROR(recDtor(node->right));
-
-        delete node;
-
-        return Utils::Error();
-    }
 };
 
 } // namespace mlib

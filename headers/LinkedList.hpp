@@ -129,6 +129,17 @@ public:
 
         return { curEl, curEl ? Error() : CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
     }
+
+    Utils::Result<size_t> Find(const T& value) const noexcept
+    {
+        size_t curEl = Head();
+
+        while (curEl && m_data[curEl] != value)
+            curEl = m_next[curEl];
+
+        return { curEl, curEl ? Utils::Error() :
+                                CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
+    }
 public:
     void StartLogging(const char* logFolder) noexcept
     {

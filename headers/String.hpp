@@ -31,10 +31,7 @@ public:
     String(const char* string)
         : String(string, strlen(string)) {}
     String(const char chr)
-        : String()
-    {
-        *this += chr;
-    }
+        : String(&chr, 1) {}
 public:
     operator char*()             noexcept { return RawPtr(); }
     operator const char*() const noexcept { return RawPtr(); }
@@ -163,8 +160,9 @@ public:
         return Count(string.RawPtr());
     }
 
+private:
     static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
-
+public:
     Utils::Result<Vector<String>> Split() const noexcept
     {
         return Split(SPACE_CHARS);
@@ -198,6 +196,36 @@ public:
         free(buf);
 
         return words;
+    }
+
+    Utils::Error Filter(const char* filter) noexcept
+    {
+        SoftAssert(filter, Utils::ErrorCode::ERROR_NULLPTR);
+
+        char*       writePtr = RawPtr();
+        const char* readPtr  = writePtr;
+
+        while (*readPtr)
+        {
+            char c = *readPtr++;
+
+            if (!std::strchr(filter, c))
+                *writePtr++ = c;
+        }
+
+        *writePtr = '\0';
+
+        return Utils::Error();
+    }
+
+    Utils::Error Filter(const String& filter) noexcept
+    {
+        return Filter(filter.RawPtr());
+    }
+
+    Utils::Error Filter() noexcept
+    {
+        return Filter(SPACE_CHARS);
     }
 };
 

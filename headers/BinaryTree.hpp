@@ -10,67 +10,67 @@ namespace mlib {
 template<typename T>
 struct BinaryTreeNode
 {
-    T               Value{};
-    BinaryTreeNode* Left   = nullptr;
-    BinaryTreeNode* Right  = nullptr;
-    BinaryTreeNode* Parent = nullptr;
+    T               value{};
+    BinaryTreeNode* left   = nullptr;
+    BinaryTreeNode* right  = nullptr;
+    BinaryTreeNode* parent = nullptr;
     std::size_t     id     = getNewId();
-    Utils::Error    Error  = Utils::Error();
+    Utils::Error    error  = Utils::Error();
 
     BinaryTreeNode() noexcept {}
 
     BinaryTreeNode(const T& value) noexcept
-        : Value(value) {}
+        : value(value) {}
 
     BinaryTreeNode(const T& value,
                    BinaryTreeNode* left, BinaryTreeNode* right) noexcept
-        : Value(value), Left(left), Right(right)
+        : value(value), left(left), right(right)
     {
         if (left)
-            left->Parent  = this;
+            left->parent  = this;
         if (right)
-            right->Parent = this;
+            right->parent = this;
     }
 
     BinaryTreeNode(const BinaryTreeNode& other)
-        : Value(other.Value)
+        : value(other.value)
     {
-        auto left = other.Left->Clone();
+        auto left = other.left->Clone();
         if (!left)
         {
-            Error = left;
+            error = left;
             return;
         }
 
-        auto right = other.Left->Clone();
+        auto right = other.left->Clone();
         if (!right)
         {
-            Error = right;
+            error = right;
             return;
         }
 
-        Left  = left;
-        Right = right;
+        left  = left;
+        right = right;
     }
 
     BinaryTreeNode(BinaryTreeNode&& other)
-        : Value(std::move(other.Value)),
-          Left(other.Left), Right(other.Right),
-          Parent(other.Parent),
+        : value(std::move(other.value)),
+          left(other.left), right(other.right),
+          parent(other.parent),
           id(other.id)
     {
-        other.Left   = nullptr;
-        other.Right  = nullptr;
-        other.Parent = nullptr;
+        other.left   = nullptr;
+        other.right  = nullptr;
+        other.parent = nullptr;
     }
 
     BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
     BinaryTreeNode& operator=(BinaryTreeNode&& other)
     {
-        Value  = std::move(other.Value);
-        Left   = other.Left;
-        Right  = other.Right;
-        Parent = other.Parent;
+        value  = std::move(other.value);
+        left   = other.left;
+        right  = other.right;
+        parent = other.parent;
         id     = other.id;
 
         return *this;
@@ -78,15 +78,15 @@ struct BinaryTreeNode
 
     Utils::Error SetLeft(BinaryTreeNode* node)
     {
-        Left         = node;
-        node->Parent = this;
+        left         = node;
+        node->parent = this;
 
         return Utils::Error();
     }
     Utils::Error SetRight(BinaryTreeNode* node)
     {
-        Right        = node;
-        node->Parent = this;
+        right        = node;
+        node->parent = this;
 
         return Utils::Error();
     }
@@ -96,14 +96,14 @@ struct BinaryTreeNode
         Utils::Result<BinaryTreeNode*> left  = {};
         Utils::Result<BinaryTreeNode*> right = {};
 
-        if (Left)
-            left = Left->Clone();
+        if (left)
+            left = left->Clone();
         RETURN_RESULT(left);
-        if (Right)
-            right = Right->Clone();
+        if (right)
+            right = right->Clone();
         RETURN_RESULT(right);
 
-        auto node = BinaryTreeNode::New(Value, left.value, right.value);
+        auto node = BinaryTreeNode::New(value, left.value, right.value);
 
         return node;
     }
@@ -118,9 +118,9 @@ struct BinaryTreeNode
             return { nullptr, CREATE_ERROR(Utils::ERROR_NO_MEMORY) };
 
         if (left)
-            left->Parent  = node;
+            left->parent  = node;
         if (right)
-            right->Parent = node;
+            right->parent = node;
 
         return { node, Utils::Error() };
     }
@@ -136,8 +136,8 @@ template<typename T, std::size_t MaxSize = 1000>
 class BinaryTree
 {
 public:
-    BinaryTreeNode<T>* Root  = nullptr;
-    Utils::Error       Error{};
+    BinaryTreeNode<T>* root  = nullptr;
+    Utils::Error       error{};
 private:
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
@@ -147,25 +147,21 @@ public:
     BinaryTree() noexcept {}
 
     BinaryTree(BinaryTreeNode<T>* root) noexcept
-        : Root(root) {}
+        : root(root) {}
 
     BinaryTree(const T& value)
     {
-        auto root = BinaryTreeNode<T>::New(value);
-        if (!root)
-        {
-            Error = root;
-            return;
-        }
-        Root = root.value;
+        auto _root = BinaryTreeNode<T>::New(value);
+        error = _root;
+        root  = _root;
     }
 
     ~BinaryTree()
     {
-        Error = recDtor(Root->Left);
-        if (Error) return;
-        Error = recDtor(Root->Right);
-        delete Root;
+        error = recDtor(root->left);
+        if (error) return;
+        error = recDtor(root->right);
+        delete root;
     }
     BinaryTree(const BinaryTree& other)            = delete;
     // BinaryTree(BinaryTree&& other)                 = delete;
@@ -183,9 +179,9 @@ public:
 #define NODE_FRAME_COLOR "\"#000000\""
 #define ROOT_COLOR "\"#c95b90\""
 #define FREE_HEAD_COLOR "\"#b9e793\""
-    Utils::Error StartLogging(const char* logFolder)
+    void StartLogging(const char* logFolder)
     {
-        SoftAssert(logFolder, Utils::ERROR_NULLPTR);
+        HardAssert(logFolder, Utils::ERROR_NULLPTR);
 
         m_logFolder = logFolder;
 
@@ -200,16 +196,12 @@ public:
         "</style>,\n"
         "<body>\n"
         "<div class=\"content\">";
-
-        return Utils::Error();
     }
 
-    Utils::Error EndLogging()
+    void EndLogging()
     {
         m_htmlLogFile << "</div>\n</body>\n";
         m_htmlLogFile.close();
-
-        return Utils::Error();
     }
 
     Utils::Error Dump()
@@ -245,23 +237,23 @@ public:
 
         outGraphFile <<
         "TREE[rank = \"min\", style = \"filled\", fillcolor = " TREE_COLOR ", "
-                        "label = \"{Tree|Error: " << Error.GetErrorName() << "|"
+                        "label = \"{Tree|Error: " << error.GetErrorName() << "|"
                         "<root>Root}\"];"
-        "\nNODE_" << Root << "[style = \"filled\", "
+        "\nNODE_" << root << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
-        "label = \"{Value:\\n|" << Root->Value <<
+        "label = \"{Value:\\n|" << root->value <<
         "|{<left>Left|<right>Right}}\"];\n";
 
         std::size_t MAX_DEPTH = MaxSize;
 
-        if (Root->Left)
-            RETURN_ERROR(recBuildCellTemplatesGraph(Root->Left,  outGraphFile, 0, MAX_DEPTH));
-        if (Root->Right)
-            RETURN_ERROR(recBuildCellTemplatesGraph(Root->Right, outGraphFile, 0, MAX_DEPTH));
+        if (root->left)
+            RETURN_ERROR(recBuildCellTemplatesGraph(root->left,  outGraphFile, 0, MAX_DEPTH));
+        if (root->right)
+            RETURN_ERROR(recBuildCellTemplatesGraph(root->right, outGraphFile, 0, MAX_DEPTH));
 
-        RETURN_ERROR(recDrawGraph(Root, outGraphFile, 0, MAX_DEPTH));
+        RETURN_ERROR(recDrawGraph(root, outGraphFile, 0, MAX_DEPTH));
         outGraphFile << "\n"
-        << "TREE:root->NODE_" << Root <<"\n"
+        << "TREE:root->NODE_" << root <<"\n"
         << "}\n";
 
         outGraphFile.close();
@@ -297,7 +289,7 @@ private:
 
         outGraphFile << "NODE_" << node << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
-        "label = \"{Value:\\n" << node->Value <<
+        "label = \"{Value:\\n" << node->value <<
         "|id:\\n";
 
         if (node->id == BAD_ID)
@@ -307,13 +299,13 @@ private:
 
         outGraphFile << "|{<left>left|<right>right}}\"];\n";
         
-        if (node->Left)
+        if (node->left)
             RETURN_ERROR(recBuildCellTemplatesGraph(
-                node->Left,  outGraphFile, curDepth + 1, maxDepth
+                node->left,  outGraphFile, curDepth + 1, maxDepth
             ));
-        if (node->Right)
+        if (node->right)
             RETURN_ERROR(recBuildCellTemplatesGraph(
-                node->Right, outGraphFile, curDepth + 1, maxDepth
+                node->right, outGraphFile, curDepth + 1, maxDepth
             ));
 
         return Utils::Error();
@@ -327,15 +319,15 @@ private:
         if (curDepth > maxDepth)
             return CREATE_ERROR(Utils::ERROR_BAD_TREE);
 
-        if (node->Left)
+        if (node->left)
         {
-            outGraphFile << "NODE_" << node << ":left->NODE_" << node->Left << ";\n";
-            RETURN_ERROR(recDrawGraph(node->Left, outGraphFile, curDepth + 1, maxDepth));
+            outGraphFile << "NODE_" << node << ":left->NODE_" << node->left << ";\n";
+            RETURN_ERROR(recDrawGraph(node->left, outGraphFile, curDepth + 1, maxDepth));
         }
-        if (node->Right)
+        if (node->right)
         {
-            outGraphFile << "NODE_" << node << ":right->NODE_" << node->Right << ";\n";
-            RETURN_ERROR(recDrawGraph(node->Right, outGraphFile, curDepth + 1, maxDepth));
+            outGraphFile << "NODE_" << node << ":right->NODE_" << node->right << ";\n";
+            RETURN_ERROR(recDrawGraph(node->right, outGraphFile, curDepth + 1, maxDepth));
         }
 
         return Utils::Error();
@@ -354,10 +346,10 @@ private:
 private:
     static Utils::Error recDtor(BinaryTreeNode<T>* node)
     {
-        if (node->Left)
-            RETURN_ERROR(recDtor(node->Left));
-        if (node->Right)
-            RETURN_ERROR(recDtor(node->Right));
+        if (node->left)
+            RETURN_ERROR(recDtor(node->left));
+        if (node->right)
+            RETURN_ERROR(recDtor(node->right));
 
         delete node;
 

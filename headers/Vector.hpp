@@ -11,7 +11,7 @@ class Vector final
 private:
     Buffer<T, DefaultCapacity, GrowFactor> m_buf;
 public:
-    std::size_t       Length() const noexcept  { return m_buf.Length; }
+    std::size_t  Length() const noexcept  { return m_buf.Length; }
     Utils::Error Error()  const noexcept  { return m_buf.Error;  }
 public:
     Vector()

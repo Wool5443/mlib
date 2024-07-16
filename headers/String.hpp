@@ -14,7 +14,7 @@ class String final
 private:
     Buffer<char, DefaultCapacity, GrowFactor> m_buf;
 public:
-    std::size_t       Length() const noexcept { return m_buf.Length; }
+    std::size_t  Length() const noexcept { return m_buf.Length; }
     Utils::Error Error()  const noexcept { return m_buf.Error;  }
     char*        RawPtr()       noexcept { return m_buf.RawPtr(); }
     const char*  RawPtr() const noexcept { return m_buf.RawPtr(); }

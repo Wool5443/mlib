@@ -115,7 +115,7 @@ Utils::Error Tests::TestBTree()
 
     tree.StartLogging("../treeLog");
 
-    BinaryTreeNode<int>* root = tree.Root;
+    BinaryTreeNode<int>* root = tree.root;
 
     root->SetLeft(BinaryTreeNode<int>::New(1).value);
     root->SetRight(BinaryTreeNode<int>::New(2).value);

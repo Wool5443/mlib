@@ -23,7 +23,7 @@ public:
 public:
     inline std::size_t       Length()   const noexcept { return m_data.Length; }
     inline std::size_t       Capacity() const noexcept { return m_data.GetCapacity(); }
-    inline Utils::Error Error()    const noexcept
+    inline Utils::Error      Error()    const noexcept
     {
         if (m_data.Error) return m_data.Error;
         if (m_next.Error) return m_next.Error;

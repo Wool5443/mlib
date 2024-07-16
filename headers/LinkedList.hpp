@@ -69,7 +69,7 @@ public:
         m_prev[m_next[index]] = insertIndex;
         m_next[index]         = insertIndex;
 
-        return Error();
+        return Utils::Error();
     }
 
     Utils::Error InsertBefore(const T& value, std::size_t index) noexcept

@@ -325,7 +325,7 @@ public:
 
     /**
      * @brief Call only after StartLogging
-     * Dumps a tree
+     * Dumps the tree
      * 
      * @return Utils::Error
      */

@@ -1,11 +1,33 @@
 #ifndef MLIB_LINKED_LIST_HPP
 #define MLIB_LINKED_LIST_HPP
 
+/**
+ * @file LinkedList.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief This file contains an implementation of a
+ * templated LinkedList
+ * 
+ * Elements are stored in an array, thus, this
+ * list is very cache-friendly
+ * 
+ * @version 1.0
+ * @date 16-07-2024
+ * 
+ * @copyright Copyright (c) 2024
+ */
+
 #include <fstream>
 #include "GeneralBuffer.hpp"
 
 namespace mlib {
 
+/** @class LinkedList
+ * @brief LinkedList class using arrays
+ * 
+ * @tparam T value type
+ * @tparam DefaultCapacity 
+ * @tparam GrowFactor 
+ */
 template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class LinkedList final
 {
@@ -18,22 +40,52 @@ private:
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
 public:
-    inline std::size_t Head() const noexcept { return m_next[0]; }
-    inline std::size_t Tail() const noexcept { return m_prev[0]; }
+    /**
+     * @brief Return the head
+     * 
+     * @return std::size_t index of the head
+     */
+    inline std::size_t  Head()     const noexcept { return m_next[0]; }
+    /**
+     * @brief Return the tail 
+     * 
+     * @return std::size_t index of the tail
+     */
+    inline std::size_t  Tail()     const noexcept { return m_prev[0]; }
 public:
-    inline std::size_t       Length()   const noexcept { return m_data.Length; }
-    inline std::size_t       Capacity() const noexcept { return m_data.GetCapacity(); }
-    inline Utils::Error      Error()    const noexcept
+    /**
+     * @brief Return the length
+     * 
+     * @return std::size_t length
+     */
+    inline std::size_t  Length()   const noexcept { return m_data.Length; }
+    /**
+     * @brief Return error of the underlying buffers
+     * 
+     * @return Utils::Error error
+     */
+    inline Utils::Error Error()    const noexcept
     {
         if (m_data.Error) return m_data.Error;
         if (m_next.Error) return m_next.Error;
         return m_prev.Error;
     }
 public:
+    /**
+     * @brief Construct a new Linked List object
+     */
     LinkedList()
         : LinkedList(0) {}
 
-    LinkedList(std::size_t hintLength)
+    /**
+     * @brief Construct a new Linked List object
+     * and ensures that the capacity is enougth
+     * for hintLength elements, thus, avoiding
+     * reallocations
+     * 
+     * @param [in] hintLength length to ensure big enough capacity
+     */
+    explicit LinkedList(std::size_t hintLength)
         : m_data(hintLength), m_next(hintLength), m_prev(hintLength),
           m_freeHead(1)
     {
@@ -46,6 +98,13 @@ public:
           T& operator[](std::size_t index)       & noexcept { return m_data[index]; }
     const T& operator[](std::size_t index) const & noexcept { return m_data[index]; }
 public:
+    /**
+     * @brief Inserts an element after index
+     * 
+     * @param [in] value
+     * @param [in] index
+     * @return Utils::Error
+     */
     Utils::Error InsertAfter(const T& value, std::size_t index)
     {
         if (index >= m_data.GetCapacity())
@@ -72,28 +131,53 @@ public:
         return Utils::Error();
     }
 
+    /**
+     * @brief Inserts an element before index
+     * 
+     * @param [in] value
+     * @param [in] index
+     * @return Utils::Error
+     */
     Utils::Error InsertBefore(const T& value, std::size_t index) noexcept
     {
         return InsertAfter(value, m_prev[index]);
     }
 
+    /**
+     * @brief Inserts an element at the end
+     * 
+     * @param [in] value
+     * @return Utils::Error
+     */
     Utils::Error PushBack(const T& value) noexcept
     {
         return InsertAfter(value, Tail());
     }
 
+    /**
+     * @brief Inserts an element at the front
+     * 
+     * @param [in] value
+     * @return Utils::Error
+     */
     Utils::Error PushFront(const T& value) noexcept
     {
         return InsertBefore(value, Head());
     }
 
+    /**
+     * @brief Pops an element at index
+     * 
+     * @param [in] index where to pop
+     * @return Utils::Result<T> value result
+     */
     Utils::Result<T> Pop(std::size_t index) noexcept
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
             return { {}, CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS) };
 
-        const T& value = m_data[index];
+        T value = m_data[index];
 
         m_next[m_prev[index]] = m_next[index];
         m_prev[m_next[index]] = m_prev[index];
@@ -105,11 +189,33 @@ public:
         return { value, Error() };
     }
 
-    Utils::Result<T> Pop() noexcept
+    /**
+     * @brief Pops an element at the end
+     * 
+     * @return Utils::Result<T> value result
+     */
+    Utils::Result<T> PopBack() noexcept
     {
         return Pop(Tail());
     }
 
+    /**
+     * @brief Pops an element at the front
+     * 
+     * @return Utils::Result<T> value result
+     */
+    Utils::Result<T> PopFront() noexcept
+    {
+        return PopFront(Head());
+    }
+
+    /**
+     * @brief Slowly iterates over the list until it gets
+     * to the element you want(don't use it)
+     * 
+     * @param [in] index index if we untangle the list
+     * @return Utils::Result<T> 
+     */
     Utils::Result<T> GetValueByItsOrderInTheList(std::size_t index)
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
@@ -130,6 +236,12 @@ public:
         return { curEl, curEl ? Error() : CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
     }
 
+    /**
+     * @brief Finds an element in the list
+     * 
+     * @param [in] value 
+     * @return Utils::Result<size_t> index result
+     */
     Utils::Result<size_t> Find(const T& value) const noexcept
     {
         size_t curEl = Head();
@@ -141,6 +253,12 @@ public:
                                 CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
     }
 public:
+    /**
+     * @brief Initializes log files and writes
+     * the header of the html log file
+     * 
+     * @param [in] logFolder where to put logs
+     */
     void StartLogging(const char* logFolder) noexcept
     {
         HardAssert(logFolder, Utils::ERROR_BAD_FILE);
@@ -163,6 +281,9 @@ public:
             "<div class=\"content\">";
     }
 
+    /**
+     * @brief Ends logging
+     */
     void EndLogging() noexcept
     {
         m_htmlLogFile << "</div>\n</body>\n";
@@ -180,6 +301,12 @@ public:
     
     constexpr static std::size_t FREE_ELEM = Utils::SIZET_POISON;
 
+    /**
+     * @brief Call only after StartLogging
+     * Dumps the list
+     * 
+     * @return Utils::Error
+     */
     Utils::Error Dump() noexcept
     {
         static const std::size_t NUM_STR_MAX_LENGTH = 21;

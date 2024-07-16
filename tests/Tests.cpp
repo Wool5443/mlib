@@ -92,7 +92,7 @@ Utils::Error Tests::TestList(std::size_t n)
 
     for (std::size_t i = 0; i < n; i++)
     {
-        Utils::Result<int> res = list.Pop();
+        Utils::Result<int> res = list.PopBack();
         RETURN_ERROR(res);
 
         if (res.value != ((int)n - (int)i) * 10)

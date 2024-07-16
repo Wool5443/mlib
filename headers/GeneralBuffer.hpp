@@ -77,9 +77,11 @@ public:
         : Buffer(DefaultCapacity, 0, nullptr) {}
     /**
      * @brief Construct a new Buffer object
+     * and ensures that the capacity is enougth
+     * for hintLength elements, thus, avoiding
+     * reallocations
      * 
-     * @param [in] hintLength length to ensure enough capacity
-     * to reduce reallocations
+     * @param [in] hintLength length to ensure big enough capacity
      * @param [in] buf can be used for buffers
      * of type without a ctor, because if passed
      * it will std::memcpy buf. Also sets the length to hintLength

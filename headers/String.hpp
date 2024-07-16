@@ -1,6 +1,16 @@
 #ifndef MLIB_STRING_HPP
 #define MLIB_STRING_HPP
 
+/**
+ * @file String.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief This file contains the implementation of a String
+ * @version 1.0
+ * @date 16-07-2024
+ * 
+ * @copyright Copyright (c) 2024
+ */
+
 #include <iostream>
 #include <cstring>
 #include "Utils.hpp"
@@ -8,34 +18,90 @@
 
 namespace mlib {
 
+/** @class String
+ * @brief A resizeable string
+ * 
+ * @tparam DefaultCapacity
+ * @tparam GrowFactor
+ */
 template<std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class String final
 {
 private:
     Buffer<char, DefaultCapacity, GrowFactor> m_buf;
 public:
+    /**
+     * @brief Get length
+     * 
+     * @return std::size_t length
+     */
     std::size_t  Length() const noexcept { return m_buf.Length; }
+    /**
+     * @brief Get error
+     * 
+     * @return Utils::Error error
+     */
     Utils::Error Error()  const noexcept { return m_buf.Error;  }
+    /**
+     * @brief Get a c-style string
+     * 
+     * @return char* string
+     */
     char*        RawPtr()       noexcept { return m_buf.RawPtr(); }
+    /**
+     * @brief Get a c-style string
+     * 
+     * @return const char* string
+     */
     const char*  RawPtr() const noexcept { return m_buf.RawPtr(); }
 public:
+    /**
+     * @brief Construct a new String object
+     */
     String()
         : m_buf() {}
 
+    /**
+     * @brief Construct a new String object
+     * with known length
+     * 
+     * @param [in] hintLength legnth to ensure capacity
+     * for less reallocations
+     */
     explicit String(std::size_t hintLength)
         : m_buf(hintLength) {}
 
+    /**
+     * @brief Construct a new String object
+     * from a c-style string knowing its length
+     * 
+     * @param [in] string 
+     * @param [in] length 
+     */
     String(const char* string, std::size_t length)
         : m_buf(length, string) {}
 
+    /**
+     * @brief Construct a new String object
+     * from a c-style string
+     * 
+     * @param [in] string 
+     */
     String(const char* string)
         : String(string, strlen(string)) {}
+
+    /**
+     * @brief Construct a new String object
+     * from a character
+     * 
+     * @param [in] chr 
+     */
     String(const char chr)
         : String(&chr, 1) {}
 public:
     operator char*()             noexcept { return RawPtr(); }
     operator const char*() const noexcept { return RawPtr(); }
-    operator bool()        const noexcept { return Error();        }
+    operator bool()        const noexcept { return Error();  }
 
     char& operator[](std::size_t index) & noexcept
     {
@@ -100,8 +166,16 @@ public:
         return out << string.RawPtr();
     }
 public:
+    /**
+     * @brief Finds a char and returns its index
+     * 
+     * @param [in] chr char to find
+     * @return Utils::Result<std::size_t> index result
+     */
     Utils::Result<std::size_t> Find(char chr) const noexcept
     {
+        RETURN_ERROR_RESULT(Error(), Utils::SIZET_POISON);
+
         const char* buf   = RawPtr();
         const char* found = strchr(buf, chr);
         if (!found)
@@ -111,8 +185,16 @@ public:
         return found - buf;
     }
 
+    /**
+     * @brief Finds a substring and returns its index
+     * 
+     * @param [in] string 
+     * @return Utils::Result<std::size_t> index result
+     */
     Utils::Result<std::size_t> Find(const char* string) const noexcept
     {
+        RETURN_ERROR_RESULT(Error(), Utils::SIZET_POISON);
+
         SoftAssertResult(string, Utils::SIZET_POISON, Utils::ERROR_NULLPTR);
 
         const char* buf   = RawPtr();
@@ -124,6 +206,12 @@ public:
         return { found - buf, Utils::Error() };
     }
 
+    /**
+     * @brief Counts occurences of chr
+     * 
+     * @param [in] chr char to count
+     * @return Utils::Result<std::size_t> count result
+     */
     Utils::Result<std::size_t> Count(char chr) const noexcept
     {
         RETURN_ERROR_RESULT(Error(), Utils::SIZET_POISON);
@@ -137,8 +225,16 @@ public:
         return { count, Utils::Error() };
     }
 
+    /**
+     * @brief Counts occurences of string
+     * 
+     * @param [in] string string to count
+     * @return Utils::Result<std::size_t> count result
+     */
     Utils::Result<std::size_t> Count(const char* string) const noexcept
     {
+        RETURN_ERROR_RESULT(Error(), Utils::SIZET_POISON);
+
         if (!string)
             return { Utils::SIZET_POISON,
                      CREATE_ERROR(Utils::ERROR_NULLPTR) };
@@ -155,6 +251,12 @@ public:
         return { count, Utils::Error() };
     }
 
+    /**
+     * @brief Counts occurences of string
+     * 
+     * @param [in] string string to count
+     * @return Utils::Result<std::size_t> count result
+     */
     Utils::Result<std::size_t> Count(const String& string) const noexcept
     {
         return Count(string.RawPtr());
@@ -163,18 +265,39 @@ public:
 private:
     static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
 public:
+    /**
+     * @brief Split the string by space characters
+     * 
+     * @return Utils::Result<Vector<String>> vector of strings
+     */
     Utils::Result<Vector<String>> Split() const noexcept
     {
         return Split(SPACE_CHARS);
     }
 
+    /**
+     * @brief Split the string by delimeters
+     * 
+     * @param [in] delimeters what to split by
+     * 
+     * @return Utils::Result<Vector<String>> vector of strings
+     */
     Utils::Result<Vector<String>> Split(const String& delimeters) const noexcept
     {
         return Split(delimeters.RawPtr());
     }
 
+    /**
+     * @brief Split the string by delimeters
+     * 
+     * @param [in] delimeters what to split by
+     * 
+     * @return Utils::Result<Vector<String>> vector of strings
+     */
     Utils::Result<Vector<String>> Split(const char* delimiters) const noexcept
     {
+        RETURN_ERROR_RESULT(Error(), {});
+
         char* buf = strdup(RawPtr());
 
         if (!buf)
@@ -198,8 +321,16 @@ public:
         return words;
     }
 
+    /**
+     * @brief Filters out characters
+     * 
+     * @param [in] filter characters to filter
+     * @return Utils::Error 
+     */
     Utils::Error Filter(const char* filter) noexcept
     {
+        RETURN_ERROR(Error());
+
         SoftAssert(filter, Utils::ErrorCode::ERROR_NULLPTR);
 
         char*       writePtr = RawPtr();
@@ -218,11 +349,22 @@ public:
         return Utils::Error();
     }
 
+    /**
+     * @brief Filters out characters
+     * 
+     * @param [in] filter characters to filter
+     * @return Utils::Error 
+     */
     Utils::Error Filter(const String& filter) noexcept
     {
         return Filter(filter.RawPtr());
     }
 
+    /**
+     * @brief Filters out space characters
+     * 
+     * @return Utils::Error 
+     */
     Utils::Error Filter() noexcept
     {
         return Filter(SPACE_CHARS);

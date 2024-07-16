@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include "Utils.hpp"
+#include "String.hpp"
 
 namespace mlib {
 
@@ -13,7 +14,8 @@ struct BinaryTreeNode
     BinaryTreeNode* Left   = nullptr;
     BinaryTreeNode* Right  = nullptr;
     BinaryTreeNode* Parent = nullptr;
-    std::size_t     id = getNewId();
+    std::size_t     id     = getNewId();
+    Utils::Error    Error  = Utils::Error();
 
     BinaryTreeNode() noexcept {}
 
@@ -30,13 +32,37 @@ struct BinaryTreeNode
             right->Parent = this;
     }
 
-    BinaryTreeNode(const BinaryTreeNode& other) = delete;
+    BinaryTreeNode(const BinaryTreeNode& other)
+        : Value(other.Value)
+    {
+        auto left = other.Left->Clone();
+        if (!left)
+        {
+            Error = left;
+            return;
+        }
+
+        auto right = other.Left->Clone();
+        if (!right)
+        {
+            Error = right;
+            return;
+        }
+
+        Left  = left;
+        Right = right;
+    }
 
     BinaryTreeNode(BinaryTreeNode&& other)
         : Value(std::move(other.Value)),
           Left(other.Left), Right(other.Right),
           Parent(other.Parent),
-          id(other.id) {}
+          id(other.id)
+    {
+        other.Left   = nullptr;
+        other.Right  = nullptr;
+        other.Parent = nullptr;
+    }
 
     BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
     BinaryTreeNode& operator=(BinaryTreeNode&& other)
@@ -65,12 +91,32 @@ struct BinaryTreeNode
         return Utils::Error();
     }
 
-    static Utils::Result<BinaryTreeNode*> New(T value = {})
+    Utils::Result<BinaryTreeNode*> Clone()
     {
-        auto node = new BinaryTreeNode(value);
+        Utils::Result<BinaryTreeNode*> left  = {};
+        Utils::Result<BinaryTreeNode*> right = {};
+
+        if (Left)
+            left = Left->Clone();
+        RETURN_RESULT(left);
+        if (Right)
+            right = Right->Clone();
+        RETURN_RESULT(right);
+
+        auto node = BinaryTreeNode::New(Value, left.value, right.value);
+
+        return node;
+    }
+
+    static Utils::Result<BinaryTreeNode*> New(const T& value = {},
+                                              BinaryTreeNode* left  = nullptr,
+                                              BinaryTreeNode* right = nullptr)
+    {
+        auto node = new BinaryTreeNode(value, left, right);
 
         if (!node)
             return { nullptr, CREATE_ERROR(Utils::ERROR_NO_MEMORY) };
+
         return { node, Utils::Error() };
     }
 private:
@@ -85,8 +131,8 @@ template<typename T, std::size_t MaxSize = 1000>
 class BinaryTree
 {
 public:
-    BinaryTreeNode<T> Root = {};
-    Utils::Error Error     = Utils::Error();
+    BinaryTreeNode<T>* Root  = nullptr;
+    Utils::Error       Error{};
 private:
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
@@ -95,17 +141,25 @@ private:
 public:
     BinaryTree() noexcept {}
 
-    BinaryTree(const BinaryTreeNode<T>& root) noexcept
+    BinaryTree(BinaryTreeNode<T>* root) noexcept
         : Root(root) {}
 
-    BinaryTree(BinaryTreeNode<T>&& root) noexcept
-        : Root(root) {}
+    BinaryTree(const T& value)
+    {
+        auto root = BinaryTreeNode<T>::New(value);
+        if (!root)
+        {
+            Error = root;
+            return;
+        }
+        Root = root.value;
+    }
 
     ~BinaryTree()
     {
-        Error = recDtor(Root.Left);
+        Error = recDtor(Root->Left);
         if (Error) return;
-        Error = recDtor(Root.Right);
+        Error = recDtor(Root->Right);
     }
 public:
 #define FONT_SIZE "10"
@@ -156,15 +210,14 @@ public:
         char iterString[NUM_STR_MAX_LENGTH] = "";
         sprintf(iterString, "%zu", dumpIteration);
 
-        if (m_htmlLogFile)
-            m_htmlLogFile <<
-            "<h1>Iteration " << dumpIteration <<"</h1>\n"
-            "<style>\n"
-            ".content {\n"
-            "max-width: 500px;\n"
-            "margin: auto;\n"
-            "}\n"
-            "</style>,\n";
+        m_htmlLogFile <<
+        "<h1>Iteration " << dumpIteration <<"</h1>\n"
+        "<style>\n"
+        ".content {\n"
+        "max-width: 500px;\n"
+        "margin: auto;\n"
+        "}\n"
+        "</style>,\n";
 
         String outGraphPath = m_logFolder;
         outGraphPath += "/dot/iter";
@@ -191,14 +244,14 @@ public:
 
         std::size_t MAX_DEPTH = MaxSize;
 
-        if (Root.Left)
-            RETURN_ERROR(recBuildCellTemplatesGraph(Root.Left,  outGraphFile, 0, MAX_DEPTH));
-        if (Root.Right)
-            RETURN_ERROR(recBuildCellTemplatesGraph(Root.Right, outGraphFile, 0, MAX_DEPTH));
+        if (Root->Left)
+            RETURN_ERROR(recBuildCellTemplatesGraph(Root->Left,  outGraphFile, 0, MAX_DEPTH));
+        if (Root->Right)
+            RETURN_ERROR(recBuildCellTemplatesGraph(Root->Right, outGraphFile, 0, MAX_DEPTH));
 
-        RETURN_ERROR(recDrawGraph(&Root, outGraphFile, 0, MAX_DEPTH));
+        RETURN_ERROR(recDrawGraph(Root, outGraphFile, 0, MAX_DEPTH));
         outGraphFile << "\n"
-        << "TREE:root->NODE_" << &Root <<"\n"
+        << "TREE:root->NODE_" << Root <<"\n"
         << "}\n";
 
         outGraphFile.close();

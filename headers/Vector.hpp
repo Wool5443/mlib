@@ -89,9 +89,8 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    using iterator      = typename Buffer<T, DefaultCapacity, GrowFactor>::iterator;
-    using constIterator = typename Buffer<T, DefaultCapacity, GrowFactor>::
-                          constIterator;
+    using iterator      = T*;
+    using constIterator = const T*;
 
     T& operator[](std::size_t index) & noexcept
     {

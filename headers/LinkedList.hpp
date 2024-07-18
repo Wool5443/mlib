@@ -31,14 +31,29 @@ namespace mlib {
 template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class LinkedList final
 {
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              FIELDS
+//
+///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<T,      DefaultCapacity, GrowFactor> m_data;
-    Buffer<std::size_t, DefaultCapacity, GrowFactor> m_next;
-    Buffer<std::size_t, DefaultCapacity, GrowFactor> m_prev;
-    std::size_t m_freeHead;
+    Buffer<T, DefaultCapacity, GrowFactor>           m_data{};
+    Buffer<std::size_t, DefaultCapacity, GrowFactor> m_next{};
+    Buffer<std::size_t, DefaultCapacity, GrowFactor> m_prev{};
+
+    std::size_t   m_freeHead = 1;
 
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
+public:
+    std::size_t   length = 1; ///< length
+                              ///< Notice that there is always a fictional
+                              ///< element
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              GETTERS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Return the head
@@ -52,13 +67,7 @@ public:
      * @return std::size_t index of the tail
      */
     inline std::size_t  Tail()     const noexcept { return m_prev[0]; }
-public:
-    /**
-     * @brief Return the length
-     * 
-     * @return std::size_t length
-     */
-    inline std::size_t  Length()   const noexcept { return m_data.Length; }
+
     /**
      * @brief Return error of the underlying buffers
      * 
@@ -66,16 +75,20 @@ public:
      */
     inline Utils::Error Error()    const noexcept
     {
-        if (m_data.Error) return m_data.Error;
-        if (m_next.Error) return m_next.Error;
-        return m_prev.Error;
+        if (m_data.error) return m_data.error;
+        if (m_next.error) return m_next.error;
+        return m_prev.error;
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTORS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Construct a new Linked List object
      */
-    LinkedList()
-        : LinkedList(0) {}
+    LinkedList() {}
 
     /**
      * @brief Construct a new Linked List object
@@ -94,15 +107,153 @@ public:
         for (std::size_t i = 1, end = m_prev.GetCapacity(); i < end; i++)
             m_prev[i] = FREE_ELEM;
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              RESULT CTORS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Construct a new LinkedList object
+     * and ensures that the capacity is enougth
+     * for hintLength elements, thus, avoiding
+     * reallocations
+     * 
+     * @param hintLength length to ensure big enough capacity
+     * for less reallocations
+     * 
+     * @return Utils::Result<LinkedList> 
+     */
+    static Utils::Result<LinkedList> New(std::size_t hintLength = 1)
+    {
+        LinkedList lst(hintLength);
+
+        return { lst, lst.Error() };
+    }
+
+    /**
+     * @brief Construct a new LinkedList object
+     * by copying
+     * 
+     * @param other list to copy
+     * 
+     * @return Utils::Result<String> 
+     */
+    static Utils::Result<String> New(const String& other) noexcept
+    {
+        LinkedList list(other);
+
+        return { list, list.Error() };
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              INDEXING AND ITERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
+private:
+    class iteratorBase
+    {
+    protected:
+        std::size_t m_index;
+    public:
+        iteratorBase(std::size_t currentIndex)
+            : m_index(currentIndex) {}
+
+        iteratorBase& operator++()
+        {
+            m_index = m_next[m_index];
+            return m_data[m_index];
+        }
+
+        iteratorBase& operator--()
+        {
+            m_index = m_prev[m_index];
+            return m_index;
+        }
+
+        iteratorBase operator++(int dummy)
+        {
+            iteratorBase copy = *this;
+            m_index       = m_next[m_index];
+            return copy;
+        }
+
+        iteratorBase operator--(int dummy)
+        {
+            iteratorBase copy = *this;
+            m_index       = m_prev[m_index];
+            return copy;
+        }
+
+        bool operator==(const iteratorBase& other) const noexcept
+        {
+            return m_index == other.m_index;
+        }
+
+        bool operator!=(const iteratorBase& other) const noexcept
+        {
+            return m_index != other.m_index;
+        }
+    };
+public:
+    class iterator: public iteratorBase
+    {
+        T& operator*()
+        {
+            return m_data[this->m_index];
+        }
+    };
+
+    class constIterator : public iteratorBase
+    {
+        const T& operator*()
+        {
+            return m_data[this->m_index];
+        }
+    };
 
           T& operator[](std::size_t index)       & noexcept { return m_data[index]; }
     const T& operator[](std::size_t index) const & noexcept { return m_data[index]; }
+
+    /**
+     * @brief Returns the start of a list
+     * 
+     * @return iterator
+     */
+    iterator      Begin()        & noexcept { return Head(); }
+
+    /**
+     * @brief Returns the start of a const list
+     * 
+     * @return constIterator
+     */
+    constIterator CBegin() const & noexcept { return Head(); }
+
+    /**
+     * @brief Returns the end of a list
+     * 
+     * @return constIterator
+     */
+    iterator      End()          & noexcept { return 0; }
+
+    /**
+     * @brief Returns the end of a const list
+     * 
+     * @return constIterator
+     */
+    constIterator CEnd()   const & noexcept { return 0; }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Inserts an element after index
      * 
      * @param [in] value
      * @param [in] index
+     * 
      * @return Utils::Error
      */
     Utils::Error InsertAfter(const T& value, std::size_t index)
@@ -113,22 +264,20 @@ public:
             return CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS);
 
         if (!m_freeHead)
-            RETURN_ERROR(realloc(Length() + 1));
-        else
-            updateLength(Length() + 1);
+            RETURN_ERROR(realloc(length + 1));
 
-        std::size_t insertIndex    = m_freeHead;
-        m_freeHead            = m_next[m_freeHead];
+        std::size_t insertIndex = m_freeHead;
+        m_freeHead              = m_next[m_freeHead];
 
-        m_data[insertIndex]   = value;
+        m_data[insertIndex]     = value;
 
-        m_prev[insertIndex]   = index;
-        m_next[insertIndex]   = m_next[index];
+        m_prev[insertIndex]     = index;
+        m_next[insertIndex]     = m_next[index];
 
-        m_prev[m_next[index]] = insertIndex;
-        m_next[index]         = insertIndex;
+        m_prev[m_next[index]]   = insertIndex;
+        m_next[index]           = insertIndex;
 
-        return Utils::Error();
+        return {};
     }
 
     /**
@@ -136,6 +285,7 @@ public:
      * 
      * @param [in] value
      * @param [in] index
+     * 
      * @return Utils::Error
      */
     Utils::Error InsertBefore(const T& value, std::size_t index) noexcept
@@ -147,6 +297,7 @@ public:
      * @brief Inserts an element at the end
      * 
      * @param [in] value
+     * 
      * @return Utils::Error
      */
     Utils::Error PushBack(const T& value) noexcept
@@ -158,6 +309,7 @@ public:
      * @brief Inserts an element at the front
      * 
      * @param [in] value
+     * 
      * @return Utils::Error
      */
     Utils::Error PushFront(const T& value) noexcept
@@ -169,6 +321,7 @@ public:
      * @brief Pops an element at index
      * 
      * @param [in] index where to pop
+     * 
      * @return Utils::Result<T> value result
      */
     Utils::Result<T> Pop(std::size_t index) noexcept
@@ -214,6 +367,7 @@ public:
      * to the element you want(don't use it)
      * 
      * @param [in] index index if we untangle the list
+     * 
      * @return Utils::Result<T> 
      */
     Utils::Result<T> GetValueByItsOrderInTheList(std::size_t index)
@@ -240,6 +394,7 @@ public:
      * @brief Finds an element in the list
      * 
      * @param [in] value 
+     * 
      * @return Utils::Result<size_t> index result
      */
     Utils::Result<size_t> Find(const T& value) const noexcept
@@ -351,22 +506,15 @@ public:
         return Error();
     }
 private:
-    inline void updateLength(std::size_t newLength)
-    {
-        m_data.Length = newLength;
-        m_next.Length = newLength;
-        m_prev.Length = newLength;
-    }
-
     inline Utils::Error realloc(std::size_t newLength)
     {
-        std::size_t oldCapacity = Capacity();
+        std::size_t oldCapacity = m_data.GetCapacity();
 
         RETURN_ERROR(m_data.Realloc(newLength));
         RETURN_ERROR(m_next.Realloc(newLength));
         RETURN_ERROR(m_prev.Realloc(newLength));
 
-        std::size_t newCapcity = Capacity();
+        std::size_t newCapcity = m_data.GetCapacity();
 
         for (std::size_t i = oldCapacity; i < newCapcity - 1; i++)
             m_next[i] = i + 1;
@@ -375,7 +523,7 @@ private:
 
         m_freeHead = oldCapacity;
 
-        return Utils::Error();
+        return {};
     }
 private:
     #define PRINT_LOG(...)                  \
@@ -396,7 +544,7 @@ private:
                    static_cast<int>(error) << "]\n");
 
         PRINT_LOG("{\n");
-        PRINT_LOG("    length = " << Length() << "\n");
+        PRINT_LOG("    length = " << length << "\n");
         PRINT_LOG("    capacity = " << m_data.GetCapacity() << "\n");
         PRINT_LOG("    head = " << Head() << "\n");
         PRINT_LOG("    tail = " << Tail() << "\n");
@@ -405,7 +553,7 @@ private:
         {
             std::size_t curEl = Head();
             std::size_t index = 1;
-            while (curEl != 0 && index <= Length() * 2)
+            while (curEl != 0 && index <= length * 2)
             {
                 PRINT_LOG("    *[" << index << "] = " << m_data[curEl] << "\n");
                 curEl = m_next[curEl];

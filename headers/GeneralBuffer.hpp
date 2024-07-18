@@ -156,7 +156,7 @@ public:
         return *this;
     }
 
-    virtual ~Buffer()
+    ~Buffer()
     {
         delete[] m_data;
     }

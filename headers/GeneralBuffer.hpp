@@ -30,51 +30,53 @@ namespace mlib {
 template<typename T, std::size_t DefaultCapacity, std::size_t GrowFactor>
 class Buffer final
 {
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              FIELDS
+//
+///////////////////////////////////////////////////////////////////////////////
 private:
-    T*          m_buf;
-    std::size_t m_capacity;
+    T*          m_data     = nullptr;
+    std::size_t m_capacity = 0;
 public:
-    std::size_t  Length; ///< Number of elements in the buffer
-    Utils::Error Error = Utils::Error(); ///< Buffer error
+    Utils::Error error{}; ///< Buffer error
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              GETTERS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief returns the raw buffer
      * 
      * @return T* raw buffer
      */
-    inline T*            RawPtr()            noexcept { return m_buf;      }
+    inline T*            RawPtr()            noexcept { return m_data;     }
     /**
      * @brief returns the raw buffer
      * 
      * @return T* raw buffer
      */
-    inline const T*      RawPtr()      const noexcept { return m_buf;      }
+    inline const T*      RawPtr()      const noexcept { return m_data;     }
     /**
      * @brief Get the Capacity object
      * 
      * @return std::size_t 
      */
     inline std::size_t   GetCapacity() const noexcept { return m_capacity; }
-private:
-    Buffer(std::size_t capacity, std::size_t length, const char* buf)
-        : m_buf(new T[capacity]{}), m_capacity(capacity), Length(length)
-    {
-        HardAssert(length < capacity, Utils::ERROR_BAD_NUMBER);
-
-        if (!m_buf)
-        {
-            Error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
-            return;
-        }
-        if (buf)
-            std::memcpy((char*)m_buf, buf, length);
-    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTOR/DTOR and =
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Construct a new Buffer object
+     * with default capacity
      */
-    explicit Buffer()
-        : Buffer(DefaultCapacity, 0, nullptr) {}
+    Buffer()
+        : Buffer(DefaultCapacity, true) {}
+
     /**
      * @brief Construct a new Buffer object
      * and ensures that the capacity is enougth
@@ -82,12 +84,10 @@ public:
      * reallocations
      * 
      * @param [in] hintLength length to ensure big enough capacity
-     * @param [in] buf can be used for buffers
-     * of type without a ctor, because if passed
-     * it will std::memcpy buf. Also sets the length to hintLength
+     * for less reallocations
      */
-    explicit Buffer(std::size_t hintLength, const char* buf = nullptr)
-        : Buffer(Buffer::calculateCapacity(hintLength), buf ? hintLength : 0, buf) {}
+    explicit Buffer(std::size_t hintLength)
+        : Buffer(calculateCapacity(hintLength), true) {}
 public:
     /**
      * @brief Buffer copy constructor
@@ -95,10 +95,11 @@ public:
      * @param [in] other buffer to copy
      */
     Buffer(const Buffer& other)
-        : Buffer(other.m_capacity, other.Length, nullptr)
+        : Buffer(other.m_capacity, true)
     {
-        for (std::size_t i = 0; i < other.Length; i++)
-            m_buf[i] = other[i];
+        if (error) return;
+
+        std::copy(other.CBegin(), other.CEnd(), m_data);
     }
 
     /**
@@ -107,39 +108,34 @@ public:
      * @param [in] other buffer to move
      */
     Buffer(Buffer&& other) noexcept
-        : m_buf(other.m_buf), m_capacity(other.m_capacity),
-          Length(other.Length)
+        : m_data(other.m_data), m_capacity(other.m_capacity)
     {
-        other.m_buf = nullptr;
+        other.m_data = nullptr;
     }
 
     /**
      * @brief Buffer copy assignment
      * 
      * @param [in] other buffer to copy
+     * 
      * @return Buffer&
      */
     Buffer& operator=(const Buffer& other)
     {
         if (this == &other) return *this;
 
-        T* newBuf = new T[other.m_capacity]{};
+        T* newData = new T[other.m_capacity]{};
 
-        if (!newBuf)
-        {
-            Error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
+        if (!newData)
             return *this;
-        }
 
-        for (std::size_t i = 0; i < other.Length; i++)
-            newBuf[i] = other[i];
+        std::copy(other.CBegin(), other.CEnd(), newData);
 
-        delete[] m_buf;
+        delete[] m_data;
 
-        m_buf      = newBuf;
+        m_data     = newData;
         m_capacity = other.m_capacity;
-        Length     = other.Length;
-        Error      = Utils::Error();
+        error      = {};
 
         return *this;
     }
@@ -148,76 +144,157 @@ public:
      * @brief Buffer move assignment
      * 
      * @param [in] other buffer to move
+     * 
      * @return Buffer&
      */
     Buffer& operator=(Buffer&& other) noexcept
     {
-        std::swap(m_buf, other.m_buf);
+        std::swap(m_data, other.m_data);
         m_capacity = other.m_capacity;
-        Length     = other.Length;
-        Error      = other.Error;
+        error      = other.error;
 
         return *this;
     }
 
     virtual ~Buffer()
     {
-        delete[] m_buf;
+        delete[] m_data;
     }
+private:
+    explicit Buffer(std::size_t capacity, bool isValidCapacity)
+        : m_data(new T[capacity]{}), m_capacity(capacity)
+    {
+        HardAssert(isValidCapacity, Utils::ERROR_BAD_VALUE);
+
+        if (!m_data)
+            error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
+    }
+
+    explicit Buffer(bool emptyInitializtion)
+    {
+        HardAssert(emptyInitializtion, Utils::ERROR_BAD_VALUE);
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              RUST-LIKE API
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
-     * @brief Reallocates the buffer and changes its length
+     * @brief Construct a new Buffer object
+     * and ensures that the capacity is enougth
+     * for hintLength elements, thus, avoiding
+     * reallocations
      * 
-     * @param newLength
+     * @param hintLength length to ensure big enough capacity
+     * for less reallocations
+     * 
+     * @return Utils::Result<Buffer> 
+     */
+    static Utils::Result<Buffer> New(std::size_t hintLength = DefaultCapacity)
+    {
+        Buffer buffer(hintLength);
+
+        return { buffer, buffer.error };
+    }
+
+    /**
+     * @brief Copies a buffer object
+     * 
+     * @param other buffer to copy
+     * @return Utils::Result<Buffer> 
+     */
+    static Utils::Result<Buffer> New(const Buffer& other)
+    {
+        Buffer buffer(other);
+
+        return { buffer, buffer.error };
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Reallocates the buffer
+     * new capacity is at least capacity
+     * 
+     * @param_capacity
      * @return Utils::Error 
      */
-    Utils::Error Realloc(std::size_t newLength)
+    Utils::Error Realloc(std::size_t capacity)
     {
-        if (Error)
-            return Error;
+        RETURN_ERROR(error);
 
-        std::size_t oldLength = Length;
-        Length                = newLength;
+        std::size_t newCapacity = calculateCapacity(capacity);
 
-        if (newLength < m_capacity)
-            return Utils::Error();
+        T* newData = new T[newCapacity]{};
 
-        std::size_t newCapacity = calculateCapacity(newLength);
+        if (!newData)
+            return CREATE_ERROR(Utils::ERROR_NO_MEMORY);
 
-        T* newBuf = new T[newCapacity]{};
+        std::copy(CBegin(), CEnd(), newData);
 
-        if (!newBuf)
-        {
-            Error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
-            return Error;
-        }
+        delete[] m_data;
 
-        for (std::size_t i = 0; i <= oldLength; i++)
-            newBuf[i] = m_buf[i];
-
-        delete[] m_buf;
-
-        m_buf      = newBuf;
+        m_data     = newData;
         m_capacity = newCapacity;
 
-        return Utils::Error();
+        return {};
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              INDEXING AND ITERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
+    using iterator      = T*;
+    using constIterator = const T*;
+
     T& operator[](std::size_t index) & noexcept
     {
-        return m_buf[index];
+        return m_data[index];
     }
 
     const T& operator[](std::size_t index) const & noexcept
     {
-        return m_buf[index];
+        return m_data[index];
     }
+
+    /**
+     * @brief Returns the start of a buffer
+     * 
+     * @return iterator 
+     */
+    inline iterator      Begin()        noexcept { return m_data; }
+
+    /**
+     * @brief Returns the start of a const buffer
+     * 
+     * @return constIterator 
+     */
+    inline constIterator CBegin() const noexcept { return m_data; }
+
+    /**
+     * @brief Returns the end of a buffer
+     * 
+     * @return iterator 
+     */
+    inline iterator      End()          noexcept { return m_data + m_capacity; }
+
+    /**
+     * @brief Returns the end of a const buffer
+     * 
+     * @return constIterator 
+     */
+    inline constIterator CEnd()   const noexcept { return m_data + m_capacity; }
 private:
     static inline std::size_t calculateCapacity(std::size_t hintLength) noexcept
     {
         std::size_t capacity = DefaultCapacity;
 
-        while (capacity <= hintLength)
+        while (capacity < hintLength)
             capacity *= GrowFactor;
 
         return capacity;

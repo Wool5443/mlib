@@ -92,15 +92,8 @@ public:
     using iterator      = T*;
     using constIterator = const T*;
 
-    T& operator[](std::size_t index) & noexcept
-    {
-        return m_data[index];
-    }
-
-    const T& operator[](std::size_t index) const & noexcept
-    {
-        return m_data[index];
-    }
+          T& operator[](std::size_t index)       & noexcept { return m_data[index]; }
+    const T& operator[](std::size_t index) const & noexcept { return m_data[index]; }
 
     /**
      * @brief Returns the start of a buffer

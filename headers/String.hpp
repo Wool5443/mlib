@@ -190,15 +190,8 @@ public:
     using iterator      = char*;
     using constIterator = const char*;
 
-    char& operator[](std::size_t index) & noexcept
-    {
-        return m_data[index];
-    }
-
-    const char& operator[](std::size_t index) const & noexcept
-    {
-        return m_data[index];
-    }
+          char& operator[](std::size_t index)       & noexcept { return m_data[index]; }
+    const char& operator[](std::size_t index) const & noexcept { return m_data[index]; }
 
     /**
      * @brief Returns the start of a string

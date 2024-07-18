@@ -26,17 +26,34 @@ namespace mlib {
 template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class Vector final
 {
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              FIELDS
+//
+///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<T, DefaultCapacity, GrowFactor> m_buf;
+    Buffer<T, DefaultCapacity, GrowFactor> m_data{};
 public:
-    std::size_t  Length() const noexcept  { return m_buf.Length; }
-    Utils::Error Error()  const noexcept  { return m_buf.Error;  }
+    std::size_t  length = 0; ///< length
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              GETTERS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    Utils::Error Error()  const noexcept  { return m_data.error;  }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTOR/DTOR and =
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Construct a new Vector object
      */
     Vector()
-        : m_buf() {}
+        : m_data() {}
+
     /**
      * @brief Construct a new Vector object
      * and ensures that the capacity is enougth
@@ -46,48 +63,113 @@ public:
      * @param [in] hintLength expected number of elements
      */
     explicit Vector(std::size_t hintLength)
-        : m_buf(hintLength) {}
+        : m_data(hintLength) {}
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              RESULT CTORS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
-    /**
-     * @brief Pushes an element at the end of the vector
-     * 
-     * @param element 
-     * @return Utils::Error 
-     */
-    Utils::Error PushBack(const T& element)
+    static Utils::Result<Vector> New(std::size_t hintLength = DefaultCapacity)
     {
-        std::size_t oldLength = Length();
-        RETURN_ERROR(m_buf.Realloc(oldLength + 1));
+        Vector vec(hintLength);
 
-        m_buf[oldLength] = element;
-
-        return Utils::Error();
+        return { vec, vec.Error() };
     }
 
-    /**
-     * @brief Pushes an element at the end of the vector
-     * 
-     * @param element 
-     * @return Utils::Error 
-     */
-    Utils::Error PushBack(T&& element)
+    static Utils::Result<Vector> New(const Vector& other)
     {
-        std::size_t oldLength = Length();
-        RETURN_ERROR(m_buf.Realloc(oldLength + 1));
+        Vector vec(other);
 
-        m_buf[oldLength] = element;
-
-        return Utils::Error();
+        return { vec, vec.Error() };
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              INDEXING AND ITERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
+    using iterator      = typename Buffer<T, DefaultCapacity, GrowFactor>::iterator;
+    using constIterator = typename Buffer<T, DefaultCapacity, GrowFactor>::
+                          constIterator;
+
     T& operator[](std::size_t index) & noexcept
     {
-        return m_buf[index];
+        return m_data[index];
     }
 
     const T& operator[](std::size_t index) const & noexcept
     {
-        return m_buf[index];
+        return m_data[index];
+    }
+
+    /**
+     * @brief Returns the start of a buffer
+     * 
+     * @return iterator 
+     */
+    inline iterator      Begin()        noexcept { return m_data.RawPtr();          }
+
+    /**
+     * @brief Returns the start of a const buffer
+     * 
+     * @return constIterator 
+     */
+    inline constIterator CBegin() const noexcept { return m_data.RawPtr();          }
+
+    /**
+     * @brief Returns the end of a buffer
+     * 
+     * @return iterator 
+     */
+    inline iterator      End()          noexcept { return m_data.RawPtr() + length; }
+
+    /**
+     * @brief Returns the end of a const buffer
+     * 
+     * @return constIterator 
+     */
+    inline constIterator CEnd()   const noexcept { return m_data.RawPtr() + length; }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Pushes an element at the end of the vector
+     * 
+     * @param element 
+     * 
+     * @return Utils::Error 
+     */
+    Utils::Error PushBack(const T& element)
+    {
+        RETURN_ERROR(m_data.Realloc(length + 1));
+
+        m_data[length] = element;
+
+        length++;
+
+        return {};
+    }
+
+    /**
+     * @brief Pushes an element at the end of the vector
+     * 
+     * @param element 
+     * 
+     * @return Utils::Error 
+     */
+    Utils::Error PushBack(T&& element)
+    {
+        RETURN_ERROR(m_data.Realloc(length + 1));
+
+        m_data[length] = element;
+
+        length++;
+
+        return Utils::Error();
     }
 };
 

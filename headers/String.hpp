@@ -27,21 +27,27 @@ namespace mlib {
 template<std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class String final
 {
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              FIELDS
+//
+///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<char, DefaultCapacity, GrowFactor> m_buf;
+    Buffer<char, DefaultCapacity, GrowFactor> m_buf{true};
 public:
-    /**
-     * @brief Get length
-     * 
-     * @return std::size_t length
-     */
-    std::size_t  Length() const noexcept { return m_buf.Length; }
+    std::size_t length = 0; ///< string length
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              GETTERS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
     /**
      * @brief Get error
      * 
      * @return Utils::Error error
      */
-    Utils::Error Error()  const noexcept { return m_buf.Error;  }
+    Utils::Error Error()  const noexcept { return m_buf.error;  }
     /**
      * @brief Get a c-style string
      * 
@@ -54,6 +60,11 @@ public:
      * @return const char* string
      */
     const char*  RawPtr() const noexcept { return m_buf.RawPtr(); }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTOR/DTOR and =
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Construct a new String object
@@ -79,7 +90,11 @@ public:
      * @param [in] length 
      */
     String(const char* string, std::size_t length)
-        : m_buf(length, string) {}
+        : m_buf(length), length(length)
+    {
+        if (Error()) return;
+        std::memcpy(RawPtr(), string, length);
+    }
 
     /**
      * @brief Construct a new String object
@@ -98,10 +113,33 @@ public:
      */
     String(const char chr)
         : String(&chr, 1) {}
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              RESULT CTORS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
-    operator char*()             noexcept { return RawPtr(); }
-    operator const char*() const noexcept { return RawPtr(); }
-    operator bool()        const noexcept { return Error();  }
+    static Utils::Result<String> New(std::size_t hintLength = DefaultCapacity)
+    {
+        String string(hintLength);
+
+        return { string, string.Error() };
+    }
+
+    static Utils::Result<String> New(const String& other)
+    {
+        String string(other);
+
+        return { string, string.Error() };
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              INDEXING AND ITERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    using iterator      = char*;
+    using constIterator = const char*;
 
     char& operator[](std::size_t index) & noexcept
     {
@@ -112,24 +150,21 @@ public:
     {
         return m_buf[index];
     }
-private:
-    String& append(const char* string, std::size_t length)
-    {
-        std::size_t oldLength = Length();
-        std::size_t newLength = oldLength + length;
 
-        m_buf.Realloc(newLength);
-        if (Error()) return *this;
-
-        std::memcpy(RawPtr() + oldLength, string, length);
-
-        return *this;
-    }
+    inline iterator      Begin()        noexcept { return RawPtr();          }
+    inline constIterator CBegin() const noexcept { return RawPtr();          }
+    inline iterator      End()          noexcept { return RawPtr() + length; }
+    inline constIterator CEnd()   const noexcept { return RawPtr() + length; }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              MATH OPERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     bool operator==(const String& other) const noexcept
     {
         return strncmp(RawPtr(), other.m_buf.RawPtr(),
-                       std::min(Length(), other.Length())) == 0;
+                       std::min(length, other.length)) == 0;
     }
 
     bool operator!=(const String& other) const noexcept
@@ -144,7 +179,7 @@ public:
 
     String& operator+=(const String& other)
     {
-        return append(other.RawPtr(), other.Length());
+        return append(other.RawPtr(), other.length);
     }
 
     #define OPERATOR_PLUS_CODE                              \
@@ -160,11 +195,43 @@ public:
     friend String operator+(const String& lhs, const String& rhs)
     OPERATOR_PLUS_CODE
     #undef OPERATOR_PLUS_CODE
+private:
+    String& append(const char* string, std::size_t strLength)
+    {
+        std::size_t oldLength = length;
+        std::size_t newLength = oldLength + strLength;
 
+        m_buf.Realloc(newLength);
+        if (Error()) return *this;
+
+        std::memcpy(RawPtr() + oldLength, string, length);
+
+        return *this;
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              STREAM OPERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
     friend std::ostream& operator<<(std::ostream& out, const String& string)
     {
         return out << string.RawPtr();
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              IMPLICIT CASTS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    operator char*()              noexcept { return RawPtr(); }
+    operator const char*()  const noexcept { return RawPtr(); }
+    operator bool()         const noexcept { return Error();  }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Finds a char and returns its index
@@ -218,7 +285,7 @@ public:
 
         std::size_t count = 0;
 
-        for (std::size_t i = 0; i < Length(); i++)
+        for (std::size_t i = 0; i < length; i++)
             if (m_buf[i] == chr)
                 count++;
 

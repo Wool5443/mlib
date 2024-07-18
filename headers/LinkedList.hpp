@@ -89,7 +89,8 @@ public:
     /**
      * @brief Construct a new Linked List object
      */
-    LinkedList() {}
+    LinkedList()
+        : LinkedList(0) {}
 
     /**
      * @brief Construct a new Linked List object
@@ -277,6 +278,8 @@ public:
 
         m_prev[m_next[index]]   = insertIndex;
         m_next[index]           = insertIndex;
+
+        length++;
 
         return {};
     }

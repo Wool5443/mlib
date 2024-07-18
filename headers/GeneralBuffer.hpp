@@ -88,7 +88,7 @@ public:
      */
     explicit Buffer(std::size_t hintLength)
         : Buffer(calculateCapacity(hintLength), true) {}
-public:
+
     /**
      * @brief Buffer copy constructor
      * 
@@ -169,14 +169,9 @@ private:
         if (!m_data)
             error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
     }
-
-    explicit Buffer(bool emptyInitializtion)
-    {
-        HardAssert(emptyInitializtion, Utils::ERROR_BAD_VALUE);
-    }
 ///////////////////////////////////////////////////////////////////////////////
 //
-//                              RUST-LIKE API
+//                              RESULT CTORS
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
@@ -209,39 +204,6 @@ public:
         Buffer buffer(other);
 
         return { buffer, buffer.error };
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
-//                              PUBLIC METHODS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Reallocates the buffer
-     * new capacity is at least capacity
-     * 
-     * @param_capacity
-     * @return Utils::Error 
-     */
-    Utils::Error Realloc(std::size_t capacity)
-    {
-        RETURN_ERROR(error);
-
-        std::size_t newCapacity = calculateCapacity(capacity);
-
-        T* newData = new T[newCapacity]{};
-
-        if (!newData)
-            return CREATE_ERROR(Utils::ERROR_NO_MEMORY);
-
-        std::copy(CBegin(), CEnd(), newData);
-
-        delete[] m_data;
-
-        m_data     = newData;
-        m_capacity = newCapacity;
-
-        return {};
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -298,6 +260,39 @@ private:
             capacity *= GrowFactor;
 
         return capacity;
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Reallocates the buffer
+     * new capacity is at least capacity
+     * 
+     * @param_capacity
+     * @return Utils::Error 
+     */
+    Utils::Error Realloc(std::size_t capacity)
+    {
+        RETURN_ERROR(error);
+
+        std::size_t newCapacity = calculateCapacity(capacity);
+
+        T* newData = new T[newCapacity]{};
+
+        if (!newData)
+            return CREATE_ERROR(Utils::ERROR_NO_MEMORY);
+
+        std::copy(CBegin(), CEnd(), newData);
+
+        delete[] m_data;
+
+        m_data     = newData;
+        m_capacity = newCapacity;
+
+        return {};
     }
 };
 

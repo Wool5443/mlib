@@ -321,7 +321,7 @@ public:
             return { Utils::SIZET_POISON,
                      CREATE_ERROR(Utils::ERROR_NULLPTR) };
 
-        std::size_t      count = 0;
+        std::size_t count = 0;
         const char* found = strstr(RawPtr(), string);
 
         while (found)

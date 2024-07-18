@@ -69,7 +69,7 @@ public:
     /**
      * @brief Construct a new String object
      */
-    String()
+    String() noexcept
         : m_data() {}
 
     /**
@@ -79,7 +79,7 @@ public:
      * @param [in] hintLength legnth to ensure capacity
      * for less reallocations
      */
-    explicit String(std::size_t hintLength)
+    explicit String(std::size_t hintLength) noexcept
         : m_data(hintLength) {}
 
     /**
@@ -89,7 +89,7 @@ public:
      * @param [in] string 
      * @param [in] length 
      */
-    String(const char* string, std::size_t length)
+    String(const char* string, std::size_t length) noexcept
         : m_data(length), length(length)
     {
         if (Error()) return;
@@ -102,7 +102,7 @@ public:
      * 
      * @param [in] string 
      */
-    String(const char* string)
+    String(const char* string) noexcept
         : String(string, strlen(string)) {}
 
     /**
@@ -111,7 +111,7 @@ public:
      * 
      * @param [in] chr 
      */
-    String(const char chr)
+    String(const char chr) noexcept
         : String(&chr, 1) {}
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -127,7 +127,7 @@ public:
      * 
      * @return Utils::Result<String> 
      */
-    static Utils::Result<String> New(const char* string)
+    static Utils::Result<String> New(const char* string) noexcept
     {
         String str(string);
 
@@ -142,7 +142,7 @@ public:
      * 
      * @return Utils::Result<String> 
      */
-    static Utils::Result<String> New(const char* string, std::size_t length)
+    static Utils::Result<String> New(const char* string, std::size_t length) noexcept
     {
         String str(string, length);
 
@@ -160,7 +160,7 @@ public:
      * 
      * @return Utils::Result<String> 
      */
-    static Utils::Result<String> New(std::size_t hintLength = DefaultCapacity)
+    static Utils::Result<String> New(std::size_t hintLength = DefaultCapacity) noexcept
     {
         String str(hintLength);
 
@@ -175,7 +175,7 @@ public:
      * 
      * @return Utils::Result<String> 
      */
-    static Utils::Result<String> New(const String& other)
+    static Utils::Result<String> New(const String& other) noexcept
     {
         String str(other);
 
@@ -198,28 +198,28 @@ public:
      * 
      * @return iterator 
      */
-    inline iterator      Begin()        noexcept { return RawPtr();          }
+    inline iterator      Begin()        & noexcept { return RawPtr();          }
 
     /**
      * @brief Returns the start of a const string
      * 
      * @return constIterator 
      */
-    inline constIterator CBegin() const noexcept { return RawPtr();          }
+    inline constIterator CBegin() const & noexcept { return RawPtr();          }
 
     /**
      * @brief Returns the end of a string
      * 
      * @return iterator 
      */
-    inline iterator      End()          noexcept { return RawPtr() + length; }
+    inline iterator      End()          & noexcept { return RawPtr() + length; }
 
     /**
      * @brief Returns the end of a const string
      * 
      * @return constIterator 
      */
-    inline constIterator CEnd()   const noexcept { return RawPtr() + length; }
+    inline constIterator CEnd()   const & noexcept { return RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              MATH OPERATORS
@@ -237,12 +237,12 @@ public:
         return !operator==(other);
     }
 
-    String& operator+=(const char* other)
+    String& operator+=(const char* other) noexcept
     {
         return append(other, strlen(other));
     }
 
-    String& operator+=(const String& other)
+    String& operator+=(const String& other) noexcept
     {
         return append(other.RawPtr(), other.length);
     }
@@ -253,15 +253,15 @@ public:
         result += rhs;                                      \
         return result;                                      \
     }
-    friend String operator+(const char* lhs, const String& rhs)
+    friend String operator+(const char* lhs, const String& rhs) noexcept
     OPERATOR_PLUS_CODE
-    friend String operator+(const String& lhs, const char* rhs)
+    friend String operator+(const String& lhs, const char* rhs) noexcept
     OPERATOR_PLUS_CODE
-    friend String operator+(const String& lhs, const String& rhs)
+    friend String operator+(const String& lhs, const String& rhs) noexcept
     OPERATOR_PLUS_CODE
     #undef OPERATOR_PLUS_CODE
 private:
-    String& append(const char* string, std::size_t strLength)
+    String& append(const char* string, std::size_t strLength) noexcept
     {
         std::size_t newLength = length + strLength;
 

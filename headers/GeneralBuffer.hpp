@@ -227,28 +227,28 @@ public:
      * 
      * @return iterator 
      */
-    inline iterator      Begin()        noexcept { return m_data; }
+    inline iterator      Begin()        & noexcept { return m_data; }
 
     /**
      * @brief Returns the start of a const buffer
      * 
      * @return constIterator 
      */
-    inline constIterator CBegin() const noexcept { return m_data; }
+    inline constIterator CBegin() const & noexcept { return m_data; }
 
     /**
      * @brief Returns the end of a buffer
      * 
      * @return iterator 
      */
-    inline iterator      End()          noexcept { return m_data + m_capacity; }
+    inline iterator      End()          & noexcept { return m_data + m_capacity; }
 
     /**
      * @brief Returns the end of a const buffer
      * 
      * @return constIterator 
      */
-    inline constIterator CEnd()   const noexcept { return m_data + m_capacity; }
+    inline constIterator CEnd()   const & noexcept { return m_data + m_capacity; }
 private:
     static inline std::size_t calculateCapacity(std::size_t hintLength) noexcept
     {

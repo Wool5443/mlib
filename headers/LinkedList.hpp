@@ -139,7 +139,7 @@ public:
      * 
      * @return Utils::Result<String> 
      */
-    static Utils::Result<String> New(const String& other) noexcept
+    static Utils::Result<LinkedList> New(const LinkedList& other) noexcept
     {
         LinkedList list(other);
 

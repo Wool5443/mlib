@@ -119,6 +119,14 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    /**
+     * @brief Constructs a new String object
+     * from a cstring
+     * 
+     * @param string 
+     * 
+     * @return Utils::Result<String> 
+     */
     static Utils::Result<String> New(const char* string)
     {
         String str(string);
@@ -126,6 +134,14 @@ public:
         return { str, str.Error() };
     }
 
+    /**
+     * @brief Constructs a new String object
+     * from a cstring knowing its length
+     * 
+     * @param string 
+     * 
+     * @return Utils::Result<String> 
+     */
     static Utils::Result<String> New(const char* string, std::size_t length)
     {
         String str(string, length);
@@ -133,6 +149,17 @@ public:
         return { str, str.Error() };
     }
 
+    /**
+     * @brief Construct a new String object
+     * and ensures that the capacity is enougth
+     * for hintLength elements, thus, avoiding
+     * reallocations
+     * 
+     * @param hintLength length to ensure big enough capacity
+     * for less reallocations
+     * 
+     * @return Utils::Result<String> 
+     */
     static Utils::Result<String> New(std::size_t hintLength = DefaultCapacity)
     {
         String str(hintLength);
@@ -140,6 +167,14 @@ public:
         return { str, str.Error() };
     }
 
+    /**
+     * @brief Construct a new String object
+     * by copying
+     * 
+     * @param other string to copy
+     * 
+     * @return Utils::Result<String> 
+     */
     static Utils::Result<String> New(const String& other)
     {
         String str(other);
@@ -305,12 +340,12 @@ public:
         SoftAssertResult(string, Utils::SIZET_POISON, Utils::ERROR_NULLPTR);
 
         const char* data  = RawPtr();
-        const char* found = strstr(buf, string);
+        const char* found = strstr(data, string);
 
         if (!found)
             return { Utils::SIZET_POISON, CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
 
-        return { found - buf, Utils::Error() };
+        return { found - data, {} };
     }
 
     /**

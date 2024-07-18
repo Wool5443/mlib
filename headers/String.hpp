@@ -33,7 +33,7 @@ class String final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<char, DefaultCapacity, GrowFactor> m_buf{true};
+    Buffer<char, DefaultCapacity, GrowFactor> m_data{true};
 public:
     std::size_t length = 0; ///< string length
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,19 +47,19 @@ public:
      * 
      * @return Utils::Error error
      */
-    Utils::Error Error()  const noexcept { return m_buf.error;  }
+    Utils::Error Error()  const noexcept { return m_data.error;    }
     /**
      * @brief Get a c-style string
      * 
      * @return char* string
      */
-    char*        RawPtr()       noexcept { return m_buf.RawPtr(); }
+    char*        RawPtr()       noexcept { return m_data.RawPtr(); }
     /**
      * @brief Get a c-style string
      * 
      * @return const char* string
      */
-    const char*  RawPtr() const noexcept { return m_buf.RawPtr(); }
+    const char*  RawPtr() const noexcept { return m_data.RawPtr(); }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              CTOR/DTOR and =
@@ -70,7 +70,7 @@ public:
      * @brief Construct a new String object
      */
     String()
-        : m_buf() {}
+        : m_data() {}
 
     /**
      * @brief Construct a new String object
@@ -80,7 +80,7 @@ public:
      * for less reallocations
      */
     explicit String(std::size_t hintLength)
-        : m_buf(hintLength) {}
+        : m_data(hintLength) {}
 
     /**
      * @brief Construct a new String object
@@ -90,7 +90,7 @@ public:
      * @param [in] length 
      */
     String(const char* string, std::size_t length)
-        : m_buf(length), length(length)
+        : m_data(length), length(length)
     {
         if (Error()) return;
         std::memcpy(RawPtr(), string, length);
@@ -157,17 +157,40 @@ public:
 
     char& operator[](std::size_t index) & noexcept
     {
-        return m_buf[index];
+        return m_data[index];
     }
 
     const char& operator[](std::size_t index) const & noexcept
     {
-        return m_buf[index];
+        return m_data[index];
     }
 
+    /**
+     * @brief Returns the start of a string
+     * 
+     * @return iterator 
+     */
     inline iterator      Begin()        noexcept { return RawPtr();          }
+
+    /**
+     * @brief Returns the start of a const string
+     * 
+     * @return constIterator 
+     */
     inline constIterator CBegin() const noexcept { return RawPtr();          }
+
+    /**
+     * @brief Returns the end of a string
+     * 
+     * @return iterator 
+     */
     inline iterator      End()          noexcept { return RawPtr() + length; }
+
+    /**
+     * @brief Returns the end of a const string
+     * 
+     * @return constIterator 
+     */
     inline constIterator CEnd()   const noexcept { return RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -177,7 +200,7 @@ public:
 public:
     bool operator==(const String& other) const noexcept
     {
-        return strncmp(RawPtr(), other.m_buf.RawPtr(),
+        return strncmp(RawPtr(), other.m_data.RawPtr(),
                        std::min(length, other.length)) == 0;
     }
 
@@ -215,7 +238,7 @@ private:
         std::size_t oldLength = length;
         std::size_t newLength = oldLength + strLength;
 
-        m_buf.Realloc(newLength);
+        m_data.Realloc(newLength);
         if (Error()) return *this;
 
         std::memcpy(RawPtr() + oldLength, string, length);
@@ -251,6 +274,7 @@ public:
      * @brief Finds a char and returns its index
      * 
      * @param [in] chr char to find
+     * 
      * @return Utils::Result<std::size_t> index result
      */
     Utils::Result<std::size_t> Find(char chr) const noexcept
@@ -271,6 +295,7 @@ public:
      * @brief Finds a substring and returns its index
      * 
      * @param [in] string 
+     * 
      * @return Utils::Result<std::size_t> index result
      */
     Utils::Result<std::size_t> Find(const char* string) const noexcept
@@ -279,7 +304,7 @@ public:
 
         SoftAssertResult(string, Utils::SIZET_POISON, Utils::ERROR_NULLPTR);
 
-        const char* buf   = RawPtr();
+        const char* data  = RawPtr();
         const char* found = strstr(buf, string);
 
         if (!found)
@@ -292,6 +317,7 @@ public:
      * @brief Counts occurences of chr
      * 
      * @param [in] chr char to count
+     * 
      * @return Utils::Result<std::size_t> count result
      */
     Utils::Result<std::size_t> Count(char chr) const noexcept
@@ -301,7 +327,7 @@ public:
         std::size_t count = 0;
 
         for (std::size_t i = 0; i < length; i++)
-            if (m_buf[i] == chr)
+            if (m_data[i] == chr)
                 count++;
 
         return { count, Utils::Error() };
@@ -311,6 +337,7 @@ public:
      * @brief Counts occurences of string
      * 
      * @param [in] string string to count
+     * 
      * @return Utils::Result<std::size_t> count result
      */
     Utils::Result<std::size_t> Count(const char* string) const noexcept
@@ -337,6 +364,7 @@ public:
      * @brief Counts occurences of string
      * 
      * @param [in] string string to count
+     * 
      * @return Utils::Result<std::size_t> count result
      */
     Utils::Result<std::size_t> Count(const String& string) const noexcept
@@ -407,6 +435,7 @@ public:
      * @brief Filters out characters
      * 
      * @param [in] filter characters to filter
+     * 
      * @return Utils::Error 
      */
     Utils::Error Filter(const char* filter) noexcept
@@ -435,6 +464,7 @@ public:
      * @brief Filters out characters
      * 
      * @param [in] filter characters to filter
+     * 
      * @return Utils::Error 
      */
     Utils::Error Filter(const String& filter) noexcept

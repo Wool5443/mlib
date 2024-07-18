@@ -119,18 +119,32 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    static Utils::Result<String> New(const char* string)
+    {
+        String str(string);
+
+        return { str, str.Error() };
+    }
+
+    static Utils::Result<String> New(const char* string, std::size_t length)
+    {
+        String str(string, length);
+
+        return { str, str.Error() };
+    }
+
     static Utils::Result<String> New(std::size_t hintLength = DefaultCapacity)
     {
-        String string(hintLength);
+        String str(hintLength);
 
-        return { string, string.Error() };
+        return { str, str.Error() };
     }
 
     static Utils::Result<String> New(const String& other)
     {
-        String string(other);
+        String str(other);
 
-        return { string, string.Error() };
+        return { str, str.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -249,6 +263,7 @@ public:
             return {
                 Utils::SIZET_POISON, CREATE_ERROR(Utils::ERROR_NOT_FOUND)
             };
+
         return found - buf;
     }
 

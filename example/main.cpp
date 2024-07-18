@@ -2,9 +2,9 @@
 
 int main()
 {
-    Tests::TestString(100).Print();
-    Tests::TestVector(25).Print();
-    Tests::TestList(25).Print();
-    Tests::TestBTree().Print();
+    std::cout << "String: " << Tests::TestString(100).GetErrorName() << '\n';
+    std::cout << "Vector: " << Tests::TestVector(25).GetErrorName() << '\n';
+    std::cout << "List:   " << Tests::TestList(25).GetErrorName() << '\n';
+    std::cout << "BTree:  " << Tests::TestBTree().GetErrorName() << '\n';
     return 0;
 }

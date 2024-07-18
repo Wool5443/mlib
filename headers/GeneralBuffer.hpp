@@ -101,7 +101,7 @@ public:
     {
         if (error) return;
 
-        std::copy(other.CBegin(), other.CEnd(), m_data);
+        std::copy(other.cebgin(), other.cend(), m_data);
     }
 
     /**
@@ -131,7 +131,7 @@ public:
         if (!newData)
             return *this;
 
-        std::copy(other.CBegin(), other.CEnd(), newData);
+        std::copy(other.cebgin(), other.cend(), newData);
 
         delete[] m_data;
 
@@ -227,28 +227,28 @@ public:
      * 
      * @return iterator 
      */
-    inline iterator      Begin()        & noexcept { return m_data; }
+    inline iterator      begin()        & noexcept { return m_data; }
 
     /**
      * @brief Returns the start of a const buffer
      * 
      * @return constIterator 
      */
-    inline constIterator CBegin() const & noexcept { return m_data; }
+    inline constIterator cebgin() const & noexcept { return m_data; }
 
     /**
      * @brief Returns the end of a buffer
      * 
      * @return iterator 
      */
-    inline iterator      End()          & noexcept { return m_data + m_capacity; }
+    inline iterator      end()          & noexcept { return m_data + m_capacity; }
 
     /**
      * @brief Returns the end of a const buffer
      * 
      * @return constIterator 
      */
-    inline constIterator CEnd()   const & noexcept { return m_data + m_capacity; }
+    inline constIterator cend()   const & noexcept { return m_data + m_capacity; }
 private:
     static inline std::size_t calculateCapacity(std::size_t hintLength) noexcept
     {
@@ -283,7 +283,7 @@ public:
         if (!newData)
             return CREATE_ERROR(Utils::ERROR_NO_MEMORY);
 
-        std::copy(CBegin(), CEnd(), newData);
+        std::copy(cebgin(), cend(), newData);
 
         delete[] m_data;
 

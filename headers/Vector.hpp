@@ -100,28 +100,28 @@ public:
      * 
      * @return iterator 
      */
-    inline iterator      Begin()        noexcept { return m_data.RawPtr();          }
+    inline iterator      begin()        noexcept { return m_data.RawPtr();          }
 
     /**
      * @brief Returns the start of a const buffer
      * 
      * @return constIterator 
      */
-    inline constIterator CBegin() const noexcept { return m_data.RawPtr();          }
+    inline constIterator cebgin() const noexcept { return m_data.RawPtr();          }
 
     /**
      * @brief Returns the end of a buffer
      * 
      * @return iterator 
      */
-    inline iterator      End()          noexcept { return m_data.RawPtr() + length; }
+    inline iterator      end()          noexcept { return m_data.RawPtr() + length; }
 
     /**
      * @brief Returns the end of a const buffer
      * 
      * @return constIterator 
      */
-    inline constIterator CEnd()   const noexcept { return m_data.RawPtr() + length; }
+    inline constIterator cend()   const noexcept { return m_data.RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS

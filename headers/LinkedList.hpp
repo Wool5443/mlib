@@ -42,9 +42,10 @@ private:
     Buffer<std::size_t, DefaultCapacity, GrowFactor> m_prev{};
 
     std::size_t   m_freeHead = 1;
-
+#ifdef LOGGING
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
+#endif
 public:
     std::size_t   length = 1; ///< length
                               ///< Notice that there is always a fictional
@@ -220,28 +221,28 @@ public:
      * 
      * @return iterator
      */
-    iterator      Begin()        & noexcept { return Head(); }
+    iterator      begin()        & noexcept { return Head(); }
 
     /**
      * @brief Returns the start of a const list
      * 
      * @return constIterator
      */
-    constIterator CBegin() const & noexcept { return Head(); }
+    constIterator cebgin() const & noexcept { return Head(); }
 
     /**
      * @brief Returns the end of a list
      * 
      * @return constIterator
      */
-    iterator      End()          & noexcept { return 0; }
+    iterator      end()          & noexcept { return 0; }
 
     /**
      * @brief Returns the end of a const list
      * 
      * @return constIterator
      */
-    constIterator CEnd()   const & noexcept { return 0; }
+    constIterator cend()   const & noexcept { return 0; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS

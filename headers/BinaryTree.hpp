@@ -326,9 +326,11 @@ class BinaryTree final
 ///////////////////////////////////////////////////////////////////////////////
 public:
     BinaryTreeNode<T>* root = nullptr; ///< root
+#ifdef LOGGING
 private:
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
@@ -411,7 +413,7 @@ public:
     {
         auto newRoot = other.root->Clone();
 
-        if (newRoot.error) return;
+        if (newRoot.error) return *this;
 
         root->Delete();
 
@@ -493,6 +495,7 @@ public:
 //                              PUBLIC METHODS
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifdef LOGGING
 public:
 #define FONT_SIZE "10"
 #define FONT_NAME "\"Fira Code Bold\""
@@ -685,6 +688,7 @@ private:
 #undef NODE_FRAME_COLOR
 #undef ROOT_COLOR
 #undef FREE_HEAD_COLOR
+#endif
 };
 
 } // namespace mlib

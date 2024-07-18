@@ -40,14 +40,14 @@ Utils::Error Tests::TestString(std::size_t n)
     auto words = wordsStr.Split();
     RETURN_ERROR(words);
 
-    for (std::size_t i = 0, end = words.value.Length(); i < end; i++)
-        std::cout << words.value[i] << ' ';
+    for (const String<>& word : words.value)
+        std::cout << word << ' ';
 
     std::cout << '\n';
 
-    if (words.value.Length() != wordsNum)
+    if (words.value.length != wordsNum)
     {
-        std::cout << "Got: " << words.value.Length() << ", expected: " << wordsNum << '\n';
+        std::cout << "Got: " << words.value.length << ", expected: " << wordsNum << '\n';
         return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
     }
 
@@ -113,16 +113,19 @@ Utils::Error Tests::TestBTree()
 {
     BinaryTree<int> tree(0);
 
+    #ifdef LOGGING
     tree.StartLogging("../treeLog");
+    #endif
 
     BinaryTreeNode<int>* root = tree.root;
 
     root->SetLeft(BinaryTreeNode<int>::New(1).value);
     root->SetRight(BinaryTreeNode<int>::New(2).value);
 
+    #ifdef LOGGING
     tree.Dump();
-
     tree.EndLogging();
+    #endif
 
     return Utils::Error();
 }

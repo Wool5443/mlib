@@ -198,28 +198,28 @@ public:
      * 
      * @return iterator 
      */
-    inline iterator      Begin()        & noexcept { return RawPtr();          }
+    inline iterator      begin()        & noexcept { return RawPtr();          }
 
     /**
      * @brief Returns the start of a const string
      * 
      * @return constIterator 
      */
-    inline constIterator CBegin() const & noexcept { return RawPtr();          }
+    inline constIterator cebgin() const & noexcept { return RawPtr();          }
 
     /**
      * @brief Returns the end of a string
      * 
      * @return iterator 
      */
-    inline iterator      End()          & noexcept { return RawPtr() + length; }
+    inline iterator      end()          & noexcept { return RawPtr() + length; }
 
     /**
      * @brief Returns the end of a const string
      * 
      * @return constIterator 
      */
-    inline constIterator CEnd()   const & noexcept { return RawPtr() + length; }
+    inline constIterator cend()   const & noexcept { return RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              MATH OPERATORS

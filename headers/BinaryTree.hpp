@@ -27,13 +27,65 @@ namespace mlib {
 template<typename T>
 struct BinaryTreeNode final
 {
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              FIELDS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
     T               value{};
     BinaryTreeNode* left   = nullptr; /**< ptr to left child */
     BinaryTreeNode* right  = nullptr; /**< ptr to right child */
     BinaryTreeNode* parent = nullptr; /**< ptr to parent */
     std::size_t     id     = getNewId(); /** id of the node */
-    Utils::Error    error  = Utils::Error(); /** errors which may occur in ctor */
+    Utils::Error    error  = {}; /** errors which may occur in ctor */
 
+    static const std::size_t BAD_ID = Utils::SIZET_POISON;
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              SETTERS
+//
+///////////////////////////////////////////////////////////////////////////////
+    /**
+     * @brief Set the left child
+     * 
+     * @param [in] node child
+     * 
+     * @return Utils::Error 
+     */
+    Utils::Error SetLeft(BinaryTreeNode* node)
+    {
+        if (left)
+            left->parent = nullptr;
+
+        left         = node;
+        node->parent = this;
+
+        return {};
+    }
+    /**
+     * @brief Set the right child
+     * 
+     * @param [in] node child
+     * 
+     * @return Utils::Error 
+     */
+    Utils::Error SetRight(BinaryTreeNode* node)
+    {
+        if (right)
+            right->parent = nullptr;
+
+        right        = node;
+        node->parent = this;
+
+        return {};
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTOR/DTOR AND =
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
     /**
      * @brief Construct a new Binary Tree Node object
      */
@@ -51,10 +103,35 @@ struct BinaryTreeNode final
      * @brief Construct a new Binary Tree Node object
      * 
      * @param [in] value init value
+     */
+    BinaryTreeNode(T&& value) noexcept
+        : value(value) {}
+
+    /**
+     * @brief Construct a new Binary Tree Node object
+     * 
+     * @param [in] value init value
      * @param [in] left left child
      * @param [in] right right child
      */
     BinaryTreeNode(const T& value,
+                   BinaryTreeNode* left, BinaryTreeNode* right) noexcept
+        : value(value), left(left), right(right)
+    {
+        if (left)
+            left->parent  = this;
+        if (right)
+            right->parent = this;
+    }
+
+    /**
+     * @brief Construct a new Binary Tree Node object
+     * 
+     * @param [in] value init value
+     * @param [in] left left child
+     * @param [in] right right child
+     */
+    BinaryTreeNode(T&& value,
                    BinaryTreeNode* left, BinaryTreeNode* right) noexcept
         : value(value), left(left), right(right)
     {
@@ -79,7 +156,7 @@ struct BinaryTreeNode final
             return;
         }
 
-        auto right = other.left->Clone();
+        auto right = other.right->Clone();
         if (!right)
         {
             error = right;
@@ -101,6 +178,13 @@ struct BinaryTreeNode final
           parent(other.parent),
           id(other.id)
     {
+        if (other.parent)
+        {
+            if (other.parent->left == &other)
+                other.parent->left = this;
+            other.parent->right = this;
+        }
+
         other.left   = nullptr;
         other.right  = nullptr;
         other.parent = nullptr;
@@ -110,9 +194,17 @@ struct BinaryTreeNode final
      * @brief Copy assignment is forbidden
      * 
      * @param [in] other node to copy
+     * 
      * @return BinaryTreeNode&
      */
     BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
+
+    /**
+     * @brief Move assignment is cool
+     * 
+     * @param other 
+     * @return BinaryTreeNode& 
+     */
     BinaryTreeNode& operator=(BinaryTreeNode&& other)
     {
         value  = std::move(other.value);
@@ -121,64 +213,52 @@ struct BinaryTreeNode final
         parent = other.parent;
         id     = other.id;
 
+        if (other.parent)
+        {
+            if (other.parent->left == &other)
+                other.parent->left = this;
+            other.parent->right = this;
+        }
+
+        other.left   = nullptr;
+        other.right  = nullptr;
+        other.parent = nullptr;
+
         return *this;
     }
 
+
     /**
-     * @brief Set the left child
+     * @brief Recursively deletes the node
      * 
-     * @param [in] node child
      * @return Utils::Error 
      */
-    Utils::Error SetLeft(BinaryTreeNode* node)
+    Utils::Error Delete()
     {
-        left         = node;
-        node->parent = this;
+        if (this->id == BAD_ID)
+            return CREATE_ERROR(Utils::ERROR_BAD_TREE);
+        if (this->left)
+            RETURN_ERROR(this->left->Delete());
+        if (this->right)
+            RETURN_ERROR(this->right->Delete());
 
-        return Utils::Error();
+        delete this;
+
+        return {};
     }
-    /**
-     * @brief Set the right child
-     * 
-     * @param [in] node child
-     * @return Utils::Error 
-     */
-    Utils::Error SetRight(BinaryTreeNode* node)
-    {
-        right        = node;
-        node->parent = this;
-
-        return Utils::Error();
-    }
-
-    /**
-     * @brief Clone the node
-     * 
-     * @return Utils::Result<BinaryTreeNode*> copy
-     */
-    Utils::Result<BinaryTreeNode*> Clone()
-    {
-        Utils::Result<BinaryTreeNode*> left  = {};
-        Utils::Result<BinaryTreeNode*> right = {};
-
-        if (left)
-            left = left->Clone();
-        RETURN_RESULT(left);
-        if (right)
-            right = right->Clone();
-        RETURN_RESULT(right);
-
-        auto node = BinaryTreeNode::New(value, left.value, right.value);
-
-        return node;
-    }
-
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              RESULT CTORS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
     /**
      * @brief Allocates memory for the node and returns a pointer
      * 
      * @param [in] value init value
      * @param [in] left left child
      * @param [in] right right child
+     * 
      * @return Utils::Result<BinaryTreeNode*> new node
      */
     static Utils::Result<BinaryTreeNode*> New(const T& value = {},
@@ -195,24 +275,32 @@ struct BinaryTreeNode final
         if (right)
             right->parent = node;
 
-        return { node, Utils::Error() };
+        return { node, {} };
     }
-
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
     /**
-     * @brief Recursively deletes the node
+     * @brief Clone the node
      * 
-     * @return Utils::Error 
+     * @return Utils::Result<BinaryTreeNode*> copy
      */
-    Utils::Error Delete()
+    Utils::Result<BinaryTreeNode*> Clone()
     {
-        if (this->left)
-            RETURN_ERROR(this->left->Delete());
-        if (this->right)
-            RETURN_ERROR(this->right->Delete());
+        Utils::Result<BinaryTreeNode*> left {};
+        Utils::Result<BinaryTreeNode*> right{};
 
-        delete this;
+        if (left)
+            left = left->Clone();
+        RETURN_RESULT(left);
+        if (right)
+            right = right->Clone();
+        RETURN_RESULT(right);
 
-        return Utils::Error();
+        return BinaryTreeNode::New(value, left.value, right.value);
     }
 private:
     inline std::size_t getNewId()
@@ -231,14 +319,28 @@ private:
 template<typename T, std::size_t MaxSize = 1000>
 class BinaryTree final
 {
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              FIELDS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
-    BinaryTreeNode<T>* root  = nullptr; ///< root
-    Utils::Error       error{}; ///< error from the ctor
+    BinaryTreeNode<T>* root = nullptr; ///< root
 private:
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
-
-    static const std::size_t BAD_ID = Utils::SIZET_POISON;
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              GETTERS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    Utils::Error Error() const noexcept { return root ? root->error : Utils::Error(); }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTOR/DTOR AND =
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
     /**
      * @brief Construct a new Binary Tree object
@@ -263,19 +365,134 @@ public:
     BinaryTree(const T& value)
     {
         auto _root = BinaryTreeNode<T>::New(value);
-        error = _root;
-        root  = _root;
+        if (_root.error)
+            return;
+
+        root  = _root.value;
     }
 
+    /**
+     * @brief Construct a new Binary Tree object
+     * This ctor creates a valid tree with a root
+     * 
+     * @param [in] value root init value
+     */
+    BinaryTree(T&& value)
+    {
+        auto _root = BinaryTreeNode<T>::New(value);
+        if (_root.error)
+            return;
+
+        root  = _root.value;
+    }
+
+    /**
+     * @brief Construct a new Binary Tree object
+     * 
+     * @param [in] other 
+     */
+    BinaryTree(const BinaryTree& other)
+    {
+        auto newRoot = other.root->Clone();
+
+        if (newRoot.error) return;
+
+        root = newRoot.value;
+    }
+
+    /**
+     * @brief Copy assign
+     * 
+     * @param [in] other 
+     * 
+     * @return BinaryTree& 
+     */
+    BinaryTree& operator=(const BinaryTree& other)
+    {
+        auto newRoot = other.root->Clone();
+
+        if (newRoot.error) return;
+
+        root->Delete();
+
+        root = newRoot.value;
+
+        return *this;
+    }
+
+    /**
+     * @brief Move assign
+     * 
+     * @param [in] other 
+     * 
+     * @return BinaryTree& 
+     */
+    BinaryTree& operator=(BinaryTree&& other)
+    {
+        std::swap(root, other.root);
+        std::swap(m_logFolder, other.m_logFolder);
+        m_htmlLogFile.close();
+        std::swap(m_htmlLogFile, other.m_htmlLogFile);
+    }
+
+    /**
+     * @brief Destroy the Binary Tree object
+     */
     ~BinaryTree()
     {
         if (root)
-            error = root->Delete();
+            root->Delete();
+        root = nullptr;
     }
-    BinaryTree(const BinaryTree& other)            = delete;
-    // BinaryTree(BinaryTree&& other)                 = delete;
-    BinaryTree& operator=(const BinaryTree& other) = delete;
-    BinaryTree& operator=(BinaryTree&& other)      = delete;
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              RESULT CTORS
+//
+///////////////////////////////////////////////////////////////////////////////
+    /**
+     * @brief Construct a new LinkedList object
+     * 
+     * @param value init root value
+     * 
+     * @return Utils::Result<Tree> 
+     */
+    static Utils::Result<BinaryTree> New(const T& value)
+    {
+        BinaryTree tree(value);
+        return { tree, tree.Error() };
+    }
+
+    /**
+     * @brief Construct a new Tree object
+     * 
+     * @param value init root value
+     * 
+     * @return Utils::Result<Tree> 
+     */
+    static Utils::Result<BinaryTree> New(T&& value)
+    {
+        BinaryTree tree(value);
+        return { tree, tree.Error() };
+    }
+
+    /**
+     * @brief Construct a new Tree object
+     * by copying
+     * 
+     * @param other tree to copy
+     * 
+     * @return Utils::Result<Tree> 
+     */
+    static Utils::Result<BinaryTree> New(const BinaryTree& other)
+    {
+        BinaryTree tree(other);
+        return { tree, tree.Error() };
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
 public:
 #define FONT_SIZE "10"
 #define FONT_NAME "\"Fira Code Bold\""
@@ -362,7 +579,7 @@ public:
 
         outGraphFile <<
         "TREE[rank = \"min\", style = \"filled\", fillcolor = " TREE_COLOR ", "
-                        "label = \"{Tree|Error: " << error.GetErrorName() << "|"
+                        "label = \"{Tree|Error: " << Error().GetErrorName() << "|"
                         "<root>Root}\"];"
         "\nNODE_" << root << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
@@ -399,7 +616,7 @@ public:
 
         dumpIteration++;
 
-        return Utils::Error();
+        return {};
     }
 private:
     static Utils::Error recBuildCellTemplatesGraph(const BinaryTreeNode<T>* node,
@@ -417,7 +634,7 @@ private:
         "label = \"{Value:\\n" << node->value <<
         "|id:\\n";
 
-        if (node->id == BAD_ID)
+        if (node->id == BinaryTreeNode<T>::BAD_ID)
             outGraphFile << "BAD_ID";
         else
             outGraphFile << node->id;
@@ -433,7 +650,7 @@ private:
                 node->right, outGraphFile, curDepth + 1, maxDepth
             ));
 
-        return Utils::Error();
+        return {};
     }
 
     static Utils::Error recDrawGraph(const BinaryTreeNode<T>* node,
@@ -455,7 +672,7 @@ private:
             RETURN_ERROR(recDrawGraph(node->right, outGraphFile, curDepth + 1, maxDepth));
         }
 
-        return Utils::Error();
+        return {};
     }
 #undef FONT_SIZE
 #undef FONT_NAME

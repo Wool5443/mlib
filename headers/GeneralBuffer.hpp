@@ -52,12 +52,14 @@ public:
      * @return T* raw buffer
      */
     inline T*            RawPtr()            noexcept { return m_data;     }
+
     /**
      * @brief returns the raw buffer
      * 
      * @return T* raw buffer
      */
     inline const T*      RawPtr()      const noexcept { return m_data;     }
+
     /**
      * @brief Get the Capacity object
      * 
@@ -76,6 +78,13 @@ public:
      */
     Buffer()
         : Buffer(DefaultCapacity, true) {}
+
+    /**
+     * @brief Construct a new empty Buffer object
+     * 
+     * @param emptyInitialize dummy parameter
+     */
+    explicit Buffer(bool emptyInitialize) {}
 
     /**
      * @brief Construct a new Buffer object
@@ -156,6 +165,9 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Destroy the Buffer object
+     */
     ~Buffer()
     {
         delete[] m_data;

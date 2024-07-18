@@ -270,13 +270,14 @@ public:
 private:
     String& append(const char* string, std::size_t strLength)
     {
-        std::size_t oldLength = length;
-        std::size_t newLength = oldLength + strLength;
+        std::size_t newLength = length + strLength;
 
         m_data.Realloc(newLength);
         if (Error()) return *this;
 
-        std::memcpy(RawPtr() + oldLength, string, length);
+        std::memcpy(RawPtr() + length, string, strLength);
+
+        length = newLength;
 
         return *this;
     }

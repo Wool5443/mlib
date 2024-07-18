@@ -80,13 +80,6 @@ public:
         : Buffer(DefaultCapacity, true) {}
 
     /**
-     * @brief Construct a new empty Buffer object
-     * 
-     * @param emptyInitialize dummy parameter
-     */
-    explicit Buffer(bool emptyInitialize) {}
-
-    /**
      * @brief Construct a new Buffer object
      * and ensures that the capacity is enougth
      * for hintLength elements, thus, avoiding

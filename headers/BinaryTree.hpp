@@ -42,7 +42,7 @@ public:
 
     static const std::size_t BAD_ID = (std::size_t)-1;
 private:
-    err::Logger* m_logger  = nullptr;
+    err::Logger*    m_logger = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              SETTERS
@@ -163,12 +163,13 @@ public:
      * @param [in] other node to copy
      */
     BinaryTreeNode(const BinaryTreeNode& other)
-        : value(other.value)
+        : value(other.value), m_logger(other.m_logger)
     {
+        if (other.error) return;
+
         auto left = other.left->Clone();
         if (!left)
         {
-            LOG(m_logger, left);
             error = left;
             return;
         }
@@ -176,7 +177,6 @@ public:
         auto right = other.right->Clone();
         if (!right)
         {
-            LOG(m_logger, right);
             error = right;
             return;
         }
@@ -194,7 +194,8 @@ public:
         : value(std::move(other.value)),
           left(other.left), right(other.right),
           parent(other.parent),
-          id(other.id)
+          id(other.id),
+          m_logger(other.m_logger)
     {
         if (other.parent)
         {
@@ -226,11 +227,14 @@ public:
      */
     BinaryTreeNode& operator=(BinaryTreeNode&& other)
     {
-        value  = std::move(other.value);
-        left   = other.left;
-        right  = other.right;
-        parent = other.parent;
-        id     = other.id;
+        if (this == &other) return *this;
+
+        value    = std::move(other.value);
+        left     = other.left;
+        right    = other.right;
+        parent   = other.parent;
+        id       = other.id;
+        m_logger = other.m_logger;
 
         if (other.parent)
         {
@@ -239,9 +243,10 @@ public:
             other.parent->right = this;
         }
 
-        other.left   = nullptr;
-        other.right  = nullptr;
-        other.parent = nullptr;
+        other.left     = nullptr;
+        other.right    = nullptr;
+        other.parent   = nullptr;
+        other.m_logger = nullptr;
 
         return *this;
     }
@@ -253,12 +258,12 @@ public:
      */
     err::ErrorCode Delete()
     {
-        if (this->id == BAD_ID)
+        if (id == BAD_ID)
             RETURN_ERROR(m_logger, err::ERROR_BAD_TREE);
-        if (this->left)
-            RETURN_ERROR(m_logger, this->left->Delete());
-        if (this->right)
-            RETURN_ERROR(m_logger, this->right->Delete());
+        if (left)
+            RETURN_ERROR(m_logger, left->Delete());
+        if (right)
+            RETURN_ERROR(m_logger, right->Delete());
 
         delete this;
 
@@ -312,12 +317,16 @@ public:
         err::Result<BinaryTreeNode*> right{};
 
         if (left)
+        {
             left = left->Clone();
-        RETURN_RESULT(m_logger, left);
+            RETURN_RESULT(m_logger, left);
+        }
 
         if (right)
+        {
             right = right->Clone();
-        RETURN_RESULT(m_logger, right, left.value->Delete());
+            RETURN_RESULT(m_logger, right, left.value->Delete());
+        }
 
         return BinaryTreeNode::New(value, left.value, right.value);
     }
@@ -498,8 +507,10 @@ public:
         {
             err::ErrorCode error = root->Delete();
             if (error)
+            {
                 LOG(m_logger, error);
-            return;
+                return;
+            }
         }
         root = nullptr;
     }

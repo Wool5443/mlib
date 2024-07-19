@@ -31,9 +31,6 @@ code,
  */
 const char* GetErrorName(ErrorCode err);
 
-static const std::size_t SIZET_POISON = (std::size_t)-1;
-
-
 /** @struct Error
  * @brief Struct for handling errors
  */
@@ -127,8 +124,13 @@ public:
 #define CREATE_ERROR(errorCode) err::Error((errorCode),\
                                 GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
-#define LOG(logger, errorCode)                                      \
-    logger.PushErrorLogPleaseUseMacro(CREATE_ERROR(errorCode))
+#define LOG(loggerPtr, errorCode)                                   \
+do                                                                  \
+{                                                                   \
+    if (loggerPtr)                                                  \
+        loggerPtr->PushErrorLogPleaseUseMacro(                      \
+                   CREATE_ERROR(errorCode));                        \
+} while (0)
 
 #ifdef NDEBUG
 #define SoftAssert(...)
@@ -142,7 +144,7 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        Utils::Error _error = CREATE_ERROR(errorCode);              \
+        err::Error _error = CREATE_ERROR(errorCode);                \
         _error.Print();                                             \
         __VA_ARGS__;                                                \
         return _error;                                              \
@@ -157,7 +159,7 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        Utils::Error _error = CREATE_ERROR(errorCode);              \
+        err::Error _error = CREATE_ERROR(errorCode);                \
         _error.Print();                                             \
         __VA_ARGS__;                                                \
         return { poison, _error };                                  \
@@ -173,7 +175,7 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        Utils::Error _error = CREATE_ERROR(errorCode);              \
+        err::Error _error = CREATE_ERROR(errorCode);                \
         _error.Print();                                             \
         __VA_ARGS__;                                                \
         exit(_error);                                               \
@@ -183,12 +185,14 @@ do                                                                  \
 /**
  * @brief returns error if it is not EVERYTHING_FINE
  */
-#define RETURN_ERROR(error, ...)                                    \
+#define RETURN_ERROR(loggerPtr, error, ...)                         \
 do                                                                  \
 {                                                                   \
-    Utils::ErrorCode _error = error;                                \
+    err::ErrorCode _error = error;                                  \
     if (_error)                                                     \
     {                                                               \
+        if (loggerPtr)                                              \
+            LOG(loggerPtr, _error);                                 \
         __VA_ARGS__;                                                \
         return _error;                                              \
     }                                                               \
@@ -197,12 +201,14 @@ do                                                                  \
 /**
  * @brief returns error and poison if it is not EVERYTHING_FINE
  */
-#define RETURN_ERROR_RESULT(error, poison, ...)                     \
+#define RETURN_ERROR_RESULT(loggerPtr, error, poison, ...)          \
 do                                                                  \
 {                                                                   \
-    Utils::ErrorCode _error = error;                                \
+    err::ErrorCode _error = error;                                  \
     if (_error)                                                     \
     {                                                               \
+        if (loggerPtr)                                              \
+            LOG(loggerPtr, _error);                                 \
         __VA_ARGS__;                                                \
         return { poison, _error };                                  \
     }                                                               \
@@ -211,12 +217,14 @@ do                                                                  \
 /**
  * @brief returns result if it contains an error
  */
-#define RETURN_RESULT(result, ...)                                  \
+#define RETURN_RESULT(loggerPtr, result, ...)                       \
 do                                                                  \
 {                                                                   \
     __typeof__(result) _result = result;                            \
     if (!_result)                                                   \
     {                                                               \
+        if (loggerPtr)                                              \
+            LOG(loggerPtr, _result);                                \
         __VA_ARGS__;                                                \
         return _result;                                             \
     }                                                               \

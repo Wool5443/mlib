@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Errors.hpp"
+#include "Error.hpp"
 
 namespace {
 

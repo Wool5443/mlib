@@ -5,10 +5,11 @@
 
 namespace Tests {
 
-Utils::Error TestString(std::size_t n);
-Utils::Error TestVector(std::size_t n);
-Utils::Error TestList  (std::size_t n);
-Utils::Error TestBTree ();
+Utils::Error TestString   (std::size_t n);
+Utils::Error TestVector   (std::size_t n);
+Utils::Error TestList     (std::size_t n);
+Utils::Error TestBTree    ();
+Utils::Error TestHashTable();
 
 } // namespace Test
 

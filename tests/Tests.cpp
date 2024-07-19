@@ -78,7 +78,7 @@ Utils::Error Tests::TestVector(std::size_t n)
     auto find50 = vec.Find(50);
     RETURN_ERROR(find50);
 
-    std::cout << vec[find50.value] << ' ';
+    std::cout << vec[find50.value] << '\n';
 
     return Utils::Error();
 }
@@ -139,4 +139,22 @@ Utils::Error Tests::TestBTree()
     #endif
 
     return Utils::Error();
+}
+
+Utils::Error Tests::TestHashTable()
+{
+    HashTable<String<>, int> table;
+
+    RETURN_ERROR(table.Add({ "Hello", 1 }));
+    RETURN_ERROR(table.Add({ "World", 2 }));
+
+    std::cout << *table["Hello"] << '\n';
+    std::cout << *table["World"] << '\n';
+
+    auto res1 = table.Pop("Hello");
+    RETURN_ERROR(res1);
+
+    std::cout << res1.value << '\n';
+
+    return {};
 }

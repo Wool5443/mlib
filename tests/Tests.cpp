@@ -69,6 +69,11 @@ Utils::Error Tests::TestVector(std::size_t n)
             return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
         }
 
+    auto find50 = vec.Find(50);
+    RETURN_ERROR(find50);
+
+    std::cout << vec[find50.value] << ' ';
+
     return Utils::Error();
 }
 

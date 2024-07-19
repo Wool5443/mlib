@@ -12,6 +12,7 @@
  * @copyright Copyright (c) 2024
  */
 
+#include <utility>
 #include "GeneralBuffer.hpp"
 
 namespace mlib {
@@ -162,6 +163,17 @@ public:
         length++;
 
         return Utils::Error();
+    }
+
+    Utils::Result<std::size_t> Find(const T& value)
+    {
+        for (std::size_t i = 0; i < length; i++)
+        {
+            if (m_data[i] == value)
+                return { i, {} };
+        }
+
+        return { Utils::SIZET_POISON, CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
     }
 };
 

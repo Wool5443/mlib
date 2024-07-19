@@ -11,7 +11,7 @@
  * @copyright Copyright (c) 2024
  */
 
-#include <iostream>
+#include <ostream>
 #include <cstring>
 #include "Utils.hpp"
 #include "Vector.hpp"

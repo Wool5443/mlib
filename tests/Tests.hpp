@@ -1,10 +1,7 @@
 #ifndef MLIB_TESTS_HPP
 #define MLIB_TESTS_HPP
 
-#include "String.hpp"
-#include "Vector.hpp"
-#include "LinkedList.hpp"
-#include "BinaryTree.hpp"
+#include "Utils.hpp"
 
 namespace Tests {
 

@@ -1,4 +1,10 @@
+#include <iostream>
 #include "Tests.hpp"
+#include "String.hpp"
+#include "Vector.hpp"
+#include "LinkedList.hpp"
+#include "BinaryTree.hpp"
+#include "HashTable.hpp"
 
 using namespace mlib;
 

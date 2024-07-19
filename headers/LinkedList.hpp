@@ -6,13 +6,13 @@
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief This file contains an implementation of a
  * templated LinkedList
- * 
+ *
  * Elements are stored in an array, thus, this
  * list is very cache-friendly
- * 
+ *
  * @version 1.0
  * @date 16-07-2024
- * 
+ *
  * @copyright Copyright (c) 2024
  */
 
@@ -23,10 +23,10 @@ namespace mlib {
 
 /** @class LinkedList
  * @brief LinkedList class using arrays
- * 
+ *
  * @tparam T value type
- * @tparam DefaultCapacity 
- * @tparam GrowFactor 
+ * @tparam DefaultCapacity
+ * @tparam GrowFactor
  */
 template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class LinkedList final
@@ -42,10 +42,8 @@ private:
     Buffer<std::size_t, DefaultCapacity, GrowFactor> m_prev{};
 
     std::size_t   m_freeHead = 1;
-#ifdef LOGGING
     String<>      m_logFolder{};
     std::ofstream m_htmlLogFile{};
-#endif
 public:
     std::size_t   length = 1; ///< length
                               ///< Notice that there is always a fictional
@@ -58,23 +56,23 @@ public:
 public:
     /**
      * @brief Return the head
-     * 
+     *
      * @return std::size_t index of the head
      */
-    inline std::size_t  Head()     const noexcept { return m_next[0]; }
+     std::size_t  Head()     const noexcept { return m_next[0]; }
     /**
-     * @brief Return the tail 
-     * 
+     * @brief Return the tail
+     *
      * @return std::size_t index of the tail
      */
-    inline std::size_t  Tail()     const noexcept { return m_prev[0]; }
+     std::size_t  Tail()     const noexcept { return m_prev[0]; }
 
     /**
      * @brief Return error of the underlying buffers
-     * 
-     * @return Utils::Error error
+     *
+     * @return err::ErrorCode error
      */
-    inline Utils::Error Error()    const noexcept
+     err::ErrorCode Error()    const noexcept
     {
         if (m_data.error) return m_data.error;
         if (m_next.error) return m_next.error;
@@ -97,13 +95,19 @@ public:
      * and ensures that the capacity is enougth
      * for hintLength elements, thus, avoiding
      * reallocations
-     * 
+     *
      * @param [in] hintLength length to ensure big enough capacity
      */
     explicit LinkedList(std::size_t hintLength)
         : m_data(hintLength), m_next(hintLength), m_prev(hintLength),
           m_freeHead(1)
     {
+        if (auto err = Error())
+        {
+            LOG(err);
+            return;
+        }
+
         for (std::size_t i = 1, end = m_next.GetCapacity() - 1; i < end; i++)
             m_next[i] = i + 1;
         for (std::size_t i = 1, end = m_prev.GetCapacity(); i < end; i++)
@@ -120,31 +124,31 @@ public:
      * and ensures that the capacity is enougth
      * for hintLength elements, thus, avoiding
      * reallocations
-     * 
-     * @param hintLength length to ensure big enough capacity
+     *
+     * @param [in] hintLength length to ensure big enough capacity
      * for less reallocations
-     * 
-     * @return Utils::Result<LinkedList> 
+     *
+     * @return err::Result<LinkedList>
      */
-    static Utils::Result<LinkedList> New(std::size_t hintLength = 1)
+    static err::Result<LinkedList> New(std::size_t hintLength = 1)
     {
-        LinkedList lst(hintLength);
-
-        return { lst, lst.Error() };
+        LinkedList list(hintLength);
+        LOG(list.Error());
+        return { list, list.Error() };
     }
 
     /**
      * @brief Construct a new LinkedList object
      * by copying
-     * 
+     *
      * @param other list to copy
-     * 
-     * @return Utils::Result<String> 
+     *
+     * @return err::Result<String>
      */
-    static Utils::Result<LinkedList> New(const LinkedList& other) noexcept
+    static err::Result<LinkedList> New(const LinkedList& other) noexcept
     {
         LinkedList list(other);
-
+        LOG(list.Error());
         return { list, list.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -176,14 +180,14 @@ private:
         iteratorBase operator++(int dummy)
         {
             iteratorBase copy = *this;
-            m_index       = m_next[m_index];
+            m_index           = m_next[m_index];
             return copy;
         }
 
         iteratorBase operator--(int dummy)
         {
             iteratorBase copy = *this;
-            m_index       = m_prev[m_index];
+            m_index           = m_prev[m_index];
             return copy;
         }
 
@@ -219,28 +223,28 @@ public:
 
     /**
      * @brief Returns the start of a list
-     * 
+     *
      * @return iterator
      */
     iterator      begin()        & noexcept { return Head(); }
 
     /**
      * @brief Returns the start of a const list
-     * 
+     *
      * @return constIterator
      */
     constIterator cebgin() const & noexcept { return Head(); }
 
     /**
      * @brief Returns the end of a list
-     * 
+     *
      * @return constIterator
      */
     iterator      end()          & noexcept { return 0; }
 
     /**
      * @brief Returns the end of a const list
-     * 
+     *
      * @return constIterator
      */
     constIterator cend()   const & noexcept { return 0; }
@@ -252,18 +256,18 @@ public:
 public:
     /**
      * @brief Inserts an element after index
-     * 
+     *
      * @param [in] value
      * @param [in] index
-     * 
-     * @return Utils::Error
+     *
+     * @return err::ErrorCode
      */
-    Utils::Error InsertAfter(const T& value, std::size_t index)
+    err::ErrorCode InsertAfter(const T& value, std::size_t index)
     {
         if (index >= m_data.GetCapacity())
-            return CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS);
+            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
         if (m_prev[index] == FREE_ELEM)
-            return CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS);
+            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
 
         if (!m_freeHead)
             RETURN_ERROR(realloc(length + 1));
@@ -286,53 +290,53 @@ public:
 
     /**
      * @brief Inserts an element before index
-     * 
+     *
      * @param [in] value
      * @param [in] index
-     * 
-     * @return Utils::Error
+     *
+     * @return err::ErrorCode
      */
-    Utils::Error InsertBefore(const T& value, std::size_t index) noexcept
+    err::ErrorCode InsertBefore(const T& value, std::size_t index) noexcept
     {
         return InsertAfter(value, m_prev[index]);
     }
 
     /**
      * @brief Inserts an element at the end
-     * 
+     *
      * @param [in] value
-     * 
-     * @return Utils::Error
+     *
+     * @return err::ErrorCode
      */
-    Utils::Error PushBack(const T& value) noexcept
+    err::ErrorCode PushBack(const T& value) noexcept
     {
         return InsertAfter(value, Tail());
     }
 
     /**
      * @brief Inserts an element at the front
-     * 
+     *
      * @param [in] value
-     * 
-     * @return Utils::Error
+     *
+     * @return err::ErrorCode
      */
-    Utils::Error PushFront(const T& value) noexcept
+    err::ErrorCode PushFront(const T& value) noexcept
     {
         return InsertBefore(value, Head());
     }
 
     /**
      * @brief Pops an element at index
-     * 
+     *
      * @param [in] index where to pop
-     * 
-     * @return Utils::Result<T> value result
+     *
+     * @return err::Result<T> value result
      */
-    Utils::Result<T> Pop(std::size_t index) noexcept
+    err::Result<T> Pop(std::size_t index) noexcept
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            return { {}, CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS) };
+            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, {});
 
         T value = m_data[index];
 
@@ -348,20 +352,20 @@ public:
 
     /**
      * @brief Pops an element at the end
-     * 
-     * @return Utils::Result<T> value result
+     *
+     * @return err::Result<T> value result
      */
-    Utils::Result<T> PopBack() noexcept
+    err::Result<T> PopBack() noexcept
     {
         return Pop(Tail());
     }
 
     /**
      * @brief Pops an element at the front
-     * 
-     * @return Utils::Result<T> value result
+     *
+     * @return err::Result<T> value result
      */
-    Utils::Result<T> PopFront() noexcept
+    err::Result<T> PopFront() noexcept
     {
         return PopFront(Head());
     }
@@ -369,21 +373,19 @@ public:
     /**
      * @brief Slowly iterates over the list until it gets
      * to the element you want(don't use it)
-     * 
+     *
      * @param [in] index index if we untangle the list
-     * 
-     * @return Utils::Result<T> 
+     *
+     * @return err::Result<T>
      */
-    Utils::Result<T> GetValueByItsOrderInTheList(std::size_t index)
+    err::Result<T> GetValueByItsOrderInTheList(std::size_t index)
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            return { FREE_ELEM, CREATE_ERROR(Utils::ERROR_INDEX_OUT_OF_BOUNDS) };
+            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, FREE_ELEM);
 
-        ERR_DUMP_RET_RES(this, 0);
-        
         std::size_t curEl = Head();
-        std::size_t i = 1;
+        std::size_t i     = 1;
 
         while (i < index && curEl)
         {
@@ -391,36 +393,41 @@ public:
             i++;
         }
 
-        return { curEl, curEl ? Error() : CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
+        if (!curEl)
+            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
+
+        return { curEl, err::EVERYTHING_FINE };
     }
 
     /**
      * @brief Finds an element in the list
-     * 
-     * @param [in] value 
-     * 
-     * @return Utils::Result<size_t> index result
+     *
+     * @param [in] value
+     *
+     * @return err::Result<size_t> index result
      */
-    Utils::Result<size_t> Find(const T& value) const noexcept
+    err::Result<size_t> Find(const T& value) const noexcept
     {
         size_t curEl = Head();
 
         while (curEl && m_data[curEl] != value)
             curEl = m_next[curEl];
 
-        return { curEl, curEl ? Utils::Error() :
-                                CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
+        if (!curEl)
+            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
+
+        return { curEl, err::EVERYTHING_FINE };
     }
 public:
     /**
      * @brief Initializes log files and writes
      * the header of the html log file
-     * 
+     *
      * @param [in] logFolder where to put logs
      */
     void StartLogging(const char* logFolder) noexcept
     {
-        HardAssert(logFolder, Utils::ERROR_BAD_FILE);
+        HardAssert(logFolder, err::ERROR_BAD_FILE);
         m_logFolder = logFolder;
 
         String htmlFilePath = logFolder;
@@ -457,16 +464,16 @@ public:
     #define NODE_FRAME_COLOR "\"#000000\""
     #define ROOT_COLOR "\"#c95b90\""
     #define FREE_HEAD_COLOR "\"#b9e793\""
-    
-    constexpr static std::size_t FREE_ELEM = Utils::SIZET_POISON;
+
+    constexpr static std::size_t FREE_ELEM = SIZE_MAX;
 
     /**
      * @brief Call only after StartLogging
      * Dumps the list
-     * 
-     * @return Utils::Error
+     *
+     * @return err::ErrorCode
      */
-    Utils::Error Dump() noexcept
+    err::ErrorCode Dump() noexcept
     {
         static const std::size_t NUM_STR_MAX_LENGTH = 21;
         static std::size_t       dumpIteration      = 0;
@@ -474,7 +481,7 @@ public:
         char iterString[NUM_STR_MAX_LENGTH] = "";
         sprintf(iterString, "%zu", dumpIteration);
 
-        Utils::Error error = Error();
+        err::ErrorCode error = Error();
 
         String outTextPath = m_logFolder;
         outTextPath += "/txt/iter";
@@ -510,7 +517,7 @@ public:
         return Error();
     }
 private:
-    inline Utils::Error realloc(std::size_t newLength)
+     err::ErrorCode realloc(std::size_t newLength)
     {
         std::size_t oldCapacity = m_data.GetCapacity();
 
@@ -527,7 +534,7 @@ private:
 
         m_freeHead = oldCapacity;
 
-        return {};
+        return err::EVERYTHING_FINE;
     }
 private:
     #define PRINT_LOG(...)                  \
@@ -537,14 +544,14 @@ private:
         m_htmlLogFile << __VA_ARGS__;       \
     } while (0)
 
-    Utils::Error dumpListText(const String<>& outTextPath, Utils::Error error)
+    err::ErrorCode dumpListText(const String<>& outTextPath, err::ErrorCode error)
     {
         std::ofstream outTextFile{outTextPath};
         if (!outTextFile)
-            return CREATE_ERROR(Utils::ERROR_BAD_FILE);
+            RETURN_ERROR(err::ERROR_BAD_FILE);
 
         PRINT_LOG("List[" << this << "]\n");
-        PRINT_LOG("List condition - " << error.GetErrorName() << "[" <<
+        PRINT_LOG("List condition - " << GetErrorName(error) << "[" <<
                    static_cast<int>(error) << "]\n");
 
         PRINT_LOG("{\n");
@@ -588,7 +595,7 @@ private:
             else
                 PRINT_LOG("     [" << i << "] = BAD\n");
         }
-            
+
         PRINT_LOG("}\n");
 
         return Error();
@@ -596,11 +603,11 @@ private:
 
     #undef PRINT_LOG
 
-    Utils::Error dumpListGraph(const String<>& outGraphPath)
+    err::ErrorCode dumpListGraph(const String<>& outGraphPath)
     {
         std::ofstream outGraphFile{outGraphPath};
         if (!outGraphFile)
-            return CREATE_ERROR(Utils::ERROR_BAD_FILE);
+            RETURN_ERROR(err::ERROR_BAD_FILE);
 
         std::size_t head = Head(), tail = Tail();
 
@@ -615,7 +622,7 @@ private:
         tail << "}\"];\n"
         "FREE_HEAD[style = \"filled\", fillcolor = " FREE_HEAD_COLOR ", "
         "label = \"FREE HEAD|<freeHead>freeHead = " << m_freeHead << "\"];\n";
-        
+
         for (std::size_t i = 1, end = m_data.GetCapacity(); i < end; i++)
         {
             outGraphFile <<
@@ -640,10 +647,10 @@ private:
             outGraphFile << "->CELL_" << i;
 
         outGraphFile << " [weight = 1000000000, color = " BACK_GROUND_COLOR "];\n";
-        
+
         if (head)
             outGraphFile << "ROOT:head->CELL_" << head << " [style = \"bold\", color = white];\n";
-        
+
         if (tail)
             outGraphFile << "ROOT:tail->CELL_" << tail << " [style = \"bold\", color = white];\n";
 

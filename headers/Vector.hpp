@@ -5,10 +5,10 @@
  * @file Vector.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief This file contains an implementation of a templated vector
- * 
+ *
  * @version 1.0
  * @date 16-07-2024
- * 
+ *
  * @copyright Copyright (c) 2024
  */
 
@@ -19,10 +19,10 @@ namespace mlib {
 
 /** @class Vector
  * @brief Templated vector
- * 
+ *
  * @tparam T value type
- * @tparam DefaultCapacity 
- * @tparam GrowFactor 
+ * @tparam DefaultCapacity
+ * @tparam GrowFactor
  */
 template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class Vector final
@@ -35,14 +35,14 @@ class Vector final
 private:
     Buffer<T, DefaultCapacity, GrowFactor> m_data{};
 public:
-    std::size_t  length = 0; ///< length
+    std::size_t    length = 0; ///< length
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    Utils::Error Error()  const noexcept  { return m_data.error;  }
+    err::ErrorCode Error()  const noexcept  { return m_data.error;  }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              CTOR/DTOR and =
@@ -60,7 +60,7 @@ public:
      * and ensures that the capacity is enougth
      * for hintLength elements, thus, avoiding
      * reallocations
-     * 
+     *
      * @param [in] hintLength expected number of elements
      */
     explicit Vector(std::size_t hintLength)
@@ -71,17 +71,17 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    static Utils::Result<Vector> New(std::size_t hintLength = DefaultCapacity)
+    static err::Result<Vector> New(std::size_t hintLength = DefaultCapacity)
     {
         Vector vec(hintLength);
-
+        LOG(vec.Error());
         return { vec, vec.Error() };
     }
 
-    static Utils::Result<Vector> New(const Vector& other)
+    static err::Result<Vector> New(const Vector& other)
     {
         Vector vec(other);
-
+        LOG(vec.Error());
         return { vec, vec.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,31 +98,31 @@ public:
 
     /**
      * @brief Returns the start of a buffer
-     * 
-     * @return iterator 
+     *
+     * @return iterator
      */
-    inline iterator      begin()        noexcept { return m_data.RawPtr();          }
+     iterator      begin()        noexcept { return m_data.RawPtr();          }
 
     /**
      * @brief Returns the start of a const buffer
-     * 
-     * @return constIterator 
+     *
+     * @return constIterator
      */
-    inline constIterator cebgin() const noexcept { return m_data.RawPtr();          }
+     constIterator cebgin() const noexcept { return m_data.RawPtr();          }
 
     /**
      * @brief Returns the end of a buffer
-     * 
-     * @return iterator 
+     *
+     * @return iterator
      */
-    inline iterator      end()          noexcept { return m_data.RawPtr() + length; }
+     iterator      end()          noexcept { return m_data.RawPtr() + length; }
 
     /**
      * @brief Returns the end of a const buffer
-     * 
-     * @return constIterator 
+     *
+     * @return constIterator
      */
-    inline constIterator cend()   const noexcept { return m_data.RawPtr() + length; }
+     constIterator cend()   const noexcept { return m_data.RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS
@@ -131,12 +131,12 @@ public:
 public:
     /**
      * @brief Pushes an element at the end of the vector
-     * 
-     * @param element 
-     * 
-     * @return Utils::Error 
+     *
+     * @param [in] element
+     *
+     * @return err::ErrorCode
      */
-    Utils::Error PushBack(const T& element)
+    err::ErrorCode PushBack(const T& element)
     {
         if (length == m_data.GetCapacity())
             RETURN_ERROR(m_data.Realloc(length + 1));
@@ -145,17 +145,17 @@ public:
 
         length++;
 
-        return {};
+        return err::EVERYTHING_FINE;
     }
 
     /**
      * @brief Pushes an element at the end of the vector
-     * 
-     * @param element 
-     * 
-     * @return Utils::Error 
+     *
+     * @param [in] element
+     *
+     * @return err::ErrorCode
      */
-    Utils::Error PushBack(T&& element)
+    err::ErrorCode PushBack(T&& element)
     {
         if (length == m_data.GetCapacity())
             RETURN_ERROR(m_data.Realloc(length + 1));
@@ -164,10 +164,10 @@ public:
 
         length++;
 
-        return Utils::Error();
+        return err::EVERYTHING_FINE;
     }
 
-    Utils::Result<std::size_t> Find(const T& value)
+    err::Result<std::size_t> Find(const T& value)
     {
         for (std::size_t i = 0; i < length; i++)
         {
@@ -175,7 +175,7 @@ public:
                 return { i, {} };
         }
 
-        return { Utils::SIZET_POISON, CREATE_ERROR(Utils::ERROR_NOT_FOUND) };
+        return { SIZE_MAX, err::ERROR_NOT_FOUND };
     }
 };
 

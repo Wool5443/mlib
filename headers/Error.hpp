@@ -127,9 +127,10 @@ public:
 #define LOG(loggerPtr, errorCode)                                   \
 do                                                                  \
 {                                                                   \
-    if (loggerPtr)                                                  \
+    err::ErrorCode err = errorCode;                                 \
+    if (err && loggerPtr)                                           \
         loggerPtr->PushErrorLogPleaseUseMacro(                      \
-                   CREATE_ERROR(errorCode));                        \
+                   CREATE_ERROR(err));                              \
 } while (0)
 
 #ifdef NDEBUG

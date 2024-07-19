@@ -6,21 +6,21 @@
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief This file contains the implementation of a templated
  * buffer used in other containers
- * 
+ *
  * @version 1.0
  * @date 16-07-2024
- * 
+ *
  * @copyright Copyright (c) 2024
- * 
+ *
  */
 
-#include "Utils.hpp"
+#include "Error.hpp"
 
 namespace mlib {
 
 /**
  * @brief Resizeable buffer allocated on heap
- * 
+ *
  * @tparam T value type
  * @tparam DefaultCapacity
  * @tparam GrowFactor
@@ -34,10 +34,11 @@ class Buffer final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    T*          m_data     = nullptr;
-    std::size_t m_capacity = 0;
+    T*           m_data     = nullptr;
+    err::Logger* m_logger   = nullptr;
+    std::size_t  m_capacity = 0;
 public:
-    Utils::Error error{}; ///< Buffer error
+    err::ErrorCode error   = err::EVERYTHING_FINE; ///< Buffer error
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
@@ -46,24 +47,24 @@ public:
 public:
     /**
      * @brief returns the raw buffer
-     * 
+     *
      * @return T* raw buffer
      */
-    inline T*            RawPtr()            noexcept { return m_data;     }
+     T*            RawPtr()            noexcept { return m_data;     }
 
     /**
      * @brief returns the raw buffer
-     * 
+     *
      * @return T* raw buffer
      */
-    inline const T*      RawPtr()      const noexcept { return m_data;     }
+     const T*      RawPtr()      const noexcept { return m_data;     }
 
     /**
      * @brief Get the Capacity object
-     * 
-     * @return std::size_t 
+     *
+     * @return std::size_t
      */
-    inline std::size_t   GetCapacity() const noexcept { return m_capacity; }
+     std::size_t   GetCapacity() const noexcept { return m_capacity; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              CTOR/DTOR and =
@@ -82,7 +83,7 @@ public:
      * and ensures that the capacity is enougth
      * for hintLength elements, thus, avoiding
      * reallocations
-     * 
+     *
      * @param [in] hintLength length to ensure big enough capacity
      * for less reallocations
      */
@@ -91,20 +92,24 @@ public:
 
     /**
      * @brief Buffer copy constructor
-     * 
+     *
      * @param [in] other buffer to copy
      */
     Buffer(const Buffer& other)
         : Buffer(other.m_capacity, true)
     {
-        if (error) return;
+        if (error)
+        {
+            LOG(error);
+            return;
+        }
 
         std::copy(other.cebgin(), other.cend(), m_data);
     }
 
     /**
      * @brief Buffer move constructor
-     * 
+     *
      * @param [in] other buffer to move
      */
     Buffer(Buffer&& other) noexcept
@@ -115,9 +120,9 @@ public:
 
     /**
      * @brief Buffer copy assignment
-     * 
+     *
      * @param [in] other buffer to copy
-     * 
+     *
      * @return Buffer&
      */
     Buffer& operator=(const Buffer& other)
@@ -127,7 +132,11 @@ public:
         T* newData = new T[other.m_capacity]{};
 
         if (!newData)
+        {
+            error = err::ERROR_NO_MEMORY;
+            LOG(error);
             return *this;
+        }
 
         std::copy(other.cebgin(), other.cend(), newData);
 
@@ -142,9 +151,9 @@ public:
 
     /**
      * @brief Buffer move assignment
-     * 
+     *
      * @param [in] other buffer to move
-     * 
+     *
      * @return Buffer&
      */
     Buffer& operator=(Buffer&& other) noexcept
@@ -167,10 +176,13 @@ private:
     explicit Buffer(std::size_t capacity, bool isValidCapacity)
         : m_data(new T[capacity]{}), m_capacity(capacity)
     {
-        HardAssert(isValidCapacity, Utils::ERROR_BAD_VALUE);
+        HardAssert(isValidCapacity, err::ERROR_BAD_VALUE);
 
         if (!m_data)
-            error = CREATE_ERROR(Utils::ERROR_NO_MEMORY);
+        {
+            error = err::ERROR_NO_MEMORY;
+            LOG(error);
+        }
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -183,29 +195,29 @@ public:
      * and ensures that the capacity is enougth
      * for hintLength elements, thus, avoiding
      * reallocations
-     * 
-     * @param hintLength length to ensure big enough capacity
+     *
+     * @param [in] hintLength length to ensure big enough capacity
      * for less reallocations
-     * 
-     * @return Utils::Result<Buffer> 
+     *
+     * @return err::Result<Buffer>
      */
-    static Utils::Result<Buffer> New(std::size_t hintLength = DefaultCapacity)
+    static err::Result<Buffer> New(std::size_t hintLength = DefaultCapacity)
     {
         Buffer buffer(hintLength);
-
+        LOG(buffer.error);
         return { buffer, buffer.error };
     }
 
     /**
      * @brief Copies a buffer object
-     * 
+     *
      * @param other buffer to copy
-     * @return Utils::Result<Buffer> 
+     * @return err::Result<Buffer>
      */
-    static Utils::Result<Buffer> New(const Buffer& other)
+    static err::Result<Buffer> New(const Buffer& other)
     {
         Buffer buffer(other);
-
+        LOG(buffer.error);
         return { buffer, buffer.error };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -222,33 +234,33 @@ public:
 
     /**
      * @brief Returns the start of a buffer
-     * 
-     * @return iterator 
+     *
+     * @return iterator
      */
-    inline iterator      begin()        & noexcept { return m_data; }
+     iterator      begin()        & noexcept { return m_data; }
 
     /**
      * @brief Returns the start of a const buffer
-     * 
-     * @return constIterator 
+     *
+     * @return constIterator
      */
-    inline constIterator cebgin() const & noexcept { return m_data; }
+     constIterator cebgin() const & noexcept { return m_data; }
 
     /**
      * @brief Returns the end of a buffer
-     * 
-     * @return iterator 
+     *
+     * @return iterator
      */
-    inline iterator      end()          & noexcept { return m_data + m_capacity; }
+     iterator      end()          & noexcept { return m_data + m_capacity; }
 
     /**
      * @brief Returns the end of a const buffer
-     * 
-     * @return constIterator 
+     *
+     * @return constIterator
      */
-    inline constIterator cend()   const & noexcept { return m_data + m_capacity; }
+     constIterator cend()   const & noexcept { return m_data + m_capacity; }
 private:
-    static inline std::size_t calculateCapacity(std::size_t hintLength) noexcept
+    static  std::size_t calculateCapacity(std::size_t hintLength) noexcept
     {
         std::size_t capacity = DefaultCapacity;
 
@@ -266,11 +278,11 @@ public:
     /**
      * @brief Reallocates the buffer
      * new capacity is at least capacity
-     * 
+     *
      * @param_capacity
-     * @return Utils::Error 
+     * @return err::ErrorCode
      */
-    Utils::Error Realloc(std::size_t capacity)
+    err::ErrorCode Realloc(std::size_t capacity)
     {
         RETURN_ERROR(error);
 
@@ -279,7 +291,7 @@ public:
         T* newData = new T[newCapacity]{};
 
         if (!newData)
-            return CREATE_ERROR(Utils::ERROR_NO_MEMORY);
+            RETURN_ERROR(err::ERROR_NO_MEMORY);
 
         std::copy(cebgin(), cend(), newData);
 

@@ -42,7 +42,7 @@ private:
     Buffer<std::size_t, DefaultCapacity, GrowFactor> m_prev{};
 
     std::size_t   m_freeHead = 1;
-    String<>      m_logFolder{};
+    String<>      m_dumpFolder{};
     std::ofstream m_htmlLogFile{};
 public:
     std::size_t   length = 1; ///< length
@@ -428,7 +428,7 @@ public:
     void StartLogging(const char* logFolder) noexcept
     {
         HardAssert(logFolder, err::ERROR_BAD_FILE);
-        m_logFolder = logFolder;
+        m_dumpFolder = logFolder;
 
         String htmlFilePath = logFolder;
 
@@ -483,12 +483,12 @@ public:
 
         err::ErrorCode error = Error();
 
-        String outTextPath = m_logFolder;
+        String outTextPath = m_dumpFolder;
         outTextPath += "/txt/iter";
         outTextPath += iterString;
         outTextPath += ".txt";
 
-        String outGraphPath = m_logFolder;
+        String outGraphPath = m_dumpFolder;
         outGraphPath += "/dot/iter";
         outGraphPath += iterString;
         outGraphPath += ".dot";
@@ -501,7 +501,7 @@ public:
 
         RETURN_ERROR(dumpListGraph(outGraphPath));
 
-        String outImgPath = m_logFolder;
+        String outImgPath = m_dumpFolder;
         outImgPath += "/img/iter";
         outImgPath += iterString;
         outImgPath += ".png";

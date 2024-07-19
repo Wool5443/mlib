@@ -118,18 +118,20 @@ public:
     void PrintErrors(std::ostream& out = std::cout);
 };
 
+extern Logger* LOGGER;
+
 #define GET_FILE_NAME() __FILE__
 #define GET_LINE()      __LINE__
 #define GET_FUNCTION()  __PRETTY_FUNCTION__
 #define CREATE_ERROR(errorCode) err::Error((errorCode),\
                                 GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
-#define LOG(loggerPtr, errorCode)                                   \
+#define LOG(errorCode)                                              \
 do                                                                  \
 {                                                                   \
     err::ErrorCode err = errorCode;                                 \
-    if (err && loggerPtr)                                           \
-        loggerPtr->PushErrorLogPleaseUseMacro(                      \
+    if (err && err::LOGGER)                                         \
+        err::LOGGER->PushErrorLogPleaseUseMacro(                    \
                    CREATE_ERROR(err));                              \
 } while (0)
 
@@ -186,14 +188,13 @@ do                                                                  \
 /**
  * @brief returns error if it is not EVERYTHING_FINE
  */
-#define RETURN_ERROR(loggerPtr, error, ...)                         \
+#define RETURN_ERROR(error, ...)                                    \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error = error;                                  \
     if (_error)                                                     \
     {                                                               \
-        if (loggerPtr)                                              \
-            LOG(loggerPtr, _error);                                 \
+        LOG(_error);                                                \
         __VA_ARGS__;                                                \
         return _error;                                              \
     }                                                               \
@@ -202,14 +203,13 @@ do                                                                  \
 /**
  * @brief returns error and poison if it is not EVERYTHING_FINE
  */
-#define RETURN_ERROR_RESULT(loggerPtr, error, poison, ...)          \
+#define RETURN_ERROR_RESULT(error, poison, ...)                     \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error = error;                                  \
     if (_error)                                                     \
     {                                                               \
-        if (loggerPtr)                                              \
-            LOG(loggerPtr, _error);                                 \
+        LOG(_error);                                                \
         __VA_ARGS__;                                                \
         return { poison, _error };                                  \
     }                                                               \
@@ -218,14 +218,13 @@ do                                                                  \
 /**
  * @brief returns result if it contains an error
  */
-#define RETURN_RESULT(loggerPtr, result, ...)                       \
+#define RETURN_RESULT(result, ...)                                  \
 do                                                                  \
 {                                                                   \
     __typeof__(result) _result = result;                            \
     if (!_result)                                                   \
     {                                                               \
-        if (loggerPtr)                                              \
-            LOG(loggerPtr, _result);                                \
+        LOG(_result);                                               \
         __VA_ARGS__;                                                \
         return _result;                                             \
     }                                                               \

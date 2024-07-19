@@ -41,8 +41,6 @@ public:
     err::ErrorCode  error  = err::EVERYTHING_FINE; /** error which may occur in ctor */
 
     static const std::size_t BAD_ID = (std::size_t)-1;
-private:
-    err::Logger*    m_logger = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              SETTERS
@@ -57,7 +55,7 @@ private:
      */
     err::ErrorCode SetLeft(BinaryTreeNode* node)
     {
-        RETURN_ERROR(m_logger, error);
+        RETURN_ERROR(error);
 
         if (left)
             left->parent = nullptr;
@@ -76,7 +74,7 @@ private:
      */
     err::ErrorCode SetRight(BinaryTreeNode* node)
     {
-        RETURN_ERROR(m_logger, error);
+        RETURN_ERROR(error);
 
         if (right)
             right->parent = nullptr;
@@ -85,16 +83,6 @@ private:
         node->parent = this;
 
         return err::EVERYTHING_FINE;
-    }
-
-    /**
-     * @brief Set the logger
-     * 
-     * @param [in] logger 
-     */
-    void SetLogger(err::Logger* logger)
-    {
-        m_logger = logger;
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -163,14 +151,19 @@ public:
      * @param [in] other node to copy
      */
     BinaryTreeNode(const BinaryTreeNode& other)
-        : value(other.value), m_logger(other.m_logger)
+        : value(other.value)
     {
-        if (other.error) return;
+        if (other.error)
+        {
+            LOG(other.error);
+            return;
+        }
 
         auto left = other.left->Clone();
         if (!left)
         {
             error = left;
+            LOG(error);
             return;
         }
 
@@ -178,6 +171,7 @@ public:
         if (!right)
         {
             error = right;
+            LOG(error);
             return;
         }
 
@@ -194,8 +188,7 @@ public:
         : value(std::move(other.value)),
           left(other.left), right(other.right),
           parent(other.parent),
-          id(other.id),
-          m_logger(other.m_logger)
+          id(other.id)
     {
         if (other.parent)
         {
@@ -234,7 +227,6 @@ public:
         right    = other.right;
         parent   = other.parent;
         id       = other.id;
-        m_logger = other.m_logger;
 
         if (other.parent)
         {
@@ -246,7 +238,6 @@ public:
         other.left     = nullptr;
         other.right    = nullptr;
         other.parent   = nullptr;
-        other.m_logger = nullptr;
 
         return *this;
     }
@@ -259,11 +250,11 @@ public:
     err::ErrorCode Delete()
     {
         if (id == BAD_ID)
-            RETURN_ERROR(m_logger, err::ERROR_BAD_TREE);
+            RETURN_ERROR(err::ERROR_BAD_TREE);
         if (left)
-            RETURN_ERROR(m_logger, left->Delete());
+            RETURN_ERROR(left->Delete());
         if (right)
-            RETURN_ERROR(m_logger, right->Delete());
+            RETURN_ERROR(right->Delete());
 
         delete this;
 
@@ -291,7 +282,7 @@ public:
         auto node = new BinaryTreeNode(value, left, right);
 
         if (!node)
-            return { nullptr, err::ERROR_NO_MEMORY };
+            RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, nullptr);
 
         if (left)
             left->parent  = node;
@@ -319,13 +310,13 @@ public:
         if (left)
         {
             left = left->Clone();
-            RETURN_RESULT(m_logger, left);
+            RETURN_RESULT(left);
         }
 
         if (right)
         {
             right = right->Clone();
-            RETURN_RESULT(m_logger, right, left.value->Delete());
+            RETURN_RESULT(right, left.value->Delete());
         }
 
         return BinaryTreeNode::New(value, left.value, right.value);
@@ -357,7 +348,6 @@ public:
 private:
     String<>      m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
-    err::Logger*  m_logger = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              SETTERS/GETTERS
@@ -370,16 +360,6 @@ public:
      * @return err::ErrorCode 
      */
     err::ErrorCode Error() const noexcept { return root ? root->error : err::ERROR_NO_ROOT; }
-
-    /**
-     * @brief Set the logger
-     * 
-     * @param [in] logger 
-     */
-    void SetLogger(err::Logger* logger)
-    {
-        m_logger = logger;
-    }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              CTOR/DTOR AND =
@@ -411,7 +391,7 @@ public:
         auto _root = BinaryTreeNode<T>::New(value);
         if (_root.error)
         {
-            LOG(m_logger, _root.error);
+            LOG(_root.error);
             return;
         }
 
@@ -429,7 +409,7 @@ public:
         auto _root = BinaryTreeNode<T>::New(value);
         if (_root.error)
         {
-            LOG(m_logger, _root.error);
+            LOG(_root.error);
             return;
         }
 
@@ -447,7 +427,7 @@ public:
 
         if (newRoot.error)
         {
-            LOG(m_logger, newRoot.error);
+            LOG(newRoot.error);
             return;
         }
 
@@ -467,14 +447,14 @@ public:
 
         if (newRoot.error)
         {
-            LOG(m_logger, newRoot.error);
+            LOG(newRoot.error);
             return *this;
         }
 
         err::ErrorCode error = root->Delete();
         if (error)
         {
-            LOG(m_logger, error);
+            LOG(error);
             return *this;
         }
 
@@ -503,15 +483,16 @@ public:
      */
     ~BinaryTree()
     {
-        if (root)
+        if (!root)
+            return;
+
+        err::ErrorCode error = root->Delete();
+        if (error)
         {
-            err::ErrorCode error = root->Delete();
-            if (error)
-            {
-                LOG(m_logger, error);
-                return;
-            }
+            LOG(error);
+            return;
         }
+
         root = nullptr;
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -659,13 +640,13 @@ public:
         std::size_t MAX_DEPTH = MaxSize;
 
         if (root->left)
-            RETURN_ERROR(m_logger, recBuildCellTemplatesGraph(m_logger,
-                         root->left, outGraphFile, 0, MAX_DEPTH));
+            RETURN_ERROR(recBuildCellTemplatesGraph(root->left,
+                         outGraphFile, 0, MAX_DEPTH));
         if (root->right)
-            RETURN_ERROR(m_logger, recBuildCellTemplatesGraph(m_logger,
-                         root->right, outGraphFile, 0, MAX_DEPTH));
+            RETURN_ERROR(recBuildCellTemplatesGraph(root->right,
+                         outGraphFile, 0, MAX_DEPTH));
 
-        RETURN_ERROR(m_logger, recDrawGraph(m_logger, root, outGraphFile, 0, MAX_DEPTH));
+        RETURN_ERROR(recDrawGraph(root, outGraphFile, 0, MAX_DEPTH));
 
         outGraphFile << "\n"
         << "TREE:root->NODE_" << root <<"\n"
@@ -692,8 +673,7 @@ public:
         return err::EVERYTHING_FINE;
     }
 private:
-    static err::ErrorCode recBuildCellTemplatesGraph(err::Logger* logger,
-                                                     const BinaryTreeNode<T>* node,
+    static err::ErrorCode recBuildCellTemplatesGraph(const BinaryTreeNode<T>* node,
                                                      std::ofstream& outGraphFile,
                                                      std::size_t curDepth,
                                                      std::size_t maxDepth)
@@ -701,7 +681,7 @@ private:
         std::size_t nodeId = node->id;
         
         if (curDepth > maxDepth)
-            RETURN_ERROR(logger, err::ERROR_BAD_TREE);
+            RETURN_ERROR(err::ERROR_BAD_TREE);
 
         outGraphFile << "NODE_" << node << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
@@ -716,35 +696,34 @@ private:
         outGraphFile << "|{<left>left|<right>right}}\"];\n";
         
         if (node->left)
-            RETURN_ERROR(logger, recBuildCellTemplatesGraph(logger,
-                         node->left, outGraphFile, curDepth + 1, maxDepth));
+            RETURN_ERROR(recBuildCellTemplatesGraph(node->left,
+                         outGraphFile, curDepth + 1, maxDepth));
         if (node->right)
-            RETURN_ERROR(logger, recBuildCellTemplatesGraph(logger,
-                         node->right, outGraphFile, curDepth + 1, maxDepth));
+            RETURN_ERROR(recBuildCellTemplatesGraph(node->right,
+                         outGraphFile, curDepth + 1, maxDepth));
 
         return err::EVERYTHING_FINE;
     }
 
-    static err::ErrorCode recDrawGraph(err::Logger* logger,
-                                       const BinaryTreeNode<T>* node,
+    static err::ErrorCode recDrawGraph(const BinaryTreeNode<T>* node,
                                        std::ofstream& outGraphFile,
                                        std::size_t curDepth,
                                        std::size_t maxDepth)
     {
         if (curDepth > maxDepth)
-            RETURN_ERROR(logger, err::ERROR_BAD_TREE);
+            RETURN_ERROR(err::ERROR_BAD_TREE);
 
         if (node->left)
         {
             outGraphFile << "NODE_" << node << ":left->NODE_" << node->left << ";\n";
-            RETURN_ERROR(logger, recDrawGraph(logger,
-                         node->left, outGraphFile, curDepth + 1, maxDepth));
+            RETURN_ERROR(recDrawGraph(node->left,
+                         outGraphFile, curDepth + 1, maxDepth));
         }
         if (node->right)
         {
             outGraphFile << "NODE_" << node << ":right->NODE_" << node->right << ";\n";
-            RETURN_ERROR(logger, recDrawGraph(logger,
-                         node->right, outGraphFile, curDepth + 1, maxDepth));
+            RETURN_ERROR(recDrawGraph(node->right,
+                         outGraphFile, curDepth + 1, maxDepth));
         }
 
         return err::EVERYTHING_FINE;

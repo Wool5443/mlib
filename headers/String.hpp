@@ -7,7 +7,7 @@
  * @brief This file contains the implementation of a String
  * @version 1.0
  * @date 16-07-2024
- * 
+ *
  * @copyright Copyright (c) 2024
  */
 
@@ -20,7 +20,7 @@ namespace mlib {
 
 /** @class String
  * @brief A resizeable string
- * 
+ *
  * @tparam DefaultCapacity
  * @tparam GrowFactor
  */
@@ -34,7 +34,6 @@ class String final
 ///////////////////////////////////////////////////////////////////////////////
 private:
     Buffer<char, DefaultCapacity, GrowFactor> m_data{true};
-    static const std::size_t SIZET_POISON = (std::size_t)-1;
 public:
     std::size_t length = 0; ///< string length
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,20 +44,20 @@ public:
 public:
     /**
      * @brief Get error
-     * 
+     *
      * @return err::ErrorCode error
      */
     err::ErrorCode Error()  const noexcept { return m_data.error;  }
 
     /**
      * @brief Get a c-style string
-     * 
+     *
      * @return char* string
      */
     char*          RawPtr()       noexcept { return m_data.RawPtr(); }
     /**
      * @brief Get a c-style string
-     * 
+     *
      * @return const char* string
      */
     const char*    RawPtr() const noexcept { return m_data.RawPtr(); }
@@ -77,7 +76,7 @@ public:
     /**
      * @brief Construct a new String object
      * with known length
-     * 
+     *
      * @param [in] hintLength legnth to ensure capacity
      * for less reallocations
      */
@@ -87,9 +86,9 @@ public:
     /**
      * @brief Construct a new String object
      * from a c-style string knowing its length
-     * 
-     * @param [in] string 
-     * @param [in] length 
+     *
+     * @param [in] string
+     * @param [in] length
      */
     String(const char* string, std::size_t length) noexcept
         : m_data(length), length(length)
@@ -106,8 +105,8 @@ public:
     /**
      * @brief Construct a new String object
      * from a c-style string
-     * 
-     * @param [in] string 
+     *
+     * @param [in] string
      */
     String(const char* string) noexcept
         : String(string, strlen(string)) {}
@@ -115,8 +114,8 @@ public:
     /**
      * @brief Construct a new String object
      * from a character
-     * 
-     * @param [in] chr 
+     *
+     * @param [in] chr
      */
     String(const char chr) noexcept
         : String(&chr, 1) {}
@@ -129,10 +128,10 @@ public:
     /**
      * @brief Constructs a new String object
      * from a cstring
-     * 
-     * @param [in] string 
-     * 
-     * @return err::Result<String> 
+     *
+     * @param [in] string
+     *
+     * @return err::Result<String>
      */
     static err::Result<String> New(const char* string) noexcept
     {
@@ -144,10 +143,10 @@ public:
     /**
      * @brief Constructs a new String object
      * from a cstring knowing its length
-     * 
-     * @param [in] string 
-     * 
-     * @return err::Result<String> 
+     *
+     * @param [in] string
+     *
+     * @return err::Result<String>
      */
     static err::Result<String> New(const char* string, std::size_t length) noexcept
     {
@@ -161,11 +160,11 @@ public:
      * and ensures that the capacity is enougth
      * for hintLength elements, thus, avoiding
      * reallocations
-     * 
+     *
      * @param [in] hintLength length to ensure big enough capacity
      * for less reallocations
-     * 
-     * @return err::Result<String> 
+     *
+     * @return err::Result<String>
      */
     static err::Result<String> New(std::size_t hintLength = DefaultCapacity) noexcept
     {
@@ -177,10 +176,10 @@ public:
     /**
      * @brief Construct a new String object
      * by copying
-     * 
+     *
      * @param [in] other string to copy
-     * 
-     * @return err::Result<String> 
+     *
+     * @return err::Result<String>
      */
     static err::Result<String> New(const String& other) noexcept
     {
@@ -202,29 +201,29 @@ public:
 
     /**
      * @brief Returns the start of a string
-     * 
-     * @return iterator 
+     *
+     * @return iterator
      */
     inline iterator      begin()        & noexcept { return RawPtr();          }
 
     /**
      * @brief Returns the start of a const string
-     * 
-     * @return constIterator 
+     *
+     * @return constIterator
      */
     inline constIterator cebgin() const & noexcept { return RawPtr();          }
 
     /**
      * @brief Returns the end of a string
-     * 
-     * @return iterator 
+     *
+     * @return iterator
      */
     inline iterator      end()          & noexcept { return RawPtr() + length; }
 
     /**
      * @brief Returns the end of a const string
-     * 
-     * @return constIterator 
+     *
+     * @return constIterator
      */
     inline constIterator cend()   const & noexcept { return RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
@@ -312,55 +311,55 @@ public:
 public:
     /**
      * @brief Finds a char and returns its index
-     * 
+     *
      * @param [in] chr char to find
-     * 
+     *
      * @return err::Result<std::size_t> index result
      */
     err::Result<std::size_t> Find(char chr) const noexcept
     {
-        RETURN_ERROR_RESULT(Error(), SIZET_POISON);
+        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
 
         const char* buf   = RawPtr();
         const char* found = strchr(buf, chr);
         if (!found)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZET_POISON);
+            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
 
         return found - buf;
     }
 
     /**
      * @brief Finds a substring and returns its index
-     * 
-     * @param [in] string 
-     * 
+     *
+     * @param [in] string
+     *
      * @return err::Result<std::size_t> index result
      */
     err::Result<std::size_t> Find(const char* string) const noexcept
     {
-        RETURN_ERROR_RESULT(Error(), SIZET_POISON);
+        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
 
-        SoftAssertResult(string, SIZET_POISON, err::ERROR_NULLPTR);
+        SoftAssertResult(string, SIZE_MAX, err::ERROR_NULLPTR);
 
         const char* data  = RawPtr();
         const char* found = strstr(data, string);
 
         if (!found)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZET_POISON);
+            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
 
         return found - data;
     }
 
     /**
      * @brief Counts occurences of chr
-     * 
+     *
      * @param [in] chr char to count
-     * 
+     *
      * @return err::Result<std::size_t> count result
      */
     err::Result<std::size_t> Count(char chr) const noexcept
     {
-        RETURN_ERROR_RESULT(Error(), SIZET_POISON);
+        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
 
         std::size_t count = 0;
 
@@ -373,17 +372,17 @@ public:
 
     /**
      * @brief Counts occurences of string
-     * 
+     *
      * @param [in] string string to count
-     * 
+     *
      * @return err::Result<std::size_t> count result
      */
     err::Result<std::size_t> Count(const char* string) const noexcept
     {
         if (!string)
-            RETURN_ERROR_RESULT(err::ERROR_NULLPTR, SIZET_POISON);
+            RETURN_ERROR_RESULT(err::ERROR_NULLPTR, SIZE_MAX);
 
-        RETURN_ERROR_RESULT(Error(), SIZET_POISON);
+        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
 
         std::size_t count = 0;
         const char* found = strstr(RawPtr(), string);
@@ -399,9 +398,9 @@ public:
 
     /**
      * @brief Counts occurences of string
-     * 
+     *
      * @param [in] string string to count
-     * 
+     *
      * @return err::Result<std::size_t> count result
      */
     err::Result<std::size_t> Count(const String& string) const noexcept
@@ -413,7 +412,7 @@ private:
 public:
     /**
      * @brief Split the string by space characters
-     * 
+     *
      * @return err::Result<Vector<String>> vector of strings
      */
     err::Result<Vector<String>> Split() const noexcept
@@ -423,9 +422,9 @@ public:
 
     /**
      * @brief Split the string by delimeters
-     * 
+     *
      * @param [in] delimeters what to split by
-     * 
+     *
      * @return err::Result<Vector<String>> vector of strings
      */
     err::Result<Vector<String>> Split(const String& delimeters) const noexcept
@@ -435,9 +434,9 @@ public:
 
     /**
      * @brief Split the string by delimeters
-     * 
+     *
      * @param [in] delimeters what to split by
-     * 
+     *
      * @return err::Result<Vector<String>> vector of strings
      */
     err::Result<Vector<String>> Split(const char* delimiters) const noexcept
@@ -469,10 +468,10 @@ public:
 
     /**
      * @brief Filters out characters
-     * 
+     *
      * @param [in] filter characters to filter
-     * 
-     * @return err::ErrorCode 
+     *
+     * @return err::ErrorCode
      */
     err::ErrorCode Filter(const char* filter) noexcept
     {
@@ -498,10 +497,10 @@ public:
 
     /**
      * @brief Filters out characters
-     * 
+     *
      * @param [in] filter characters to filter
-     * 
-     * @return err::ErrorCode 
+     *
+     * @return err::ErrorCode
      */
     err::ErrorCode Filter(const String& filter) noexcept
     {
@@ -510,8 +509,8 @@ public:
 
     /**
      * @brief Filters out space characters
-     * 
-     * @return err::ErrorCode 
+     *
+     * @return err::ErrorCode
      */
     err::ErrorCode Filter() noexcept
     {

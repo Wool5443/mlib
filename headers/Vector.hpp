@@ -138,7 +138,8 @@ public:
      */
     Utils::Error PushBack(const T& element)
     {
-        RETURN_ERROR(m_data.Realloc(length + 1));
+        if (length == m_data.GetCapacity())
+            RETURN_ERROR(m_data.Realloc(length + 1));
 
         m_data[length] = element;
 
@@ -156,7 +157,8 @@ public:
      */
     Utils::Error PushBack(T&& element)
     {
-        RETURN_ERROR(m_data.Realloc(length + 1));
+        if (length == m_data.GetCapacity())
+            RETURN_ERROR(m_data.Realloc(length + 1));
 
         m_data[length] = element;
 

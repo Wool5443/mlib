@@ -6,10 +6,10 @@
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief This file contains the implementation of a templated
  * binary tree
- * 
+ *
  * @version 1.0
  * @date 16-07-2024
- * 
+ *
  * @copyright Copyright (c) 2024
  */
 
@@ -21,7 +21,7 @@ namespace mlib {
 
 /** @struct BinaryTreeNode
  * @brief Represents a tree node
- * 
+ *
  * @tparam T value type
  */
 template<typename T>
@@ -48,10 +48,10 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
     /**
      * @brief Set the left child
-     * 
+     *
      * @param [in] node child
-     * 
-     * @return err::ErrorCode 
+     *
+     * @return err::ErrorCode
      */
     err::ErrorCode SetLeft(BinaryTreeNode* node)
     {
@@ -67,10 +67,10 @@ public:
     }
     /**
      * @brief Set the right child
-     * 
+     *
      * @param [in] node child
-     * 
-     * @return err::ErrorCode 
+     *
+     * @return err::ErrorCode
      */
     err::ErrorCode SetRight(BinaryTreeNode* node)
     {
@@ -97,7 +97,7 @@ public:
 
     /**
      * @brief Construct a new Binary Tree Node object
-     * 
+     *
      * @param [in] value init value
      */
     BinaryTreeNode(const T& value) noexcept
@@ -105,7 +105,7 @@ public:
 
     /**
      * @brief Construct a new Binary Tree Node object
-     * 
+     *
      * @param [in] value init value
      */
     BinaryTreeNode(T&& value) noexcept
@@ -113,7 +113,7 @@ public:
 
     /**
      * @brief Construct a new Binary Tree Node object
-     * 
+     *
      * @param [in] value init value
      * @param [in] left left child
      * @param [in] right right child
@@ -130,7 +130,7 @@ public:
 
     /**
      * @brief Construct a new Binary Tree Node object
-     * 
+     *
      * @param [in] value init value
      * @param [in] left left child
      * @param [in] right right child
@@ -147,7 +147,7 @@ public:
 
     /**
      * @brief BinaryTreeNode copy constructore
-     * 
+     *
      * @param [in] other node to copy
      */
     BinaryTreeNode(const BinaryTreeNode& other)
@@ -181,7 +181,7 @@ public:
 
     /**
      * @brief BinaryTreeNode move constructor
-     * 
+     *
      * @param [in] other node to move
      */
     BinaryTreeNode(BinaryTreeNode&& other)
@@ -204,19 +204,19 @@ public:
 
     /**
      * @brief Copy assignment is forbidden
-     * 
+     *
      * @param [in] other node to copy
-     * 
+     *
      * @return BinaryTreeNode&
      */
     BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
 
     /**
      * @brief Move assignment is cool
-     * 
+     *
      * @param [in] other node to move
-     * 
-     * @return BinaryTreeNode& 
+     *
+     * @return BinaryTreeNode&
      */
     BinaryTreeNode& operator=(BinaryTreeNode&& other)
     {
@@ -244,8 +244,8 @@ public:
 
     /**
      * @brief Recursively deletes the node
-     * 
-     * @return err::ErrorCode 
+     *
+     * @return err::ErrorCode
      */
     err::ErrorCode Delete()
     {
@@ -268,11 +268,11 @@ public:
 public:
     /**
      * @brief Allocates memory for the node and returns a pointer
-     * 
+     *
      * @param [in] value init value
      * @param [in] left left child
      * @param [in] right right child
-     * 
+     *
      * @return err::Result<BinaryTreeNode*> new node
      */
     static err::Result<BinaryTreeNode*> New(const T& value = {},
@@ -299,7 +299,7 @@ public:
 public:
     /**
      * @brief Clone the node
-     * 
+     *
      * @return err::Result<BinaryTreeNode*> copy
      */
     err::Result<BinaryTreeNode*> Clone()
@@ -331,7 +331,7 @@ private:
 
 /**
  * @brief Represents a binary tree
- * 
+ *
  * @tparam T value type
  * @tparam MaxSize max depth
  */
@@ -356,8 +356,8 @@ private:
 public:
     /**
      * @brief Get error
-     * 
-     * @return err::ErrorCode 
+     *
+     * @return err::ErrorCode
      */
     err::ErrorCode Error() const noexcept { return root ? root->error : err::ERROR_NO_ROOT; }
 ///////////////////////////////////////////////////////////////////////////////
@@ -374,8 +374,8 @@ public:
 
     /**
      * @brief Construct a new Binary Tree object
-     * 
-     * @param [in] root 
+     *
+     * @param [in] root
      */
     BinaryTree(BinaryTreeNode<T>* root) noexcept
         : root(root) {}
@@ -383,7 +383,7 @@ public:
     /**
      * @brief Construct a new Binary Tree object
      * This ctor creates a valid tree with a root
-     * 
+     *
      * @param [in] value root init value
      */
     BinaryTree(const T& value)
@@ -401,7 +401,7 @@ public:
     /**
      * @brief Construct a new Binary Tree object
      * This ctor creates a valid tree with a root
-     * 
+     *
      * @param [in] value root init value
      */
     BinaryTree(T&& value)
@@ -418,8 +418,8 @@ public:
 
     /**
      * @brief Construct a new Binary Tree object
-     * 
-     * @param [in] other 
+     *
+     * @param [in] other
      */
     BinaryTree(const BinaryTree& other)
     {
@@ -436,10 +436,10 @@ public:
 
     /**
      * @brief Copy assign
-     * 
-     * @param [in] other 
-     * 
-     * @return BinaryTree& 
+     *
+     * @param [in] other
+     *
+     * @return BinaryTree&
      */
     BinaryTree& operator=(const BinaryTree& other)
     {
@@ -465,10 +465,10 @@ public:
 
     /**
      * @brief Move assign
-     * 
-     * @param [in] other 
-     * 
-     * @return BinaryTree& 
+     *
+     * @param [in] other
+     *
+     * @return BinaryTree&
      */
     BinaryTree& operator=(BinaryTree&& other)
     {
@@ -502,10 +502,10 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
     /**
      * @brief Construct a new LinkedList object
-     * 
+     *
      * @param value init root value
-     * 
-     * @return err::Result<Tree> 
+     *
+     * @return err::Result<Tree>
      */
     static err::Result<BinaryTree> New(const T& value)
     {
@@ -515,10 +515,10 @@ public:
 
     /**
      * @brief Construct a new Tree object
-     * 
+     *
      * @param value init root value
-     * 
-     * @return err::Result<Tree> 
+     *
+     * @return err::Result<Tree>
      */
     static err::Result<BinaryTree> New(T&& value)
     {
@@ -529,10 +529,10 @@ public:
     /**
      * @brief Construct a new Tree object
      * by copying
-     * 
+     *
      * @param other tree to copy
-     * 
-     * @return err::Result<Tree> 
+     *
+     * @return err::Result<Tree>
      */
     static err::Result<BinaryTree> New(const BinaryTree& other)
     {
@@ -560,7 +560,7 @@ public:
     /**
      * @brief Initializes dump files and writes
      * the header of the html log file
-     * 
+     *
      * @param [in] dumpFolder where to put dumps
      */
     void InitDumping(const char* dumpFolder)
@@ -594,7 +594,7 @@ public:
     /**
      * @brief Call only after StartLogging
      * Dumps the tree
-     * 
+     *
      * @return err::ErrorCode
      */
     err::ErrorCode Dump()
@@ -630,7 +630,7 @@ public:
 
         outGraphFile <<
         "TREE[rank = \"min\", style = \"filled\", fillcolor = " TREE_COLOR ", "
-                        "label = \"{Tree|Error: " << Error().GetErrorName() << "|"
+                        "label = \"{Tree|Error: " << GetErrorName(Error()) << "|"
                         "<root>Root}\"];"
         "\nNODE_" << root << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
@@ -679,7 +679,7 @@ private:
                                                      std::size_t maxDepth)
     {
         std::size_t nodeId = node->id;
-        
+
         if (curDepth > maxDepth)
             RETURN_ERROR(err::ERROR_BAD_TREE);
 
@@ -694,7 +694,7 @@ private:
             outGraphFile << node->id;
 
         outGraphFile << "|{<left>left|<right>right}}\"];\n";
-        
+
         if (node->left)
             RETURN_ERROR(recBuildCellTemplatesGraph(node->left,
                          outGraphFile, curDepth + 1, maxDepth));

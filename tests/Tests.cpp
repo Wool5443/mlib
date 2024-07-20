@@ -152,5 +152,5 @@ err::ErrorCode Tests::TestHashTable()
 
     std::cout << res1.value << '\n';
 
-    return {};
+    return err::EVERYTHING_FINE;
 }

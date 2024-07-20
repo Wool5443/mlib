@@ -46,14 +46,14 @@ const char* err::Error::GetErrorName() const noexcept
 void err::Error::Print(std::ostream& out) const noexcept
 {
     if (&out == &std::cerr || &out == &std::cout)
-        SetConsoleColor(std::cout, code ? ConsoleColor::RED :
+        SetConsoleColor(out, code ? ConsoleColor::RED :
                                           ConsoleColor::GREEN);
 
     out << GetErrorName() << " in " << file <<
     ":" << line << " in " << function << '\n';
 
     if (&out == &std::cerr || &out == &std::cout)
-        SetConsoleColor(std::cout, ConsoleColor::WHITE);
+        SetConsoleColor(out, ConsoleColor::WHITE);
 }
 
 void err::Logger::PushErrorLogPleaseUseMacro(Error&& error)
@@ -61,11 +61,11 @@ void err::Logger::PushErrorLogPleaseUseMacro(Error&& error)
     if (length == MAX_ERRORS)
         return;
 
-    m_errorStack[length++] = error;
+    errorStack[length++] = error;
 }
 
-void err::Logger::PrintErrors(std::ostream& out)
+err::Logger::~Logger()
 {
     for (std::size_t i = 0; i < length; i++)
-        m_errorStack[i].Print(out);
+        errorStack[i].Print(logStream);
 }

@@ -106,19 +106,25 @@ struct Result
     operator T() = delete;
 };
 
-class Logger
+struct Logger
 {
     static constexpr const std::size_t MAX_ERRORS = 32;
 
-    Error       m_errorStack[MAX_ERRORS]{};
-    std::size_t length = 0;
+    Error         errorStack[MAX_ERRORS]{};
+    std::size_t   length = 0;
+    std::ostream& logStream;
 public:
+    Logger(std::ostream& logStream)
+        : logStream(logStream) {}
+
     void PushErrorLogPleaseUseMacro(Error&& error);
 
-    void PrintErrors(std::ostream& out = std::cout);
+    ~Logger();
 };
 
-extern Logger* LOGGER;
+} // namespace err
+
+extern err::Logger LOGGER;
 
 #define GET_FILE_NAME() __FILE__
 #define GET_LINE()      __LINE__
@@ -129,11 +135,21 @@ extern Logger* LOGGER;
 #define LOG(errorCode)                                              \
 do                                                                  \
 {                                                                   \
-    err::ErrorCode _error_ = errorCode;                             \
-    if (_error_ && err::LOGGER)                                     \
-        err::LOGGER->PushErrorLogPleaseUseMacro(                    \
-                   CREATE_ERROR(_error_));                          \
+    LOGGER.PushErrorLogPleaseUseMacro(                              \
+                CREATE_ERROR(errorCode));                           \
 } while (0)
+
+#define LOG_IF(errorCode)                                           \
+do                                                                  \
+{                                                                   \
+    err::ErrorCode _error_ = errorCode;                             \
+    if (_error_)                                                    \
+        LOG(_error_);                                               \
+} while (0)
+
+#define LOG_INIT_CONSOLE() LOG_INIT_FILE(std::cout)
+#define LOG_INIT_FILE(fileStream)                                   \
+    err::Logger LOGGER{fileStream};                                 \
 
 #ifdef NDEBUG
 #define SoftAssert(...)
@@ -229,7 +245,5 @@ do                                                                  \
         return _result_;                                            \
     }                                                               \
 } while(0)
-
-} // namespace err
 
 #endif

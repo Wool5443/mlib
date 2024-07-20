@@ -73,14 +73,14 @@ public:
     static err::Result<HashTable> New() noexcept
     {
         HashTable tab;
-        LOG(tab.Error());
+        LOG_IF(tab.Error());
         return { tab, tab.Error() };
     }
 
     static err::Result<HashTable> New(const HashTable& other) noexcept
     {
         HashTable tab(other);
-        LOG(tab.Error());
+        LOG_IF(tab.Error());
         return { tab, tab.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -89,9 +89,9 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    static const Hash h;
     static uint64_t getIndex(const Key& key)
     {
+        static const Hash h;
         return h(key) % Size;
     }
 public:
@@ -126,7 +126,7 @@ public:
 
         err::ErrorCode error = m_containers[index].PushBack(keyVal);
 
-        LOG(error);
+        LOG_IF(error);
 
         return error;
     }
@@ -137,7 +137,7 @@ public:
 
         err::ErrorCode error = m_containers[index].PushBack(keyVal);
 
-        LOG(error);
+        LOG_IF(error);
 
         return error;
     }
@@ -154,7 +154,7 @@ public:
 
         err::Result<HashTableElement> result = container.Pop(found.value);
 
-        LOG(result);
+        LOG_IF(result);
 
         return { result.value.val, result.error };
     }

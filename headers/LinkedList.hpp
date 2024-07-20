@@ -134,7 +134,7 @@ public:
     static err::Result<LinkedList> New(std::size_t hintLength = 1)
     {
         LinkedList list(hintLength);
-        LOG(list.Error());
+        LOG_IF(list.Error());
         return { list, list.Error() };
     }
 
@@ -149,7 +149,7 @@ public:
     static err::Result<LinkedList> New(const LinkedList& other) noexcept
     {
         LinkedList list(other);
-        LOG(list.Error());
+        LOG_IF(list.Error());
         return { list, list.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -538,7 +538,7 @@ private:
         return err::EVERYTHING_FINE;
     }
 private:
-    #define PRINT_LOG(...)                  \
+    #define PRINT_DUMP(...)                 \
     do                                      \
     {                                       \
         outTextFile    << __VA_ARGS__;      \
@@ -551,58 +551,58 @@ private:
         if (!outTextFile)
             RETURN_ERROR(err::ERROR_BAD_FILE);
 
-        PRINT_LOG("List[" << this << "]\n");
-        PRINT_LOG("List condition - " << GetErrorName(error) << "[" <<
+        PRINT_DUMP("List[" << this << "]\n");
+        PRINT_DUMP("List condition - " << GetErrorName(error) << "[" <<
                    static_cast<int>(error) << "]\n");
 
-        PRINT_LOG("{\n");
-        PRINT_LOG("    length = " << length << "\n");
-        PRINT_LOG("    capacity = " << m_data.GetCapacity() << "\n");
-        PRINT_LOG("    head = " << Head() << "\n");
-        PRINT_LOG("    tail = " << Tail() << "\n");
-        PRINT_LOG("    free head = " << m_freeHead << "\n");
-        PRINT_LOG("    list:\n");
+        PRINT_DUMP("{\n");
+        PRINT_DUMP("    length = " << length << "\n");
+        PRINT_DUMP("    capacity = " << m_data.GetCapacity() << "\n");
+        PRINT_DUMP("    head = " << Head() << "\n");
+        PRINT_DUMP("    tail = " << Tail() << "\n");
+        PRINT_DUMP("    free head = " << m_freeHead << "\n");
+        PRINT_DUMP("    list:\n");
         {
             std::size_t curEl = Head();
             std::size_t index = 1;
             while (curEl != 0 && index <= length * 2)
             {
-                PRINT_LOG("    *[" << index << "] = " << m_data[curEl] << "\n");
+                PRINT_DUMP("    *[" << index << "] = " << m_data[curEl] << "\n");
                 curEl = m_next[curEl];
                 index++;
             }
         }
 
-        PRINT_LOG("\n    data[" << m_data.RawPtr() << "]\n");
+        PRINT_DUMP("\n    data[" << m_data.RawPtr() << "]\n");
         for (std::size_t i = 0, end = m_data.GetCapacity(); i < end; i++)
         {
-            PRINT_LOG("    *[" << i << "] = " << m_data[i] << "\n");
+            PRINT_DUMP("    *[" << i << "] = " << m_data[i] << "\n");
         }
 
-        PRINT_LOG("\n    prev[" << m_prev.RawPtr() << "]\n");
+        PRINT_DUMP("\n    prev[" << m_prev.RawPtr() << "]\n");
         for (std::size_t i = 0, end = m_prev.GetCapacity(); i < end; i++)
         {
             if (m_prev[i] != FREE_ELEM)
-                PRINT_LOG("    *[" << i << "] = " << m_prev[i] << "\n");
+                PRINT_DUMP("    *[" << i << "] = " << m_prev[i] << "\n");
             else
-                PRINT_LOG("     [" << i << "] = FREE\n");
+                PRINT_DUMP("     [" << i << "] = FREE\n");
         }
 
-        PRINT_LOG("\n    next[" << m_next.RawPtr() << "]\n");
+        PRINT_DUMP("\n    next[" << m_next.RawPtr() << "]\n");
         for (std::size_t i = 0, end = m_next.GetCapacity(); i < end; i++)
         {
             if (m_next[i] != FREE_ELEM)
-                PRINT_LOG("    *[" << i << "] = " << m_prev[i] << "\n");
+                PRINT_DUMP("    *[" << i << "] = " << m_prev[i] << "\n");
             else
-                PRINT_LOG("     [" << i << "] = BAD\n");
+                PRINT_DUMP("     [" << i << "] = BAD\n");
         }
 
-        PRINT_LOG("}\n");
+        PRINT_DUMP("}\n");
 
         return Error();
     }
 
-    #undef PRINT_LOG
+    #undef PRINT_DUMP
 
     err::ErrorCode dumpListGraph(const String<>& outGraphPath)
     {

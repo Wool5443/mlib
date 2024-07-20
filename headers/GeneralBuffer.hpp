@@ -204,7 +204,7 @@ public:
     static err::Result<Buffer> New(std::size_t hintLength = DefaultCapacity)
     {
         Buffer buffer(hintLength);
-        LOG(buffer.error);
+        LOG_IF(buffer.error);
         return { buffer, buffer.error };
     }
 
@@ -217,7 +217,7 @@ public:
     static err::Result<Buffer> New(const Buffer& other)
     {
         Buffer buffer(other);
-        LOG(buffer.error);
+        LOG_IF(buffer.error);
         return { buffer, buffer.error };
     }
 ///////////////////////////////////////////////////////////////////////////////

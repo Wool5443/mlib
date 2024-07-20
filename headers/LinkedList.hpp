@@ -263,7 +263,7 @@ public:
      *
      * @return err::ErrorCode
      */
-    err::ErrorCode InsertAfter(const T& value, std::size_t index)
+    err::ErrorCode InsertAfter(T&& value, std::size_t index)
     {
         if (index >= m_data.GetCapacity())
             RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
@@ -276,7 +276,7 @@ public:
         std::size_t insertIndex = m_freeHead;
         m_freeHead              = m_next[m_freeHead];
 
-        m_data[insertIndex]     = value;
+        m_data[insertIndex]     = std::move(value);
 
         m_prev[insertIndex]     = index;
         m_next[insertIndex]     = m_next[index];
@@ -287,6 +287,20 @@ public:
         length++;
 
         return {};
+    }
+
+    /**
+     * @brief Inserts an element after index
+     *
+     * @param [in] value
+     * @param [in] index
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode InsertAfter(const T& value, std::size_t index)
+    {
+        T val = value;
+        return InsertAfter(std::move(val), index);
     }
 
     /**
@@ -303,6 +317,19 @@ public:
     }
 
     /**
+     * @brief Inserts an element before index
+     *
+     * @param [in] value
+     * @param [in] index
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode InsertBefore(T&& value, std::size_t index) noexcept
+    {
+        return InsertAfter(std::move(value), m_prev[index]);
+    }
+
+    /**
      * @brief Inserts an element at the end
      *
      * @param [in] value
@@ -312,6 +339,18 @@ public:
     err::ErrorCode PushBack(const T& value) noexcept
     {
         return InsertAfter(value, Tail());
+    }
+
+    /**
+     * @brief Inserts an element at the end
+     *
+     * @param [in] value
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode PushBack(T&& value) noexcept
+    {
+        return InsertAfter(std::move(value), Tail());
     }
 
     /**
@@ -327,6 +366,18 @@ public:
     }
 
     /**
+     * @brief Inserts an element at the front
+     *
+     * @param [in] value
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode PushFront(T&& value) noexcept
+    {
+        return InsertBefore(std::move(value), Head());
+    }
+
+    /**
      * @brief Pops an element at index
      *
      * @param [in] index where to pop
@@ -339,7 +390,7 @@ public:
             m_prev[index] == FREE_ELEM)
             RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, {});
 
-        T value = m_data[index];
+        T value = std::move(m_data[index]);
 
         m_next[m_prev[index]] = m_next[index];
         m_prev[m_next[index]] = m_prev[index];
@@ -377,9 +428,9 @@ public:
      *
      * @param [in] index index if we untangle the list
      *
-     * @return err::Result<T>
+     * @return err::Result<std::size_t> correct index
      */
-    err::Result<T> GetValueByItsOrderInTheList(std::size_t index)
+    err::Result<std::size_t> GetValueByItsOrderInTheList(std::size_t index)
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)

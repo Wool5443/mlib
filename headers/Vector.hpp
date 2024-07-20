@@ -141,9 +141,7 @@ public:
         if (length == m_data.GetCapacity())
             RETURN_ERROR(m_data.Realloc(length + 1));
 
-        m_data[length] = element;
-
-        length++;
+        m_data[length++] = element;
 
         return err::EVERYTHING_FINE;
     }
@@ -160,9 +158,27 @@ public:
         if (length == m_data.GetCapacity())
             RETURN_ERROR(m_data.Realloc(length + 1));
 
-        m_data[length] = element;
+        m_data[length++] = std::move(element);
 
-        length++;
+        return err::EVERYTHING_FINE;
+    }
+
+    /**
+     * @brief Creates an element at the end of the vector
+     *
+     * @tparam Args
+     *
+     * @param [in] args ctor args for a new element of T
+     *
+     * @return err::ErrorCode
+     */
+    template<typename... Args>
+    err::ErrorCode EmplaceBack(Args&&... args)
+    {
+        if (length == m_data.GetCapacity())
+            RETURN_ERROR(m_data.Realloc(length + 1));
+
+        new(&m_data[length++]) T(std::forward<Args>(args)...);
 
         return err::EVERYTHING_FINE;
     }

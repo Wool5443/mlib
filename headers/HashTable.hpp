@@ -135,7 +135,7 @@ public:
     {
         std::size_t index = getIndex(keyVal.key);
 
-        err::ErrorCode error = m_containers[index].PushBack(keyVal);
+        err::ErrorCode error = m_containers[index].PushBack(std::move(keyVal));
 
         LOG_IF(error);
 

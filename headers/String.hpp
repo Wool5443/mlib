@@ -352,6 +352,26 @@ public:
     }
 
     /**
+     * @brief Finds a substring and returns its index
+     *
+     * @param [in] string
+     *
+     * @return err::Result<std::size_t> index result
+     */
+    err::Result<std::size_t> Find(const String& string) const noexcept
+    {
+        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
+
+        const char* data  = RawPtr();
+        const char* found = strstr(data, string.RawPtr());
+
+        if (!found)
+            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
+
+        return found - data;
+    }
+
+    /**
      * @brief Counts occurences of chr
      *
      * @param [in] chr char to count

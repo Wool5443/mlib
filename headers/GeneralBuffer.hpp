@@ -158,6 +158,8 @@ public:
      */
     Buffer& operator=(Buffer&& other) noexcept
     {
+        if (this == &other) return *this;
+
         std::swap(m_data, other.m_data);
         m_capacity = other.m_capacity;
         error      = other.error;

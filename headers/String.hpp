@@ -13,6 +13,7 @@
 
 #include <ostream>
 #include <cstring>
+#include <cstdint>
 #include "Error.hpp"
 #include "Vector.hpp"
 

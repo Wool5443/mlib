@@ -43,17 +43,18 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 private:
     Vector<Container> m_containers{};
-    String<>          m_logFolder{};
+    String<>          m_dumpFolder{};
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    Utils::Error Error() const noexcept
+    err::ErrorCode Error() const noexcept
     {
-        RETURN_ERROR(m_containers.Error());
-        return m_logFolder.Error();
+        err::ErrorCode error = m_containers.Error();
+        if (error) return error;
+        return m_dumpFolder.Error();
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -69,17 +70,17 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    static Utils::Result<HashTable> New() noexcept
+    static err::Result<HashTable> New() noexcept
     {
         HashTable tab;
-
+        LOG(tab.Error());
         return { tab, tab.Error() };
     }
 
-    static Utils::Result<HashTable> New(const HashTable& other) noexcept
+    static err::Result<HashTable> New(const HashTable& other) noexcept
     {
         HashTable tab(other);
-
+        LOG(tab.Error());
         return { tab, tab.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,20 +89,23 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    static inline uint64_t getIndex(const Key& key)
+    static const Hash h;
+    static uint64_t getIndex(const Key& key)
     {
-        Hash h{};
         return h(key) % Size;
     }
 public:
     Val* operator[](const Key& key) noexcept
     {
         std::size_t index = getIndex(key);
-        
+
         auto found = m_containers[index].Find({ key, {} });
 
         if (!found)
+        {
+            LOG(err::ERROR_NOT_FOUND);
             return nullptr;
+        }
 
         return &m_containers[index][found.value].val;
     }
@@ -116,21 +120,29 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    Utils::Error Add(const HashTableElement& keyVal)
+    err::ErrorCode Add(const HashTableElement& keyVal)
     {
         std::size_t index = getIndex(keyVal.key);
 
-        return m_containers[index].PushBack(keyVal);
+        err::ErrorCode error = m_containers[index].PushBack(keyVal);
+
+        LOG(error);
+
+        return error;
     }
 
-    Utils::Error Add(HashTableElement&& keyVal)
+    err::ErrorCode Add(HashTableElement&& keyVal)
     {
         std::size_t index = getIndex(keyVal.key);
 
-        return m_containers[index].PushBack(keyVal);
+        err::ErrorCode error = m_containers[index].PushBack(keyVal);
+
+        LOG(error);
+
+        return error;
     }
 
-    Utils::Result<Val> Pop(const Key& key)
+    err::Result<Val> Pop(const Key& key)
     {
         std::size_t index = getIndex(key);
 
@@ -140,12 +152,14 @@ public:
 
         RETURN_ERROR_RESULT(found, {});
 
-        Utils::Result<HashTableElement> result = container.Pop(found.value);
+        err::Result<HashTableElement> result = container.Pop(found.value);
+
+        LOG(result);
 
         return { result.value.val, result.error };
     }
 
-    Utils::Error Remove(const Key& key)
+    err::ErrorCode Remove(const Key& key)
     {
         return Pop(key).error;
     }

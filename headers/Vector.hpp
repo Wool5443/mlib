@@ -12,7 +12,7 @@
  * @copyright Copyright (c) 2024
  */
 
-#include <utility>
+#include <cstdint>
 #include "GeneralBuffer.hpp"
 
 namespace mlib {

@@ -16,6 +16,7 @@
  * @copyright Copyright (c) 2024
  */
 
+#include <cstdint>
 #include <fstream>
 #include "GeneralBuffer.hpp"
 

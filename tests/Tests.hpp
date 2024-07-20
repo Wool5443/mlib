@@ -1,15 +1,15 @@
 #ifndef MLIB_TESTS_HPP
 #define MLIB_TESTS_HPP
 
-#include "Utils.hpp"
+#include "Error.hpp"
 
 namespace Tests {
 
-Utils::Error TestString   (std::size_t n);
-Utils::Error TestVector   (std::size_t n);
-Utils::Error TestList     (std::size_t n);
-Utils::Error TestBTree    ();
-Utils::Error TestHashTable();
+err::ErrorCode TestString   (std::size_t n);
+err::ErrorCode TestVector   (std::size_t n);
+err::ErrorCode TestList     (std::size_t n);
+err::ErrorCode TestBTree    ();
+err::ErrorCode TestHashTable();
 
 } // namespace Test
 

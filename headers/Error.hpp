@@ -24,9 +24,9 @@ code,
 
 /**
  * @brief Returns a string explaining the error
- * 
- * @param [in] err 
- * 
+ *
+ * @param [in] err
+ *
  * @return const char* error name
  */
 const char* GetErrorName(ErrorCode err);
@@ -43,11 +43,11 @@ struct Error
 
     /**
      * @brief Construct a new Error object
-     * 
-     * @param code 
-     * @param file 
-     * @param line 
-     * @param function 
+     *
+     * @param code
+     * @param file
+     * @param line
+     * @param function
      */
     Error(ErrorCode code, const char* file, std::size_t line,
           const char* function) noexcept
@@ -71,14 +71,14 @@ struct Error
 
     /**
      * @brief Get what the error means
-     * 
+     *
      * @return const char* name
      */
     const char* GetErrorName()    const noexcept;
 
     /**
      * @brief Prints error into a file
-     * 
+     *
      * @param [in] file where to print
      */
 
@@ -87,7 +87,7 @@ struct Error
 
 /** @struct Result
  * @brief Struct for returning errors with values
- * 
+ *
  * @tparam T type of value
  */
 template<typename T>
@@ -129,10 +129,10 @@ extern Logger* LOGGER;
 #define LOG(errorCode)                                              \
 do                                                                  \
 {                                                                   \
-    err::ErrorCode err = errorCode;                                 \
-    if (err && err::LOGGER)                                         \
+    err::ErrorCode _error_ = errorCode;                             \
+    if (_error_ && err::LOGGER)                                     \
         err::LOGGER->PushErrorLogPleaseUseMacro(                    \
-                   CREATE_ERROR(err));                              \
+                   CREATE_ERROR(_error_));                          \
 } while (0)
 
 #ifdef NDEBUG
@@ -147,10 +147,10 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        err::Error _error = CREATE_ERROR(errorCode);                \
-        _error.Print();                                             \
+        err::Error _error_ = CREATE_ERROR(errorCode);               \
+        _error_.Print();                                            \
         __VA_ARGS__;                                                \
-        return _error;                                              \
+        return _error_;                                             \
     }                                                               \
 } while(0)
 
@@ -162,10 +162,10 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        err::Error _error = CREATE_ERROR(errorCode);                \
-        _error.Print();                                             \
+        err::Error _error_ = CREATE_ERROR(errorCode);               \
+        _error_.Print();                                            \
         __VA_ARGS__;                                                \
-        return { poison, _error };                                  \
+        return { poison, _error_ };                                 \
     }                                                               \
 } while(0)
 #endif
@@ -178,10 +178,10 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        err::Error _error = CREATE_ERROR(errorCode);                \
-        _error.Print();                                             \
+        err::Error _error_ = CREATE_ERROR(errorCode);               \
+        _error_.Print();                                            \
         __VA_ARGS__;                                                \
-        exit(_error);                                               \
+        exit(_error_);                                              \
     }                                                               \
 } while(0)
 
@@ -191,12 +191,12 @@ do                                                                  \
 #define RETURN_ERROR(error, ...)                                    \
 do                                                                  \
 {                                                                   \
-    err::ErrorCode _error = error;                                  \
-    if (_error)                                                     \
+    err::ErrorCode _error_ = error;                                 \
+    if (_error_)                                                    \
     {                                                               \
-        LOG(_error);                                                \
+        LOG(_error_);                                               \
         __VA_ARGS__;                                                \
-        return _error;                                              \
+        return _error_;                                             \
     }                                                               \
 } while(0)
 
@@ -206,12 +206,12 @@ do                                                                  \
 #define RETURN_ERROR_RESULT(error, poison, ...)                     \
 do                                                                  \
 {                                                                   \
-    err::ErrorCode _error = error;                                  \
-    if (_error)                                                     \
+    err::ErrorCode _error_ = error;                                 \
+    if (_error_)                                                    \
     {                                                               \
-        LOG(_error);                                                \
+        LOG(_error_);                                               \
         __VA_ARGS__;                                                \
-        return { poison, _error };                                  \
+        return { poison, _error_ };                                 \
     }                                                               \
 } while(0)
 
@@ -221,12 +221,12 @@ do                                                                  \
 #define RETURN_RESULT(result, ...)                                  \
 do                                                                  \
 {                                                                   \
-    __typeof__(result) _result = result;                            \
-    if (!_result)                                                   \
+    __typeof__(result) _result_ = result;                           \
+    if (!_result_)                                                  \
     {                                                               \
-        LOG(_result);                                               \
+        LOG(_result_);                                              \
         __VA_ARGS__;                                                \
-        return _result;                                             \
+        return _result_;                                            \
     }                                                               \
 } while(0)
 

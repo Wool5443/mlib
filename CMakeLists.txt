@@ -19,14 +19,14 @@ add_compile_definitions(LOGGING)
 FILE(GLOB SOURCES_CPP src/*.cpp src/*.asm Utils/*.cpp example/main.cpp tests/Tests.cpp)
 FILE(GLOB SOURCES_HPP headers/*.hpp Utils/*.hpp tests/Tests.hpp)
 
-file(MAKE_DIRECTORY "listLog")
-file(MAKE_DIRECTORY "listLog/txt")
-file(MAKE_DIRECTORY "listLog/dot")
-file(MAKE_DIRECTORY "listLog/img")
+file(MAKE_DIRECTORY "log/list")
+file(MAKE_DIRECTORY "log/list/txt")
+file(MAKE_DIRECTORY "log/list/dot")
+file(MAKE_DIRECTORY "log/list/img")
 
-file(MAKE_DIRECTORY "treeLog")
-file(MAKE_DIRECTORY "treeLog/dot")
-file(MAKE_DIRECTORY "treeLog/img")
+file(MAKE_DIRECTORY "log/tree")
+file(MAKE_DIRECTORY "log/tree/dot")
+file(MAKE_DIRECTORY "log/tree/img")
 
 set(SOURCES
     ${SOURCES_CPP}

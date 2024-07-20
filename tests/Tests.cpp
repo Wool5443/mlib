@@ -8,7 +8,7 @@
 
 using namespace mlib;
 
-Utils::Error Tests::TestString(std::size_t n)
+err::ErrorCode Tests::TestString(std::size_t n)
 {
     String a{"Hello"};
     String b{"World"};
@@ -20,7 +20,7 @@ Utils::Error Tests::TestString(std::size_t n)
     if (c != correct)
     {
         std::cout << "Got: " << c << ", expected: " << correct << '\n';
-        return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
+        RETURN_ERROR(err::ERROR_BAD_VALUE);
     }
 
     String bebra;
@@ -28,13 +28,13 @@ Utils::Error Tests::TestString(std::size_t n)
     for (std::size_t i = 0; i < n; i++)
         bebra += "bebra";
 
-    Utils::Result<std::size_t> countRes = bebra.Count("bebra");
+    err::Result<std::size_t> countRes = bebra.Count("bebra");
     RETURN_ERROR(countRes.error);
 
     if (countRes.value != n)
     {
         std::cout << "Got: " << countRes.value << ", expected: " << n << '\n';
-        return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
+        RETURN_ERROR(err::ERROR_BAD_VALUE);
     }
 
     String wordsStr =
@@ -54,13 +54,13 @@ Utils::Error Tests::TestString(std::size_t n)
     if (words.value.length != wordsNum)
     {
         std::cout << "Got: " << words.value.length << ", expected: " << wordsNum << '\n';
-        return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
+        RETURN_ERROR(err::ERROR_BAD_VALUE);
     }
 
-    return Utils::Error();
+    return err::EVERYTHING_FINE;
 }
 
-Utils::Error Tests::TestVector(std::size_t n)
+err::ErrorCode Tests::TestVector(std::size_t n)
 {
     Vector<int> vec;
 
@@ -72,7 +72,7 @@ Utils::Error Tests::TestVector(std::size_t n)
         {
             std::cout << "Got: " << vec[i] << ", expected: " <<
                           (int)(i + 1) * 10 << '\n';
-            return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
+            RETURN_ERROR(err::ERROR_BAD_VALUE);
         }
 
     auto find50 = vec.Find(50);
@@ -80,14 +80,14 @@ Utils::Error Tests::TestVector(std::size_t n)
 
     std::cout << vec[find50.value] << '\n';
 
-    return Utils::Error();
+    return err::EVERYTHING_FINE;
 }
 
-Utils::Error Tests::TestList(std::size_t n)
+err::ErrorCode Tests::TestList(std::size_t n)
 {
     LinkedList<int> list;
 
-    list.StartLogging("../listLog");
+    list.StartLogging("../log/list");
 
     for (std::size_t i = 0; i < n; i++)
         list.PushBack((i + 1) * 10);
@@ -98,18 +98,18 @@ Utils::Error Tests::TestList(std::size_t n)
         if (list[i] != (int)(i) * 10)
         {
             std::cout << list[i] << " != " << (int)(i) * 10 << '\n';
-            return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
+            RETURN_ERROR(err::ERROR_BAD_VALUE);
         }
 
     for (std::size_t i = 0; i < n; i++)
     {
-        Utils::Result<int> res = list.PopBack();
+        err::Result<int> res = list.PopBack();
         RETURN_ERROR(res);
 
         if (res.value != ((int)n - (int)i) * 10)
         {
             std::cout << res.value << " != " << (n - i) * 10 << '\n';
-            return CREATE_ERROR(Utils::ErrorCode::ERROR_BAD_VALUE);
+            RETURN_ERROR(err::ERROR_BAD_VALUE);
         }
     }
 
@@ -117,31 +117,27 @@ Utils::Error Tests::TestList(std::size_t n)
 
     list.EndLogging();
 
-    return Utils::Error();
+    return err::EVERYTHING_FINE;
 }
 
-Utils::Error Tests::TestBTree()
+err::ErrorCode Tests::TestBTree()
 {
     BinaryTree<int> tree(0);
 
-    #ifdef LOGGING
-    tree.StartLogging("../treeLog");
-    #endif
+    tree.InitDumping("../log/tree");
 
     BinaryTreeNode<int>* root = tree.root;
 
     root->SetLeft(BinaryTreeNode<int>::New(1).value);
     root->SetRight(BinaryTreeNode<int>::New(2).value);
 
-    #ifdef LOGGING
     tree.Dump();
-    tree.EndLogging();
-    #endif
+    tree.EndDumping();
 
-    return Utils::Error();
+    return err::EVERYTHING_FINE;
 }
 
-Utils::Error Tests::TestHashTable()
+err::ErrorCode Tests::TestHashTable()
 {
     HashTable<String<>, int> table;
 

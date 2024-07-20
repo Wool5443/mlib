@@ -118,13 +118,16 @@ struct Result
     operator T() = delete;
 };
 
+/** @struct Logger
+ * @brief Struct for a simple logging system
+ */
 struct Logger
 {
     static constexpr const std::size_t MAX_ERRORS = 32;
 
-    Error         errorStack[MAX_ERRORS]{};
-    std::size_t   length = 0;
-    std::ostream& logStream;
+    Error         errorStack[MAX_ERRORS]{}; ///< stack of errors
+    std::size_t   length = 0; ///< length of the stack
+    std::ostream& logStream; ///< stream for log emitting
 public:
     Logger(std::ostream& logStream)
         : logStream(logStream) {}
@@ -144,6 +147,9 @@ extern err::Logger* LOGGER;
 #define CREATE_ERROR(errorCode) err::Error((errorCode),\
                                 GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
+/**
+ * @brief Log error
+ */
 #define LOG(errorCode)                                              \
 do                                                                  \
 {                                                                   \
@@ -152,6 +158,9 @@ do                                                                  \
                     CREATE_ERROR(errorCode));                       \
 } while (0)
 
+/**
+ * @brief Log error if it indeed is error
+ */
 #define LOG_IF(errorCode)                                           \
 do                                                                  \
 {                                                                   \
@@ -160,8 +169,19 @@ do                                                                  \
         LOG(_error_);                                               \
 } while (0)
 
+/**
+ * @brief Initialize empty logger to disable logging
+ */
 #define LOG_DISABLE() err::Logger* LOGGER = nullptr;
-#define LOG_INIT_CONSOLE() LOG_INIT_FILE(std::cout)
+
+/**
+ * @brief Initialize logger to log in std::cerr
+ */
+#define LOG_INIT_CONSOLE() LOG_INIT_FILE(std::cerr)
+
+/**
+ * @brief Initialize logger to log in fileStream
+ */
 #define LOG_INIT_FILE(fileStream)                                   \
     err::Logger _logger_{fileStream};                               \
     err::Logger* LOGGER = &_logger_;
@@ -169,6 +189,7 @@ do                                                                  \
 #ifdef NDEBUG
 #define SoftAssert(...)
 #define SoftAssertResult(...)
+#define HardAssert(...)
 #else
 /**
  * @brief Soft assert
@@ -199,7 +220,6 @@ do                                                                  \
         return { poison, _error_ };                                 \
     }                                                               \
 } while(0)
-#endif
 
 /**
  * @brief Hard assert
@@ -215,6 +235,8 @@ do                                                                  \
         exit(_error_);                                              \
     }                                                               \
 } while(0)
+
+#endif
 
 /**
  * @brief returns error if it is not EVERYTHING_FINE

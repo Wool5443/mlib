@@ -1,10 +1,15 @@
 #include <iostream>
+#include <fstream>
 
 #include "Error.hpp"
 
 #include "Tests.hpp"
 
-LOG_INIT_CONSOLE();
+// LOG_INIT_CONSOLE();
+
+std::ofstream LOG_STREAM("../log.txt");
+
+LOG_INIT_FILE(LOG_STREAM);
 
 int main()
 {

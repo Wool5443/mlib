@@ -10,8 +10,8 @@
  * Elements are stored in an array, thus, this
  * list is very cache-friendly
  *
- * @version 1.0
- * @date 16-07-2024
+ * @version 2.0
+ * @date 20-07-2024
  *
  * @copyright Copyright (c) 2024
  */

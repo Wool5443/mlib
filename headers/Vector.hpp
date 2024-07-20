@@ -6,8 +6,8 @@
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief This file contains an implementation of a templated vector
  *
- * @version 1.0
- * @date 16-07-2024
+ * @version 2.0
+ * @date 20-07-2024
  *
  * @copyright Copyright (c) 2024
  */

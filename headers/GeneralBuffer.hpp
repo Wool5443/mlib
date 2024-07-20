@@ -7,8 +7,8 @@
  * @brief This file contains the implementation of a templated
  * buffer used in other containers
  *
- * @version 1.0
- * @date 16-07-2024
+ * @version 2.0
+ * @date 20-07-2024
  *
  * @copyright Copyright (c) 2024
  *

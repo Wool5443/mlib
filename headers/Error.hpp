@@ -1,6 +1,18 @@
 #ifndef MLIB_ERRORS_HPP
 #define MLIB_ERRORS_HPP
 
+/**
+ * @file Error.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief Simple error and logging system
+ *
+ * @version 2.0
+ * @date 20-07-2024
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 #include <cstddef>
 #include <cstdio>
 #include <ostream>

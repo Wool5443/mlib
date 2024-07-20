@@ -585,14 +585,14 @@ public:
     /**
      * @brief Ends logging
      */
-    void EndDumping()
+    void Finish()
     {
         m_htmlDumpFile << "</div>\n</body>\n";
         m_htmlDumpFile.close();
     }
 
     /**
-     * @brief Call only after StartLogging
+     * @brief Call only after InitDumping
      * Dumps the tree
      *
      * @return err::ErrorCode

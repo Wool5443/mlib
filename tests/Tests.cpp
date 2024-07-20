@@ -87,7 +87,7 @@ err::ErrorCode Tests::TestList(std::size_t n)
 {
     LinkedList<int> list;
 
-    list.StartLogging("../dump/list");
+    list.InitDumping("../dump/list");
 
     for (std::size_t i = 0; i < n; i++)
         list.PushBack((i + 1) * 10);
@@ -115,7 +115,7 @@ err::ErrorCode Tests::TestList(std::size_t n)
 
     list.Dump();
 
-    list.EndLogging();
+    list.FinishDumping();
 
     return err::EVERYTHING_FINE;
 }
@@ -132,7 +132,7 @@ err::ErrorCode Tests::TestBTree()
     root->SetRight(BinaryTreeNode<int>::New(2).value);
 
     tree.Dump();
-    tree.EndDumping();
+    tree.Finish();
 
     return err::EVERYTHING_FINE;
 }

@@ -44,7 +44,7 @@ private:
 
     std::size_t   m_freeHead = 1;
     String<>      m_dumpFolder{};
-    std::ofstream m_htmlLogFile{};
+    std::ofstream m_htmlDumpFile{};
 public:
     std::size_t   length = 1; ///< length
                               ///< Notice that there is always a fictional
@@ -421,12 +421,12 @@ public:
     }
 public:
     /**
-     * @brief Initializes log files and writes
+     * @brief Initializes dump files and writes
      * the header of the html log file
      *
      * @param [in] logFolder where to put logs
      */
-    void StartLogging(const char* logFolder) noexcept
+    void InitDumping(const char* logFolder) noexcept
     {
         HardAssert(logFolder, err::ERROR_BAD_FILE);
         m_dumpFolder = logFolder;
@@ -435,9 +435,9 @@ public:
 
         htmlFilePath += "/log.html";
 
-        m_htmlLogFile.open(htmlFilePath);
+        m_htmlDumpFile.open(htmlFilePath);
 
-        m_htmlLogFile <<
+        m_htmlDumpFile <<
             "<style>\n"
             ".content {\n"
             "max-width: 500px;\n"
@@ -449,12 +449,12 @@ public:
     }
 
     /**
-     * @brief Ends logging
+     * @brief Ends dumping
      */
-    void EndLogging() noexcept
+    void FinishDumping() noexcept
     {
-        m_htmlLogFile << "</div>\n</body>\n";
-        m_htmlLogFile.close();
+        m_htmlDumpFile << "</div>\n</body>\n";
+        m_htmlDumpFile.close();
     }
 
     #define FONT_SIZE "10"
@@ -469,7 +469,7 @@ public:
     constexpr static std::size_t FREE_ELEM = SIZE_MAX;
 
     /**
-     * @brief Call only after StartLogging
+     * @brief Call only after InitDumping
      * Dumps the list
      *
      * @return err::ErrorCode
@@ -494,11 +494,11 @@ public:
         outGraphPath += iterString;
         outGraphPath += ".dot";
 
-        m_htmlLogFile << "<h1>Iteration" << iterString << "</h1>\n<pre>\n";
+        m_htmlDumpFile << "<h1>Iteration" << iterString << "</h1>\n<pre>\n";
 
         RETURN_ERROR(dumpListText(outTextPath, error));
 
-        m_htmlLogFile << "</pre>\n";
+        m_htmlDumpFile << "</pre>\n";
 
         RETURN_ERROR(dumpListGraph(outGraphPath));
 
@@ -511,7 +511,7 @@ public:
 
         system(command);
 
-        m_htmlLogFile << "<img src = \"" << outImgPath << "\"/>\n";
+        m_htmlDumpFile << "<img src = \"" << outImgPath << "\"/>\n";
 
         dumpIteration++;
 
@@ -542,7 +542,7 @@ private:
     do                                      \
     {                                       \
         outTextFile    << __VA_ARGS__;      \
-        m_htmlLogFile << __VA_ARGS__;       \
+        m_htmlDumpFile << __VA_ARGS__;       \
     } while (0)
 
     err::ErrorCode dumpListText(const String<>& outTextPath, err::ErrorCode error)

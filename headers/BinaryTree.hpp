@@ -563,7 +563,7 @@ public:
      *
      * @param [in] dumpFolder where to put dumps
      */
-    void InitDumping(const char* dumpFolder)
+    void InitDump(const char* dumpFolder)
     {
         HardAssert(dumpFolder, err::ERROR_NULLPTR);
 
@@ -585,14 +585,14 @@ public:
     /**
      * @brief Ends logging
      */
-    void Finish()
+    void FinishDump()
     {
         m_htmlDumpFile << "</div>\n</body>\n";
         m_htmlDumpFile.close();
     }
 
     /**
-     * @brief Call only after InitDumping
+     * @brief Call only after InitDump
      * Dumps the tree
      *
      * @return err::ErrorCode

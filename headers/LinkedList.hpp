@@ -426,7 +426,7 @@ public:
      *
      * @param [in] logFolder where to put logs
      */
-    void InitDumping(const char* logFolder) noexcept
+    void InitDump(const char* logFolder) noexcept
     {
         HardAssert(logFolder, err::ERROR_BAD_FILE);
         m_dumpFolder = logFolder;
@@ -451,7 +451,7 @@ public:
     /**
      * @brief Ends dumping
      */
-    void FinishDumping() noexcept
+    void FinishDump() noexcept
     {
         m_htmlDumpFile << "</div>\n</body>\n";
         m_htmlDumpFile.close();
@@ -469,7 +469,7 @@ public:
     constexpr static std::size_t FREE_ELEM = SIZE_MAX;
 
     /**
-     * @brief Call only after InitDumping
+     * @brief Call only after InitDump
      * Dumps the list
      *
      * @return err::ErrorCode

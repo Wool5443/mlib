@@ -38,7 +38,7 @@ private:
     err::Logger* m_logger   = nullptr;
     std::size_t  m_capacity = 0;
 public:
-    err::ErrorCode error   = err::EVERYTHING_FINE; ///< Buffer error
+    err::ErrorCode error    = err::EVERYTHING_FINE; ///< Buffer error
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS

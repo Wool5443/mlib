@@ -136,7 +136,7 @@ public:
 
 } // namespace err
 
-extern err::Logger LOGGER;
+extern err::Logger* LOGGER;
 
 #define GET_FILE_NAME() __FILE__
 #define GET_LINE()      __LINE__
@@ -147,8 +147,9 @@ extern err::Logger LOGGER;
 #define LOG(errorCode)                                              \
 do                                                                  \
 {                                                                   \
-    LOGGER.PushErrorLogPleaseUseMacro(                              \
-                CREATE_ERROR(errorCode));                           \
+    if (LOGGER)                                                     \
+        LOGGER->PushErrorLogPleaseUseMacro(                         \
+                    CREATE_ERROR(errorCode));                       \
 } while (0)
 
 #define LOG_IF(errorCode)                                           \
@@ -159,9 +160,11 @@ do                                                                  \
         LOG(_error_);                                               \
 } while (0)
 
+#define LOG_DISABLE() err::Logger* LOGGER = nullptr;
 #define LOG_INIT_CONSOLE() LOG_INIT_FILE(std::cout)
 #define LOG_INIT_FILE(fileStream)                                   \
-    err::Logger LOGGER{fileStream};                                 \
+    err::Logger _logger_{fileStream};                               \
+    err::Logger* LOGGER = &_logger_;
 
 #ifdef NDEBUG
 #define SoftAssert(...)

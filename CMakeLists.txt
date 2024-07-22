@@ -31,12 +31,13 @@ object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,\
 undefined,unreachable,vla-bound,vptr")
 
 set(CMAKE_CXX_FLAGS_RELEASE
-"-no-pie -Wall -Wno-maybe-uninitialized -Wno-switch                                 \
+"-no-pie -Wall -Wno-maybe-uninitialized -Wno-switch -Wno-unused                     \
 -Wno-conversion -Wno-unused-variable -Wno-pointer-arith -Wextra -march=native       \
 -mavx512f -O3 -DNDEBUG")
 
-FILE(GLOB SOURCES_CPP src/*.cpp src/*.asm Utils/*.cpp example/main.cpp tests/Tests.cpp)
-FILE(GLOB SOURCES_HPP headers/*.hpp Utils/*.hpp tests/Tests.hpp)
+FILE(GLOB SOURCES_CPP src/*.cpp src/*.asm Utils/*.cpp example/main.cpp
+                      tests/Tests.cpp libs/Utils/*.cpp)
+FILE(GLOB SOURCES_HPP headers/*.hpp Utils/*.hpp tests/Tests.hpp libs/Utils/*.hpp)
 
 file(MAKE_DIRECTORY "dump/list")
 file(MAKE_DIRECTORY "dump/list/txt")
@@ -52,7 +53,7 @@ set(SOURCES
     ${SOURCES_HPP}
 )
 
-include_directories(headers tests)
+include_directories(headers tests libs/Utils)
 
 add_executable(${projectName} ${SOURCES})
 

@@ -34,7 +34,7 @@ class String final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<char, DefaultCapacity, GrowFactor> m_data{true};
+    Buffer<char, DefaultCapacity, GrowFactor> m_data;
 public:
     std::size_t length = 0; ///< string length
 ///////////////////////////////////////////////////////////////////////////////
@@ -536,6 +536,12 @@ public:
     err::ErrorCode Filter() noexcept
     {
         return Filter(SPACE_CHARS);
+    }
+
+    void Clear() noexcept
+    {
+        m_data[0] = '\0';
+        length = 0;
     }
 };
 

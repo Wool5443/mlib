@@ -7,8 +7,9 @@
 
 namespace mlib {
 
-template<typename Key, typename Val, typename Hash = CRC32Functor<Key>,
-         std::size_t Size = 128>
+template<typename Key, typename Val, std::size_t Size = 128,
+         typename Hash = CRC32Functor<Key>>
+
 class HashTable
 {
 public:

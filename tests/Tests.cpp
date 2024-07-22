@@ -1,15 +1,21 @@
 #include <iostream>
+#include <string.h>
 #include "Tests.hpp"
 #include "String.hpp"
 #include "Vector.hpp"
 #include "LinkedList.hpp"
 #include "BinaryTree.hpp"
 #include "HashTable.hpp"
+#include "Utils.hpp"
 
 using namespace mlib;
 
 err::ErrorCode Tests::TestString(std::size_t n)
 {
+    String str8bytes{"12345678"}; // works
+
+    std::cout << str8bytes << '\n';
+
     String a{"Hello"};
     String b{"World"};
 
@@ -139,18 +145,41 @@ err::ErrorCode Tests::TestBTree()
 
 err::ErrorCode Tests::TestHashTable()
 {
-    HashTable<String<>, int> table;
+    HashTable<String<>, int, 8192> wordsCountTable;
 
-    RETURN_ERROR(table.Add({ "Hello", 1 }));
-    RETURN_ERROR(table.Add({ "World", 2 }));
+    char* buf = Utils::ReadFileToBuf("../tests/Words.txt");
 
-    std::cout << *table["Hello"] << '\n';
-    std::cout << *table["World"] << '\n';
+    String text(buf);
+    RETURN_ERROR(text.Error());
 
-    auto res1 = table.Pop("Hello");
-    RETURN_ERROR(res1);
+    free(buf);
 
-    std::cout << res1.value << '\n';
+    auto wordsRes = text.Split("\n");
+    RETURN_ERROR(wordsRes);
+
+    for (const auto& word : wordsRes.value)
+    {
+        int* count = wordsCountTable[word];
+
+        if (count)
+            *count += 1;
+        else
+            RETURN_ERROR(wordsCountTable.Add({ word, 1 }));
+    }
+
+    std::ofstream out("../tests/HashTableResult.txt");
+    if (!out)
+        RETURN_ERROR(err::ERROR_BAD_FILE);
+
+    for (const auto& word : wordsRes.value)
+    {
+        int* count = wordsCountTable[word];
+
+        if (count)
+            out << word << ": " << *count << '\n';
+        else
+            RETURN_ERROR(err::ERROR_BAD_VALUE);
+    }
 
     return err::EVERYTHING_FINE;
 }

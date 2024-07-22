@@ -82,7 +82,7 @@ public:
      * for less reallocations
      */
     explicit String(std::size_t hintLength) noexcept
-        : m_data(hintLength) {}
+        : m_data(hintLength + 1) {}
 
     /**
      * @brief Construct a new String object
@@ -92,7 +92,7 @@ public:
      * @param [in] length
      */
     String(const char* string, std::size_t length) noexcept
-        : m_data(length), length(length)
+        : m_data(length + 1), length(length)
     {
         if (auto err = Error())
         {
@@ -235,8 +235,8 @@ public:
 public:
     bool operator==(const String& other) const noexcept
     {
-        return strncmp(RawPtr(), other.m_data.RawPtr(),
-                       std::min(length, other.length)) == 0;
+        return length == other.length &&
+               strcmp(RawPtr(), other.RawPtr()) == 0;
     }
 
     bool operator!=(const String& other) const noexcept
@@ -272,7 +272,7 @@ private:
     {
         std::size_t newLength = length + strLength;
 
-        m_data.Realloc(newLength);
+        m_data.Realloc(newLength + 1);
         if (auto err = Error())
         {
             LOG(err);

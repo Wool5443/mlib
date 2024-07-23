@@ -77,13 +77,23 @@ int main()
 
 ```c++
 #include "String.hpp"
+using namespace mlib;
 
 LOG_INIT_CONSOLE();
 
 int main()
 {
     String a{"Hello"};
+    RETURN_ERROR(a);
     String b{"World"};
+    RETURN_ERROR(b);
+
+    // or
+
+    err::Result<String<>> aRes = String::New("Hello");
+    RETURN_ERROR(aRes);
+    err::Result<String<>> bRes = String::New("World");
+    RETURN_ERROR(bRes);
 
     String c = a + ' ' + b;
 
@@ -104,7 +114,7 @@ int main()
     "I know this is some cursed C++, though, " // 8 words
     "don't be to critical."; // 4 words
 
-    err::Result<Vector<String<>>> words = wordsStr.Split();
+    err::Result<Vector<String<>>> words = wordsStr.Split(" ");
     RETURN_ERROR(words);
 
     for (const String<>& word : words.value)
@@ -124,6 +134,7 @@ int main()
 ### Vector
 ```c++
 #include "Vector.hpp"
+using namespace mlib;
 
 LOG_INIT_CONSOLE();
 
@@ -131,7 +142,9 @@ int main()
 {
     Vector<int> vec;
     RETURN_ERROR(vec.Error()); // to handle possible allocation error
+
     // or more safely
+
     err::Result<Vector<int>> vecRes = Vector<int>::New();
     RETURN_ERROR(vecRes);
 
@@ -154,6 +167,7 @@ int main()
 ### LinkedList
 ```c++
 #include "LinkedList.hpp"
+using namespace mlib;
 
 LOG_INIT_CONSOLE();
 
@@ -195,6 +209,7 @@ int main()
 ### BinaryTree
 ```c++
 #include "BinaryTree.hpp"
+using namespace mlib;
 
 LOG_INIT_CONSOLE();
 
@@ -234,6 +249,7 @@ LOG_INIT_CONSOLE();
 int main()
 {
     HashTable<String<>, int> table;
+using namespace mlib;
 
     RETURN_ERROR(table.Add({ "Hello", 1 }));
     RETURN_ERROR(table.Add({ "World", 2 }));

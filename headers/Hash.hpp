@@ -3,21 +3,16 @@
 
 #include <stdint.h>
 
-extern "C" uint64_t CRC32(const void* data, size_t size, uint64_t seed);
+extern "C" uint64_t CRC32(const void* data, size_t size, uint64_t seed = 0xBEBDA);
 
 namespace mlib {
 
 template<typename T>
-struct CRC32Functor
+struct Hash
 {
-    uint64_t operator()(const T& object) const noexcept
+    uint64_t operator()()
     {
-        return CRC32(object.RawPtr(), object.length, 0);
-    }
-
-    uint64_t operator()(T&& object) const noexcept
-    {
-        return CRC32(object.RawPtr(), object.length, 0);
+        return 0;
     }
 };
 

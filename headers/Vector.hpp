@@ -42,7 +42,26 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    err::ErrorCode Error()  const noexcept  { return m_data.error;  }
+    /**
+     * @brief Get Error
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Error()  const   noexcept  { return m_data.error;    }
+
+    /**
+     * @brief return internal buffer as char*
+     *
+     * @return char*
+     */
+    char*          RawPtr()       & noexcept  { return m_data.RawPtr(); }
+
+    /**
+     * @brief return internal buffer as const char*
+     *
+     * @return const char*
+     */
+    const char*    RawPtr() const & noexcept  { return m_data.RawPtr(); }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              CTOR/DTOR and =
@@ -192,6 +211,15 @@ public:
         }
 
         return { SIZE_MAX, err::ERROR_NOT_FOUND };
+    }
+};
+
+template<typename T>
+struct Hash<Vector<T>>
+{
+    uint64_t operator()(const Vector<T>& vector)
+    {
+        return CRC32(vector.RawPtr(), vector.length);
     }
 };
 

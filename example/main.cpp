@@ -1,6 +1,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <string>
+#include <unordered_set>
+
 #include "Tests.hpp"
 
 // LOG_INIT_CONSOLE();

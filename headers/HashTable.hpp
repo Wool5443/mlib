@@ -8,7 +8,7 @@
 namespace mlib {
 
 template<typename Key, typename Val, std::size_t Size = 128,
-         typename Hash = CRC32Functor<Key>>
+         typename Hash = Hash<Key>>
 
 class HashTable
 {
@@ -91,8 +91,7 @@ public:
 private:
     static uint64_t getIndex(const Key& key)
     {
-        static const Hash h;
-        return h(key) % Size;
+        return Hash()(key) % Size;
     }
 public:
     Val* operator[](const Key& key) noexcept

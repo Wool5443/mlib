@@ -14,6 +14,7 @@
 #include <ostream>
 #include <cstring>
 #include <cstdint>
+#include "Hash.hpp"
 #include "Error.hpp"
 #include "Vector.hpp"
 
@@ -542,6 +543,15 @@ public:
     {
         m_data[0] = '\0';
         length = 0;
+    }
+};
+
+template<>
+struct Hash<String<>>
+{
+    uint64_t operator()(const String<>& string)
+    {
+        return CRC32(string.RawPtr(), string.length);
     }
 };
 

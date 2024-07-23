@@ -12,8 +12,9 @@
  */
 
 #include <ostream>
+#include <fstream>
 #include <cstring>
-#include <cstdint>
+#include <sys/stat.h>
 #include "Hash.hpp"
 #include "Error.hpp"
 #include "Vector.hpp"
@@ -325,6 +326,27 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    static err::Result<String> ReadFromFile(const char* filePath)
+    {
+        HardAssert(filePath, err::ERROR_NULLPTR);
+
+        struct stat result = {};
+        stat(filePath, &result);
+
+        auto strRes = String::New(result.st_size);
+        RETURN_RESULT(strRes);
+
+        std::ifstream input(filePath);
+        if (!input)
+            return err::ERROR_BAD_FILE;
+
+        input.read(strRes.value, result.st_size);
+
+        strRes.value.length = result.st_size;
+
+        return strRes;
+    }
+
     /**
      * @brief Finds a char and returns its index
      *

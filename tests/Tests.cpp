@@ -147,12 +147,10 @@ err::ErrorCode Tests::TestHashTable()
 {
     HashTable<String<>, int, 8192> wordsCountTable;
 
-    char* buf = Utils::ReadFileToBuf("../tests/Words.txt");
+    auto textRes = String<>::ReadFromFile("../tests/Words.txt");
+    RETURN_ERROR(textRes);
 
-    String text(buf);
-    RETURN_ERROR(text.Error());
-
-    free(buf);
+    String<>& text = textRes.value;
 
     auto wordsRes = text.Split("\n");
     RETURN_ERROR(wordsRes);

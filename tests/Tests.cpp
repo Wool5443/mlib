@@ -145,6 +145,8 @@ err::ErrorCode Tests::TestBTree()
 
 err::ErrorCode Tests::TestHashTable()
 {
+    Utils::Timer timer;
+
     HashTable<String<>, int, 8192> wordsCountTable;
 
     auto textRes = String<>::ReadFromFile("../tests/Words.txt");
@@ -164,6 +166,10 @@ err::ErrorCode Tests::TestHashTable()
         else
             RETURN_ERROR(wordsCountTable.Add({ word, 1 }));
     }
+
+    auto timeSpent = timer.Stop();
+
+    std::cout << "Hashtable spent: " << static_cast<uint64_t>(timeSpent.count() / 1000000) << " ms" << '\n';
 
     std::ofstream out("../tests/HashTableResult.txt");
     if (!out)

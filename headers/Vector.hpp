@@ -120,28 +120,42 @@ public:
      *
      * @return iterator
      */
-     iterator      begin()        noexcept { return m_data.RawPtr();          }
+    iterator      begin()        & noexcept { return m_data.RawPtr();          }
 
     /**
      * @brief Returns the start of a const buffer
      *
      * @return constIterator
      */
-     constIterator cebgin() const noexcept { return m_data.RawPtr();          }
+    constIterator begin()  const & noexcept { return m_data.RawPtr();          }
+
+    /**
+     * @brief Returns the start of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator cbegin() const & noexcept { return m_data.RawPtr();          }
 
     /**
      * @brief Returns the end of a buffer
      *
      * @return iterator
      */
-     iterator      end()          noexcept { return m_data.RawPtr() + length; }
+     iterator     end()         & noexcept { return m_data.RawPtr() + length;  }
 
     /**
      * @brief Returns the end of a const buffer
      *
      * @return constIterator
      */
-     constIterator cend()   const noexcept { return m_data.RawPtr() + length; }
+    constIterator end()    const & noexcept { return m_data.RawPtr() + length; }
+
+    /**
+     * @brief Returns the end of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator cend()   const & noexcept { return m_data.RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS

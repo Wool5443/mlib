@@ -158,64 +158,62 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    class iteratorBase
+    template<typename ListType>
+    struct iteratorBase
     {
-    protected:
-        std::size_t m_index;
-    public:
-        iteratorBase(std::size_t currentIndex)
-            : m_index(currentIndex) {}
+        ListType    l;
+        std::size_t i;
 
         iteratorBase& operator++()
         {
-            m_index = m_next[m_index];
-            return m_data[m_index];
+            i = l.m_next[i];
+            return *this;
         }
 
         iteratorBase& operator--()
         {
-            m_index = m_prev[m_index];
-            return m_index;
+            i = l.m_prev[i];
+            return *this;
         }
 
         iteratorBase operator++(int dummy)
         {
             iteratorBase copy = *this;
-            m_index           = m_next[m_index];
+            i                 = l.m_next[i];
             return copy;
         }
 
         iteratorBase operator--(int dummy)
         {
             iteratorBase copy = *this;
-            m_index           = m_prev[m_index];
+            i                 = l.m_prev[i];
             return copy;
         }
 
         bool operator==(const iteratorBase& other) const noexcept
         {
-            return m_index == other.m_index;
+            return &l == &other.l && i == other.i;
         }
 
         bool operator!=(const iteratorBase& other) const noexcept
         {
-            return m_index != other.m_index;
+            return !(*this == other);
         }
     };
 public:
-    class iterator: public iteratorBase
+    struct iterator: public iteratorBase<LinkedList&>
     {
         T& operator*()
         {
-            return m_data[this->m_index];
+            return this->l.m_data[this->i];
         }
     };
 
-    class constIterator : public iteratorBase
+    struct constIterator : public iteratorBase<const LinkedList&>
     {
         const T& operator*()
         {
-            return m_data[this->m_index];
+            return this->l.m_data[this->i];
         }
     };
 
@@ -227,28 +225,42 @@ public:
      *
      * @return iterator
      */
-    iterator      begin()        & noexcept { return Head(); }
+    iterator      begin()        & noexcept { return { *this, Head() }; }
 
     /**
      * @brief Returns the start of a const list
      *
      * @return constIterator
      */
-    constIterator cebgin() const & noexcept { return Head(); }
+    constIterator begin()  const & noexcept { return { *this, Head() }; }
+
+    /**
+     * @brief Returns the start of a const list
+     *
+     * @return constIterator
+     */
+    constIterator cbegin() const & noexcept { return { *this, Head() }; }
 
     /**
      * @brief Returns the end of a list
      *
-     * @return constIterator
+     * @return iterator
      */
-    iterator      end()          & noexcept { return 0; }
+    iterator      end()          & noexcept { return { *this, 0 }; }
 
     /**
      * @brief Returns the end of a const list
      *
      * @return constIterator
      */
-    constIterator cend()   const & noexcept { return 0; }
+    constIterator end()    const & noexcept { return { *this, 0 }; }
+
+    /**
+     * @brief Returns the end of a const list
+     *
+     * @return constIterator
+     */
+    constIterator cend()   const & noexcept { return { *this, 0 }; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS
@@ -431,6 +443,7 @@ public:
      * @return err::Result<std::size_t> correct index
      */
     err::Result<std::size_t> GetValueByItsOrderInTheList(std::size_t index)
+    const noexcept
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
@@ -469,6 +482,11 @@ public:
             RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
 
         return { curEl, err::EVERYTHING_FINE };
+    }
+
+    std::size_t GetIndexFromPointer(const T* elem) const noexcept
+    {
+        return elem - m_data.RawPtr();
     }
 public:
     /**

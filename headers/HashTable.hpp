@@ -18,7 +18,7 @@ public:
         Key key;
         Val val;
 
-        friend std::ostream& operator<<(std::ostream&           out,
+        friend std::ostream& operator<<(std::ostream& out,
                                         const HashTableElement& el) noexcept
         {
             return out << "{ " << el.key << ": " <<
@@ -98,13 +98,10 @@ public:
     {
         std::size_t index = getIndex(key);
 
-        auto found = m_containers[index].Find({ key, {} });
+        auto found = findInContainer(m_containers[index], key);
 
         if (!found)
-        {
-            LOG_ERROR(err::ERROR_NOT_FOUND);
             return nullptr;
-        }
 
         return &m_containers[index][found.value].val;
     }
@@ -123,6 +120,11 @@ public:
     {
         std::size_t index = getIndex(keyVal.key);
 
+        auto found = findInContainer(m_containers[index], keyVal.key);
+
+        if (found)
+            return found;
+
         err::ErrorCode error = m_containers[index].PushBack(keyVal);
 
         LOG_ERROR_IF(error);
@@ -133,6 +135,11 @@ public:
     err::ErrorCode Add(HashTableElement&& keyVal)
     {
         std::size_t index = getIndex(keyVal.key);
+
+        auto found = findInContainer(m_containers[index], keyVal.key);
+
+        if (found)
+            return found;
 
         err::ErrorCode error = m_containers[index].PushBack(std::move(keyVal));
 
@@ -147,7 +154,7 @@ public:
 
         auto& container = m_containers[index];
 
-        auto found = container.Find({ key, {} });
+        auto found = findInContainer(container, key);
 
         RETURN_ERROR_RESULT(found, {});
 
@@ -161,6 +168,16 @@ public:
     err::ErrorCode Remove(const Key& key)
     {
         return Pop(key).error;
+    }
+private:
+    err::Result<std::size_t>
+    findInContainer(const Container& container, const Key& key)
+    const noexcept
+    {
+        for (const auto& keyVal : container)
+            if (keyVal.key == key)
+                return container.GetIndexFromPointer(&keyVal);
+        return err::ERROR_NOT_FOUND;
     }
 };
 

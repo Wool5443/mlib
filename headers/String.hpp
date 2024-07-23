@@ -202,32 +202,46 @@ public:
     const char& operator[](std::size_t index) const & noexcept { return m_data[index]; }
 
     /**
-     * @brief Returns the start of a string
+     * @brief Returns the start of a buffer
      *
      * @return iterator
      */
-    inline iterator      begin()        & noexcept { return RawPtr();          }
+    iterator      begin()        & noexcept { return m_data.RawPtr();          }
 
     /**
-     * @brief Returns the start of a const string
+     * @brief Returns the start of a const buffer
      *
      * @return constIterator
      */
-    inline constIterator cebgin() const & noexcept { return RawPtr();          }
+    constIterator begin()  const & noexcept { return m_data.RawPtr();          }
 
     /**
-     * @brief Returns the end of a string
+     * @brief Returns the start of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator cbegin() const & noexcept { return m_data.RawPtr();          }
+
+    /**
+     * @brief Returns the end of a buffer
      *
      * @return iterator
      */
-    inline iterator      end()          & noexcept { return RawPtr() + length; }
+     iterator     end()         & noexcept { return m_data.RawPtr() + length;  }
 
     /**
-     * @brief Returns the end of a const string
+     * @brief Returns the end of a const buffer
      *
      * @return constIterator
      */
-    inline constIterator cend()   const & noexcept { return RawPtr() + length; }
+    constIterator end()    const & noexcept { return m_data.RawPtr() + length; }
+
+    /**
+     * @brief Returns the end of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator cend()   const & noexcept { return m_data.RawPtr() + length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              MATH OPERATORS

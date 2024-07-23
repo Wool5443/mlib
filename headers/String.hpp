@@ -250,6 +250,16 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    std::strong_ordering operator<=>(const String& other) const noexcept
+    {
+        int result = std::strcmp(*this, other);
+
+        if (result < 0)
+            return std::strong_ordering::less;
+        else if (result == 0)
+            return std::strong_ordering::equal;
+        return std::strong_ordering::greater;
+    }
     bool operator==(const String& other) const noexcept
     {
         return length == other.length &&
@@ -602,14 +612,47 @@ public:
  */
 struct CString final
 {
-    const char* data   = nullptr;
-    std::size_t length = 0;
+    const char* data   = nullptr; ///< data null-terminated string
+    std::size_t length = 0; ///< length
 
+    /**
+     * @brief Construct a new CString object
+     */
     CString() noexcept = default;
+
+    /**
+     * @brief Construct a new CString object
+     *
+     * @param [in] string
+     */
     CString(const char* string) noexcept;
+
+    /**
+     * @brief Construct a new CString object
+     *
+     * @param [in] string
+     * @param [in] length
+     */
     CString(const char* string, std::size_t length) noexcept;
 
+    /**
+     * @brief CString comparator
+     *
+     * @param [in] other
+     *
+     * @return std::strong_ordering
+     */
     std::strong_ordering operator<=>(const CString& other) const noexcept;
+
+    /**
+     * @brief
+     *
+     * @param [in] other
+     *
+     * @return true equal
+     * @return false not equal
+     */
+    bool operator==(const CString& other) const noexcept;
 
     operator const char*() const noexcept;
     operator bool()        const noexcept;

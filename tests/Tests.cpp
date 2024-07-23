@@ -181,6 +181,8 @@ err::ErrorCode Tests::TestHashTable()
             RETURN_ERROR(err::ERROR_BAD_VALUE);
     }
 
+    out.close();
+
     system("diff ../tests/HashTableResult.txt ../tests/ResultsPython.txt");
 
     return err::EVERYTHING_FINE;

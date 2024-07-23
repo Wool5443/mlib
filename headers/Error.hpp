@@ -48,10 +48,17 @@ const char* GetErrorName(ErrorCode err);
  */
 struct Error
 {
-    ErrorCode   code; /**< error code*/
-    const char* file; /**< file where error occured*/
-    std::size_t line; /**< line where error occured*/
-    const char* function; /**< function where error occured*/
+    ErrorCode   code      = EVERYTHING_FINE; ///< error code
+    const char* file      = nullptr; ///< file where error occured
+    std::size_t line      = 0; ///< line where error occured
+    const char* function  = nullptr; ///< function where error occured
+    const char* message   = nullptr; ///<
+    bool        isMessage = false;
+
+    Error() noexcept {}
+
+    Error(const char* message)
+        : message(message), isMessage(true) {}
 
     /**
      * @brief Construct a new Error object
@@ -64,9 +71,6 @@ struct Error
     Error(ErrorCode code, const char* file, std::size_t line,
           const char* function) noexcept
         : code(code), file(file), line(line), function(function) {}
-
-    Error() noexcept
-        : code(ErrorCode::EVERYTHING_FINE), file(""), line(0), function("") {}
 
     operator bool() const noexcept
     {
@@ -105,8 +109,8 @@ struct Error
 template<typename T>
 struct Result
 {
-    T         value; /**< value */
-    ErrorCode error; /**< error */
+    T         value; ///< value
+    ErrorCode error; ///< error
 
     Result(const T& value)
         : value(value), error(EVERYTHING_FINE) {}
@@ -133,6 +137,7 @@ public:
         : logStream(logStream) {}
 
     void PushErrorLogPleaseUseMacro(Error&& error);
+    void Dump();
 
     ~Logger();
 };
@@ -147,10 +152,17 @@ extern err::Logger* LOGGER;
 #define CREATE_ERROR(errorCode) err::Error((errorCode),\
                                 GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
+#define LOG(message)                                                \
+do                                                                  \
+{                                                                   \
+    if (LOGGER)                                                     \
+        LOGGER->PushErrorLogPleaseUseMacro(message);                \
+} while (0)
+
 /**
  * @brief Log error
  */
-#define LOG(errorCode)                                              \
+#define LOG_ERROR(errorCode)                                        \
 do                                                                  \
 {                                                                   \
     if (LOGGER)                                                     \
@@ -161,12 +173,12 @@ do                                                                  \
 /**
  * @brief Log error if it indeed is error
  */
-#define LOG_IF(errorCode)                                           \
+#define LOG_ERROR_IF(errorCode)                                     \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error_ = errorCode;                             \
     if (_error_)                                                    \
-        LOG(_error_);                                               \
+        LOG_ERROR(_error_);                                         \
 } while (0)
 
 /**
@@ -247,7 +259,7 @@ do                                                                  \
     err::ErrorCode _error_ = error;                                 \
     if (_error_)                                                    \
     {                                                               \
-        LOG(_error_);                                               \
+        LOG_ERROR(_error_);                                         \
         __VA_ARGS__;                                                \
         return _error_;                                             \
     }                                                               \
@@ -262,7 +274,7 @@ do                                                                  \
     err::ErrorCode _error_ = error;                                 \
     if (_error_)                                                    \
     {                                                               \
-        LOG(_error_);                                               \
+        LOG_ERROR(_error_);                                         \
         __VA_ARGS__;                                                \
         return { poison, _error_ };                                 \
     }                                                               \
@@ -277,7 +289,7 @@ do                                                                  \
     __typeof__(result) _result_ = result;                           \
     if (!_result_)                                                  \
     {                                                               \
-        LOG(_result_);                                              \
+        LOG_ERROR(_result_);                                        \
         __VA_ARGS__;                                                \
         return _result_;                                            \
     }                                                               \

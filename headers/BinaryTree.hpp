@@ -155,7 +155,7 @@ public:
     {
         if (other.error)
         {
-            LOG(other.error);
+            LOG_ERROR(other.error);
             return;
         }
 
@@ -163,7 +163,7 @@ public:
         if (!left)
         {
             error = left;
-            LOG(error);
+            LOG_ERROR(error);
             return;
         }
 
@@ -171,7 +171,7 @@ public:
         if (!right)
         {
             error = right;
-            LOG(error);
+            LOG_ERROR(error);
             return;
         }
 
@@ -391,7 +391,7 @@ public:
         auto _root = BinaryTreeNode<T>::New(value);
         if (_root.error)
         {
-            LOG(_root.error);
+            LOG_ERROR(_root.error);
             return;
         }
 
@@ -409,7 +409,7 @@ public:
         auto _root = BinaryTreeNode<T>::New(value);
         if (_root.error)
         {
-            LOG(_root.error);
+            LOG_ERROR(_root.error);
             return;
         }
 
@@ -427,7 +427,7 @@ public:
 
         if (newRoot.error)
         {
-            LOG(newRoot.error);
+            LOG_ERROR(newRoot.error);
             return;
         }
 
@@ -447,14 +447,14 @@ public:
 
         if (newRoot.error)
         {
-            LOG(newRoot.error);
+            LOG_ERROR(newRoot.error);
             return *this;
         }
 
         err::ErrorCode error = root->Delete();
         if (error)
         {
-            LOG(error);
+            LOG_ERROR(error);
             return *this;
         }
 
@@ -489,7 +489,7 @@ public:
         err::ErrorCode error = root->Delete();
         if (error)
         {
-            LOG(error);
+            LOG_ERROR(error);
             return;
         }
 

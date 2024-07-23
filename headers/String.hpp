@@ -97,7 +97,7 @@ public:
     {
         if (auto err = Error())
         {
-            LOG(err);
+            LOG_ERROR(err);
             return;
         }
 
@@ -138,7 +138,7 @@ public:
     static err::Result<String> New(const char* string) noexcept
     {
         String str(string);
-        LOG(str.Error());
+        LOG_ERROR(str.Error());
         return { str, str.Error() };
     }
 
@@ -153,7 +153,7 @@ public:
     static err::Result<String> New(const char* string, std::size_t length) noexcept
     {
         String str(string, length);
-        LOG(str.Error());
+        LOG_ERROR(str.Error());
         return { str, str.Error() };
     }
 
@@ -171,7 +171,7 @@ public:
     static err::Result<String> New(std::size_t hintLength = DefaultCapacity) noexcept
     {
         String str(hintLength);
-        LOG(str.Error());
+        LOG_ERROR(str.Error());
         return { str, str.Error() };
     }
 
@@ -186,7 +186,7 @@ public:
     static err::Result<String> New(const String& other) noexcept
     {
         String str(other);
-        LOG(str.Error());
+        LOG_ERROR(str.Error());
         return { str, str.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -276,7 +276,7 @@ private:
         m_data.Realloc(newLength + 1);
         if (auto err = Error())
         {
-            LOG(err);
+            LOG_ERROR(err);
             return *this;
         }
 

@@ -99,7 +99,7 @@ public:
     {
         if (error)
         {
-            LOG(error);
+            LOG_ERROR(error);
             return;
         }
 
@@ -133,7 +133,7 @@ public:
         if (!newData)
         {
             error = err::ERROR_NO_MEMORY;
-            LOG(error);
+            LOG_ERROR(error);
             return *this;
         }
 
@@ -182,7 +182,7 @@ private:
         if (!m_data)
         {
             error = err::ERROR_NO_MEMORY;
-            LOG(error);
+            LOG_ERROR(error);
         }
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -205,7 +205,7 @@ public:
     static err::Result<Buffer> New(std::size_t hintLength = DefaultCapacity)
     {
         Buffer buffer(hintLength);
-        LOG_IF(buffer.error);
+        LOG_ERROR_IF(buffer.error);
         return { buffer, buffer.error };
     }
 
@@ -218,7 +218,7 @@ public:
     static err::Result<Buffer> New(const Buffer& other)
     {
         Buffer buffer(other);
-        LOG_IF(buffer.error);
+        LOG_ERROR_IF(buffer.error);
         return { buffer, buffer.error };
     }
 ///////////////////////////////////////////////////////////////////////////////

@@ -73,14 +73,14 @@ public:
     static err::Result<HashTable> New() noexcept
     {
         HashTable tab;
-        LOG_IF(tab.Error());
+        LOG_ERROR_IF(tab.Error());
         return { tab, tab.Error() };
     }
 
     static err::Result<HashTable> New(const HashTable& other) noexcept
     {
         HashTable tab(other);
-        LOG_IF(tab.Error());
+        LOG_ERROR_IF(tab.Error());
         return { tab, tab.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,7 +102,7 @@ public:
 
         if (!found)
         {
-            LOG(err::ERROR_NOT_FOUND);
+            LOG_ERROR(err::ERROR_NOT_FOUND);
             return nullptr;
         }
 
@@ -125,7 +125,7 @@ public:
 
         err::ErrorCode error = m_containers[index].PushBack(keyVal);
 
-        LOG_IF(error);
+        LOG_ERROR_IF(error);
 
         return error;
     }
@@ -136,7 +136,7 @@ public:
 
         err::ErrorCode error = m_containers[index].PushBack(std::move(keyVal));
 
-        LOG_IF(error);
+        LOG_ERROR_IF(error);
 
         return error;
     }
@@ -153,7 +153,7 @@ public:
 
         err::Result<HashTableElement> result = container.Pop(found.value);
 
-        LOG_IF(result);
+        LOG_ERROR_IF(result);
 
         return { result.value.val, result.error };
     }

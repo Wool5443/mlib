@@ -93,14 +93,14 @@ public:
     static err::Result<Vector> New(std::size_t hintLength = DefaultCapacity)
     {
         Vector vec(hintLength);
-        LOG(vec.Error());
+        LOG_ERROR(vec.Error());
         return { vec, vec.Error() };
     }
 
     static err::Result<Vector> New(const Vector& other)
     {
         Vector vec(other);
-        LOG(vec.Error());
+        LOG_ERROR(vec.Error());
         return { vec, vec.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////

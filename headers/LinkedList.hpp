@@ -105,7 +105,7 @@ public:
     {
         if (auto err = Error())
         {
-            LOG(err);
+            LOG_ERROR(err);
             return;
         }
 
@@ -134,7 +134,7 @@ public:
     static err::Result<LinkedList> New(std::size_t hintLength = 1)
     {
         LinkedList list(hintLength);
-        LOG_IF(list.Error());
+        LOG_ERROR_IF(list.Error());
         return { list, list.Error() };
     }
 
@@ -149,7 +149,7 @@ public:
     static err::Result<LinkedList> New(const LinkedList& other) noexcept
     {
         LinkedList list(other);
-        LOG_IF(list.Error());
+        LOG_ERROR_IF(list.Error());
         return { list, list.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////

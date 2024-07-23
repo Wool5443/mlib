@@ -20,5 +20,7 @@ int main()
     std::cout << "BTree:\n"     << GetErrorName(Tests::TestBTree())     << "\n\n";
     std::cout << "HashTable:\n" << GetErrorName(Tests::TestHashTable()) << "\n\n";
 
+    LOG("Hello, friends");
+
     return 0;
 }

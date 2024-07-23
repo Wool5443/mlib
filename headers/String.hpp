@@ -13,6 +13,7 @@
 
 #include <ostream>
 #include <fstream>
+#include <compare>
 #include <cstring>
 #include <sys/stat.h>
 #include "Hash.hpp"
@@ -495,6 +496,21 @@ public:
     }
 
     /**
+     * @brief Splits the string in place by space chars.
+     * It's more memory and speed efficient, though,
+     * modifies the string
+     *
+     * @param [in] string
+     *
+     * @return err::Result<Vector<const char*>>
+     */
+    static err::Result<Vector<const char*>>
+    SplitInPlace(char* string)
+    {
+        return SplitInPlace(string, SPACE_CHARS);
+    }
+
+    /**
      * @brief Splits the string in place.
      * It's more memory and speed efficient, though,
      * modifies the string
@@ -513,7 +529,7 @@ public:
 
         const char* token = strtok(string, delimiters);
 
-        wwhile (token)
+        while (token)
         {
             words.PushBack(token);
             token = strtok(nullptr, delimiters);
@@ -577,6 +593,36 @@ public:
     {
         m_data[0] = '\0';
         length = 0;
+    }
+};
+
+/** @struct CString
+ * @brief Represents a simple static string
+ * with some useful methods and operators
+ */
+struct CString final
+{
+    const char* data   = nullptr;
+    std::size_t length = 0;
+
+    CString() noexcept = default;
+    CString(const char* string) noexcept;
+    CString(const char* string, std::size_t length) noexcept;
+
+    std::strong_ordering operator<=>(const CString& other) const noexcept;
+
+    operator const char*() const noexcept;
+    operator bool()        const noexcept;
+
+    friend std::ostream& operator<<(std::ostream& out, const CString& cstring);
+};
+
+template<>
+struct Hash<CString>
+{
+    uint64_t operator()(const CString& cstring)
+    {
+        return CRC32(cstring.data, cstring.length);
     }
 };
 

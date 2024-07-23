@@ -109,9 +109,11 @@ struct Error
 template<typename T>
 struct Result
 {
-    T         value; ///< value
+    T         value{}; ///< value
     ErrorCode error; ///< error
 
+    Result(ErrorCode error)
+        : error(error) {}
     Result(const T& value)
         : value(value), error(EVERYTHING_FINE) {}
     Result(const T& value, ErrorCode error)

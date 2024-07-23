@@ -250,7 +250,7 @@ public:
     err::ErrorCode Delete()
     {
         if (id == BAD_ID)
-            RETURN_ERROR(err::ERROR_BAD_TREE);
+            RETURN_ERROR(err::ERROR_BAD_ID);
         if (left)
             RETURN_ERROR(left->Delete());
         if (right)
@@ -681,7 +681,7 @@ private:
         std::size_t nodeId = node->id;
 
         if (curDepth > maxDepth)
-            RETURN_ERROR(err::ERROR_BAD_TREE);
+            RETURN_ERROR(err::ERROR_BAD_RECURSION);
 
         outGraphFile << "NODE_" << node << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
@@ -711,7 +711,7 @@ private:
                                        std::size_t maxDepth)
     {
         if (curDepth > maxDepth)
-            RETURN_ERROR(err::ERROR_BAD_TREE);
+            RETURN_ERROR(err::ERROR_BAD_RECURSION);
 
         if (node->left)
         {

@@ -276,13 +276,26 @@ public:
         result += rhs;                                      \
         return result;                                      \
     }
+
+    #define RVAL_OPERATOR_PLUS_CODE                         \
+    {                                                       \
+        lhs += rhs;                                         \
+        return lhs;                                         \
+    }
+
     friend String operator+(const char* lhs, const String& rhs) noexcept
     OPERATOR_PLUS_CODE
     friend String operator+(const String& lhs, const char* rhs) noexcept
     OPERATOR_PLUS_CODE
     friend String operator+(const String& lhs, const String& rhs) noexcept
     OPERATOR_PLUS_CODE
+    friend String operator+(String&& lhs, const char* rhs) noexcept
+    RVAL_OPERATOR_PLUS_CODE
+    friend String operator+(String&& lhs, const String& rhs) noexcept
+    RVAL_OPERATOR_PLUS_CODE
+
     #undef OPERATOR_PLUS_CODE
+    #undef RVAL_OPERATOR_PLUS_CODE
 private:
     String& append(const char* string, std::size_t strLength) noexcept
     {
@@ -389,26 +402,6 @@ public:
     }
 
     /**
-     * @brief Finds a substring and returns its index
-     *
-     * @param [in] string
-     *
-     * @return err::Result<std::size_t> index result
-     */
-    err::Result<std::size_t> Find(const String& string) const noexcept
-    {
-        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
-
-        const char* data  = RawPtr();
-        const char* found = strstr(data, string.RawPtr());
-
-        if (!found)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
-
-        return found - data;
-    }
-
-    /**
      * @brief Counts occurences of chr
      *
      * @param [in] chr char to count
@@ -453,18 +446,6 @@ public:
 
         return count;
     }
-
-    /**
-     * @brief Counts occurences of string
-     *
-     * @param [in] string string to count
-     *
-     * @return err::Result<std::size_t> count result
-     */
-    err::Result<std::size_t> Count(const String& string) const noexcept
-    {
-        return Count(string.RawPtr());
-    }
 private:
     static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
 public:
@@ -485,18 +466,6 @@ public:
      *
      * @return err::Result<Vector<String>> vector of strings
      */
-    err::Result<Vector<String>> Split(const String& delimeters) const noexcept
-    {
-        return Split(delimeters.RawPtr());
-    }
-
-    /**
-     * @brief Split the string by delimeters
-     *
-     * @param [in] delimeters what to split by
-     *
-     * @return err::Result<Vector<String>> vector of strings
-     */
     err::Result<Vector<String>> Split(const char* delimiters) const noexcept
     {
         RETURN_ERROR_RESULT(Error(), {});
@@ -506,8 +475,9 @@ public:
         if (!buf)
             RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, {});
 
-        Vector<String> words;
-        RETURN_ERROR_RESULT(words.Error(), {});
+        auto wordsRes = Vector<String>::New();
+        RETURN_RESULT(wordsRes);
+        Vector<String>& words = wordsRes.value;
 
         const char* token = strtok(buf, delimiters);
 
@@ -521,7 +491,35 @@ public:
 
         free(buf);
 
-        return words;
+        return wordsRes;
+    }
+
+    /**
+     * @brief Splits the string in place.
+     * It's more memory and speed efficient, though,
+     * modifies the string
+     *
+     * @param [in] string
+     * @param [in] delimiters what to split by
+     *
+     * @return err::Result<Vector<const char*>>
+     */
+    static err::Result<Vector<const char*>>
+    SplitInPlace(char* string, const char* delimiters)
+    {
+        auto wordsRes = Vector<const char*>::New();
+        RETURN_RESULT(wordsRes);
+        Vector<const char*>& words = wordsRes.value;
+
+        const char* token = strtok(string, delimiters);
+
+        wwhile (token)
+        {
+            words.PushBack(token);
+            token = strtok(nullptr, delimiters);
+        }
+
+        return wordsRes;
     }
 
     /**

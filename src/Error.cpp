@@ -47,7 +47,7 @@ void err::Error::Print(std::ostream& out) const noexcept
 {
     if (&out == &std::cerr || &out == &std::cout)
         SetConsoleColor(out, code ? ConsoleColor::RED :
-                                          ConsoleColor::GREEN);
+                                    ConsoleColor::GREEN);
 
     if (isMessage)
         out << message << '\n';

@@ -140,7 +140,7 @@ public:
     static err::Result<String> New(const char* string) noexcept
     {
         String str(string);
-        LOG_ERROR(str.Error());
+        LOG_ERROR_IF(str.Error());
         return { str, str.Error() };
     }
 
@@ -155,7 +155,7 @@ public:
     static err::Result<String> New(const char* string, std::size_t length) noexcept
     {
         String str(string, length);
-        LOG_ERROR(str.Error());
+        LOG_ERROR_IF(str.Error());
         return { str, str.Error() };
     }
 
@@ -173,7 +173,7 @@ public:
     static err::Result<String> New(std::size_t hintLength = DefaultCapacity) noexcept
     {
         String str(hintLength);
-        LOG_ERROR(str.Error());
+        LOG_ERROR_IF(str.Error());
         return { str, str.Error() };
     }
 
@@ -188,7 +188,7 @@ public:
     static err::Result<String> New(const String& other) noexcept
     {
         String str(other);
-        LOG_ERROR(str.Error());
+        LOG_ERROR_IF(str.Error());
         return { str, str.Error() };
     }
 ///////////////////////////////////////////////////////////////////////////////

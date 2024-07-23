@@ -147,17 +147,18 @@ err::ErrorCode Tests::TestHashTable()
 {
     Utils::Timer timer;
 
-    HashTable<String<>, int, 8192> wordsCountTable;
+    HashTable<CString, int, 4096> wordsCountTable;
 
-    auto textRes = String<>::ReadFromFile("../tests/Words.txt");
-    RETURN_ERROR(textRes);
+    char* text = Utils::ReadFileToBuf("../tests/Words.txt");
+    if (!text)
+        RETURN_ERROR(err::ERROR_NO_MEMORY);
 
-    String<>& text = textRes.value;
-
-    auto wordsRes = text.Split("\n");
+    auto wordsRes = String<>::SplitInPlace(text);
     RETURN_ERROR(wordsRes);
 
-    for (const auto& word : wordsRes.value)
+    Vector<const char*>& words = wordsRes.value;
+
+    for (const char* word : words)
     {
         int* count = wordsCountTable[word];
 

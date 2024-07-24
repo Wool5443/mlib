@@ -25,7 +25,7 @@ namespace mlib {
  * @tparam DefaultCapacity
  * @tparam GrowFactor
  */
-template<typename T, std::size_t DefaultCapacity, std::size_t GrowFactor>
+template<typename T>
 class Buffer final
 {
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,30 +71,25 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 public:
     /**
-     * @brief Construct a new Buffer object
-     * with default capacity
+     * @brief Construct a new empty Buffer object
      */
-    Buffer()
-        : Buffer(DefaultCapacity, true) {}
+    Buffer() noexcept = default;
 
     /**
      * @brief Construct a new Buffer object
-     * and ensures that the capacity is enougth
-     * for hintLength elements, thus, avoiding
-     * reallocations
+     * with capacity of at least hintLength
      *
-     * @param [in] hintLength length to ensure big enough capacity
-     * for less reallocations
+     * @param [in] hintLength
      */
-    explicit Buffer(std::size_t hintLength)
-        : Buffer(calculateCapacity(hintLength), true) {}
+    explicit Buffer(std::size_t hintLength) noexcept
+        : Buffer(calculateCapacity(0, hintLength), true) {}
 
     /**
      * @brief Buffer copy constructor
      *
      * @param [in] other buffer to copy
      */
-    Buffer(const Buffer& other)
+    Buffer(const Buffer& other) noexcept
         : Buffer(other.m_capacity, true)
     {
         if (error)
@@ -124,7 +119,7 @@ public:
      *
      * @return Buffer&
      */
-    Buffer& operator=(const Buffer& other)
+    Buffer& operator=(const Buffer& other) noexcept
     {
         if (this == &other) return *this;
 
@@ -174,7 +169,7 @@ public:
         delete[] m_data;
     }
 private:
-    explicit Buffer(std::size_t capacity, bool isValidCapacity)
+    explicit Buffer(std::size_t capacity, bool isValidCapacity) noexcept
         : m_data(new T[capacity]{}), m_capacity(capacity)
     {
         HardAssert(isValidCapacity, err::ERROR_BAD_VALUE);
@@ -193,16 +188,14 @@ private:
 public:
     /**
      * @brief Construct a new Buffer object
-     * and ensures that the capacity is enougth
-     * for hintLength elements, thus, avoiding
-     * reallocations
+     * with capacity of at least hintLength
      *
-     * @param [in] hintLength length to ensure big enough capacity
-     * for less reallocations
+     * @param [in] hintLength
      *
      * @return err::Result<Buffer>
      */
-    static err::Result<Buffer> New(std::size_t hintLength = DefaultCapacity)
+    static err::Result<Buffer> New(std::size_t hintLength)
+    noexcept
     {
         Buffer buffer(hintLength);
         LOG_ERROR_IF(buffer.error);
@@ -215,7 +208,7 @@ public:
      * @param other buffer to copy
      * @return err::Result<Buffer>
      */
-    static err::Result<Buffer> New(const Buffer& other)
+    static err::Result<Buffer> New(const Buffer& other) noexcept
     {
         Buffer buffer(other);
         LOG_ERROR_IF(buffer.error);
@@ -261,12 +254,20 @@ public:
      */
      constIterator cend()   const & noexcept { return m_data + m_capacity; }
 private:
-    static  std::size_t calculateCapacity(std::size_t hintLength) noexcept
+    static  std::size_t calculateCapacity(std::size_t currentCapacity,
+                                          std::size_t hintLength)
+    noexcept
     {
-        std::size_t capacity = DefaultCapacity;
+        static const std::size_t growFactorNumerator   = 3;
+        static const std::size_t growFactorDenominator = 2;
+        static const std::size_t minCapacity           = 2;
+
+        std::size_t capacity = currentCapacity ? currentCapacity :
+                                                 minCapacity;
 
         while (capacity < hintLength)
-            capacity *= GrowFactor;
+            capacity = capacity * growFactorNumerator /
+                                  growFactorDenominator;
 
         return capacity;
     }
@@ -280,16 +281,17 @@ public:
      * @brief Reallocates the buffer
      * new capacity is at least capacity
      *
-     * @param_capacity
+     * @param [in] newCapacity
+     *
      * @return err::ErrorCode
      */
-    err::ErrorCode Realloc(std::size_t capacity)
+    err::ErrorCode Realloc(std::size_t newCapacity) noexcept
     {
         RETURN_ERROR(error);
 
-        std::size_t newCapacity = calculateCapacity(capacity);
+        std::size_t capacity = calculateCapacity(m_capacity, newCapacity);
 
-        T* newData = new T[newCapacity]{};
+        T* newData = new T[capacity]{};
 
         if (!newData)
             RETURN_ERROR(err::ERROR_NO_MEMORY);

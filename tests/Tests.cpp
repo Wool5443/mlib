@@ -52,7 +52,7 @@ err::ErrorCode Tests::TestString(std::size_t n)
     auto words = wordsStr.Split();
     RETURN_ERROR(words);
 
-    for (const String<>& word : words.value)
+    for (const String& word : words.value)
         std::cout << word << ' ';
 
     std::cout << '\n';
@@ -153,7 +153,7 @@ err::ErrorCode Tests::TestHashTable()
     if (!text)
         RETURN_ERROR(err::ERROR_NO_MEMORY);
 
-    auto wordsRes = String<>::SplitInPlace(text);
+    auto wordsRes = String::SplitInPlace(text);
     RETURN_ERROR(wordsRes);
 
     Vector<const char*>& words = wordsRes.value;

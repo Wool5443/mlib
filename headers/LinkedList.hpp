@@ -38,13 +38,14 @@ class LinkedList final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<T, DefaultCapacity, GrowFactor>           m_data{};
-    Buffer<std::size_t, DefaultCapacity, GrowFactor> m_next{};
-    Buffer<std::size_t, DefaultCapacity, GrowFactor> m_prev{};
+    Buffer<T>           m_data{};
+    Buffer<std::size_t> m_next{};
+    Buffer<std::size_t> m_prev{};
+
+    String        m_dumpFolder{};
+    std::ofstream m_htmlDumpFile{};
 
     std::size_t   m_freeHead = 1;
-    String<>      m_dumpFolder{};
-    std::ofstream m_htmlDumpFile{};
 public:
     std::size_t   length = 1; ///< length
                               ///< Notice that there is always a fictional
@@ -88,8 +89,7 @@ public:
     /**
      * @brief Construct a new Linked List object
      */
-    LinkedList()
-        : LinkedList(0) {}
+    LinkedList() noexcept = default;
 
     /**
      * @brief Construct a new Linked List object
@@ -99,7 +99,7 @@ public:
      *
      * @param [in] hintLength length to ensure big enough capacity
      */
-    explicit LinkedList(std::size_t hintLength)
+    explicit LinkedList(std::size_t hintLength) noexcept
         : m_data(hintLength), m_next(hintLength), m_prev(hintLength),
           m_freeHead(1)
     {
@@ -121,13 +121,10 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 public:
     /**
-     * @brief Construct a new LinkedList object
-     * and ensures that the capacity is enougth
-     * for hintLength elements, thus, avoiding
-     * reallocations
+     * @brief Construct a new Buffer object
+     * with capacity of at least hintLength
      *
-     * @param [in] hintLength length to ensure big enough capacity
-     * for less reallocations
+     * @param [in] hintLength
      *
      * @return err::Result<LinkedList>
      */
@@ -484,6 +481,14 @@ public:
         return { curEl, err::EVERYTHING_FINE };
     }
 
+    /**
+     * @brief Knowing pointer to an element return its index
+     * in the list
+     *
+     * @param [in] elem
+     *
+     * @return std::size_t
+     */
     std::size_t GetIndexFromPointer(const T* elem) const noexcept
     {
         return elem - m_data.RawPtr();
@@ -611,10 +616,10 @@ private:
     do                                      \
     {                                       \
         outTextFile    << __VA_ARGS__;      \
-        m_htmlDumpFile << __VA_ARGS__;       \
+        m_htmlDumpFile << __VA_ARGS__;      \
     } while (0)
 
-    err::ErrorCode dumpListText(const String<>& outTextPath, err::ErrorCode error)
+    err::ErrorCode dumpListText(const String& outTextPath, err::ErrorCode error)
     {
         std::ofstream outTextFile{outTextPath};
         if (!outTextFile)
@@ -673,7 +678,7 @@ private:
 
     #undef PRINT_DUMP
 
-    err::ErrorCode dumpListGraph(const String<>& outGraphPath)
+    err::ErrorCode dumpListGraph(const String& outGraphPath)
     {
         std::ofstream outGraphFile{outGraphPath};
         if (!outGraphFile)

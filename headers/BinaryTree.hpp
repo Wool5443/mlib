@@ -346,7 +346,7 @@ class BinaryTree final
 public:
     BinaryTreeNode<T>* root = nullptr; ///< root
 private:
-    String<>      m_dumpFolder{};
+    String        m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
 ///////////////////////////////////////////////////////////////////////////////
 //

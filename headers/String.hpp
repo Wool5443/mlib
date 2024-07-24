@@ -28,7 +28,6 @@ namespace mlib {
  * @tparam DefaultCapacity
  * @tparam GrowFactor
  */
-template<std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
 class String final
 {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,9 +36,9 @@ class String final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<char, DefaultCapacity, GrowFactor> m_data;
+    Buffer<char> m_data{};
 public:
-    std::size_t length = 0; ///< string length
+    std::size_t  length = 0; ///< string length
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
@@ -74,8 +73,7 @@ public:
     /**
      * @brief Construct a new String object
      */
-    String() noexcept
-        : m_data() {}
+    String() noexcept = default;
 
     /**
      * @brief Construct a new String object
@@ -170,7 +168,7 @@ public:
      *
      * @return err::Result<String>
      */
-    static err::Result<String> New(std::size_t hintLength = DefaultCapacity) noexcept
+    static err::Result<String> New(std::size_t hintLength) noexcept
     {
         String str(hintLength);
         LOG_ERROR_IF(str.Error());
@@ -250,7 +248,14 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    std::strong_ordering operator<=>(const String& other) const noexcept
+    /**
+     * @brief Operator spaceship comparison
+     *
+     * @param [in] other to compare
+     *
+     * @return std::strong_ordering
+     */
+    std::strong_ordering operator<=>(const char* other) const noexcept
     {
         int result = std::strcmp(*this, other);
 
@@ -260,22 +265,53 @@ public:
             return std::strong_ordering::equal;
         return std::strong_ordering::greater;
     }
+
+    /**
+     * @brief Compares string for equality
+     *
+     * @param [in] other
+     *
+     * @return true equal
+     * @return false not equal
+     */
     bool operator==(const String& other) const noexcept
     {
         return length == other.length &&
                strcmp(RawPtr(), other.RawPtr()) == 0;
     }
+    bool operator==(const char* other) const noexcept
+    {
+        return strcmp(RawPtr(), other) == 0;
+    }
 
+    /**
+     * @brief Compares string for inequality
+     *
+     * @param [in] other
+     *
+     * @return true not equal
+     * @return false equal
+     */
     bool operator!=(const String& other) const noexcept
     {
         return !operator==(other);
     }
+    bool operator!=(const char* other) const noexcept
+    {
+        return !operator==(other);
+    }
 
+    /**
+     * @brief appends other
+     *
+     * @param [in] other string to append
+     *
+     * @return String& result
+     */
     String& operator+=(const char* other) noexcept
     {
         return append(other, strlen(other));
     }
-
     String& operator+=(const String& other) noexcept
     {
         return append(other.RawPtr(), other.length);
@@ -283,7 +319,7 @@ public:
 
     #define OPERATOR_PLUS_CODE                              \
     {                                                       \
-        String<> result{lhs};                               \
+        String result{lhs};                                 \
         result += rhs;                                      \
         return result;                                      \
     }
@@ -294,14 +330,29 @@ public:
         return lhs;                                         \
     }
 
+    /**
+     * @brief Adds s2 strings
+     */
     friend String operator+(const char* lhs, const String& rhs) noexcept
     OPERATOR_PLUS_CODE
+    /**
+     * @brief Adds s2 strings
+     */
     friend String operator+(const String& lhs, const char* rhs) noexcept
     OPERATOR_PLUS_CODE
+    /**
+     * @brief Adds s2 strings
+     */
     friend String operator+(const String& lhs, const String& rhs) noexcept
     OPERATOR_PLUS_CODE
+    /**
+     * @brief Adds s2 strings
+     */
     friend String operator+(String&& lhs, const char* rhs) noexcept
     RVAL_OPERATOR_PLUS_CODE
+    /**
+     * @brief Adds s2 strings
+     */
     friend String operator+(String&& lhs, const String& rhs) noexcept
     RVAL_OPERATOR_PLUS_CODE
 
@@ -331,6 +382,14 @@ private:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    /**
+     * @brief Prints string to std::ostream
+     *
+     * @param [in] out
+     * @param [in] string
+     *
+     * @return std::ostream&
+     */
     friend std::ostream& operator<<(std::ostream& out, const String& string)
     {
         return out << string.RawPtr();
@@ -350,6 +409,13 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    /**
+     * @brief Reads a file and puts it into a string
+     *
+     * @param [in] filePath path to file to read
+     *
+     * @return err::Result<String>
+     */
     static err::Result<String> ReadFromFile(const char* filePath)
     {
         HardAssert(filePath, err::ERROR_NULLPTR);
@@ -357,12 +423,12 @@ public:
         struct stat result = {};
         stat(filePath, &result);
 
-        auto strRes = String::New(result.st_size);
-        RETURN_RESULT(strRes);
-
         std::ifstream input(filePath);
         if (!input)
             return err::ERROR_BAD_FILE;
+
+        auto strRes = String::New(result.st_size);
+        RETURN_RESULT(strRes);
 
         input.read(strRes.value, result.st_size);
 
@@ -486,9 +552,7 @@ public:
         if (!buf)
             RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, {});
 
-        auto wordsRes = Vector<String>::New();
-        RETURN_RESULT(wordsRes);
-        Vector<String>& words = wordsRes.value;
+        Vector<String> words;
 
         const char* token = strtok(buf, delimiters);
 
@@ -496,13 +560,13 @@ public:
 
         while (token)
         {
-            words.PushBack(token);
+            RETURN_ERROR_RESULT(words.PushBack(token), {}, free(buf));
             token = strtok(nullptr, delimiters);
         }
 
         free(buf);
 
-        return wordsRes;
+        return words;
     }
 
     /**
@@ -533,9 +597,7 @@ public:
     static err::Result<Vector<const char*>>
     SplitInPlace(char* string, const char* delimiters)
     {
-        auto wordsRes = Vector<const char*>::New();
-        RETURN_RESULT(wordsRes);
-        Vector<const char*>& words = wordsRes.value;
+        Vector<const char*> words;
 
         const char* token = strtok(string, delimiters);
 
@@ -545,7 +607,7 @@ public:
             token = strtok(nullptr, delimiters);
         }
 
-        return wordsRes;
+        return words;
     }
 
     /**
@@ -670,9 +732,9 @@ struct Hash<CString>
 };
 
 template<>
-struct Hash<String<>>
+struct Hash<String>
 {
-    uint64_t operator()(const String<>& string)
+    uint64_t operator()(const String& string)
     {
         return CRC32(string.RawPtr(), string.length);
     }

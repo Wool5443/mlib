@@ -7,7 +7,7 @@
 
 namespace mlib {
 
-template<typename Key, typename Val, std::size_t Size = 128,
+template<typename Key, typename Val, std::size_t Size = 8,
          typename Hash = Hash<Key>>
 
 class HashTable
@@ -44,7 +44,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 private:
     Container m_containers[Size]{};
-    String<>  m_dumpFolder{};
+    String    m_dumpFolder{};
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS

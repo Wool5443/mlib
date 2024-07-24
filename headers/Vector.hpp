@@ -24,7 +24,7 @@ namespace mlib {
  * @tparam DefaultCapacity
  * @tparam GrowFactor
  */
-template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
+template<typename T>
 class Vector final
 {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,9 +33,9 @@ class Vector final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<T, DefaultCapacity, GrowFactor> m_data{};
+    Buffer<T>   m_data{};
 public:
-    std::size_t    length = 0; ///< length
+    std::size_t length = 0; ///< length
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
@@ -71,18 +71,15 @@ public:
     /**
      * @brief Construct a new Vector object
      */
-    Vector()
-        : m_data() {}
+    Vector() noexcept = default;
 
     /**
-     * @brief Construct a new Vector object
-     * and ensures that the capacity is enougth
-     * for hintLength elements, thus, avoiding
-     * reallocations
+     * @brief Construct a new Buffer object
+     * with capacity of at least hintLength
      *
      * @param [in] hintLength expected number of elements
      */
-    explicit Vector(std::size_t hintLength)
+    explicit Vector(std::size_t hintLength) noexcept
         : m_data(hintLength) {}
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -90,14 +87,14 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    static err::Result<Vector> New(std::size_t hintLength = DefaultCapacity)
+    static err::Result<Vector> New(std::size_t hintLength) noexcept
     {
         Vector vec(hintLength);
         LOG_ERROR_IF(vec.Error());
         return { vec, vec.Error() };
     }
 
-    static err::Result<Vector> New(const Vector& other)
+    static err::Result<Vector> New(const Vector& other) noexcept
     {
         Vector vec(other);
         LOG_ERROR_IF(vec.Error());

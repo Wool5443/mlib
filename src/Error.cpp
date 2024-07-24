@@ -76,5 +76,7 @@ void err::Logger::Dump()
 
 err::Logger::~Logger()
 {
+    if (length > 0)
+        std::cerr << '\n' << length << " items were dumped\n";
     Dump();
 }

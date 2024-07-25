@@ -540,7 +540,7 @@ public:
     #define ROOT_COLOR "\"#c95b90\""
     #define FREE_HEAD_COLOR "\"#b9e793\""
 
-    constexpr static std::size_t FREE_ELEM = SIZE_MAX;
+    static const std::size_t FREE_ELEM = SIZE_MAX;
 
     /**
      * @brief Call only after InitDump

@@ -129,7 +129,7 @@ struct Result
  */
 struct Logger
 {
-    static constexpr const std::size_t MAX_ERRORS = 32;
+    static const std::size_t MAX_ERRORS = 32;
 
     Error         errorStack[MAX_ERRORS]{}; ///< stack of errors
     std::size_t   length = 0; ///< length of the stack

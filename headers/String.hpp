@@ -358,7 +358,7 @@ public:
      */
     err::Result<std::size_t> Count(const char* string) const noexcept;
 private:
-    static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
+    constexpr static const char* SPACE_CHARS = " \n\t\r\f\v";
 public:
     /**
      * @brief Split the string by space characters

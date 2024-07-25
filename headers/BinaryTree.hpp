@@ -562,14 +562,18 @@ public:
      * the header of the html log file
      *
      * @param [in] dumpFolder where to put dumps
+     *
+     * @return err::ErrorCode
      */
-    void InitDump(const char* dumpFolder)
+    err::ErrorCode InitDump(const char* dumpFolder)
     {
         HardAssert(dumpFolder, err::ERROR_NULLPTR);
 
         m_dumpFolder = dumpFolder;
 
         m_htmlDumpFile.open(m_dumpFolder + "/dump.html");
+        if (!m_htmlDumpFile)
+            RETURN_ERROR(err::ERROR_BAD_FILE);
 
         m_htmlDumpFile <<
         "<style>\n"

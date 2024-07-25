@@ -15,6 +15,18 @@ Then add the source and header files to your build system.
  * LinkedList
  * HashTable
  * Logger
+ * Error handling as values
+
+Every container uses dynamic allocation and all are easily resizable.
+
+Note that all methods return either ErrorCode or a Result so you should
+always handle the error via these macros:
+```c++
+// ... is for code to do before returning
+RETURN_ERROR(error, ...)
+RETURN_ERROR_RESULT(error, poison, ...)
+RETURN_RESULT(result, ...)
+```
 
 ## How to use
 
@@ -56,7 +68,7 @@ err::Result<int> bar()
 
     // or
 
-    LOG(error);
+    LOG_ERROR(error);
     return { INT_MIN, error };
 
     /* some code */
@@ -69,7 +81,33 @@ int main()
     err::Result<int> res = bar();
     RETURN_ERROR(res); // returns and logs if bar failed
 
+    LOG("Hello, this is a test log"); // Logs a message
+
     return 0;
+}
+```
+
+### Container creation
+```c++
+#include "String.hpp"
+
+err::ErrorCode foo()
+{
+    // This creates an empty object without doing any allocations
+    String str;
+    static_assert(str.Error() == err::ERROR_UNINITIALIZED);
+
+    // Then there are 3 ways of createing a non-empty object
+    String strCommonWay("Hello");
+    RETURN_ERROR(strCommonWay.Error());
+
+    String strAssign = "Hello";
+    RETURN_ERROR(strAssign.Error());
+
+    err::Result<String> strResult = String::New("Hello");
+    RETURN_ERROR(strResult);
+
+    // Do not forget to check for errors!!!!
 }
 ```
 
@@ -83,9 +121,9 @@ LOG_INIT_CONSOLE();
 
 int main()
 {
-    String a{"Hello"};
+    String a("Hello");
     RETURN_ERROR(a.Error());
-    String b{"World"};
+    String b("World");
     RETURN_ERROR(b).Error();
 
     // or
@@ -146,18 +184,9 @@ LOG_INIT_CONSOLE();
 int main()
 {
     Vector<int> vec;
-    RETURN_ERROR(vec.Error()); // to handle possible allocation error
-
-    // or more safely
-
-    err::Result<Vector<int>> vecRes = Vector<int>::New();
-    RETURN_ERROR(vecRes);
 
     for (std::size_t i = 1; i <= 10; i++)
-    {
-        vec.PushBack(i);
-        RETURN_ERROR(vec.Error());
-    }
+        RETURN_ERROR(vec.PushBack(i));
 
     for (auto el : vec)
         std::cout << el << ' '; //> 1 2 3 ... 10
@@ -181,6 +210,8 @@ LOG_INIT_CONSOLE();
 
 int main()
 {
+    // List actually does allocation since it needs a fictional
+    // element in the beginning to be valid.
     LinkedList<int> list;
     RETURN_ERROR(list.Error());
 
@@ -189,7 +220,7 @@ int main()
     err::Result<LinkedList<int>> listRes = LinkedList<int>::New();
     RETURN_ERROR(listRes);
 
-    list.InitDump("../dump/list");
+    RETURN_ERROR(list.InitDump("../dump/list"));
 
     for (std::size_t i = 1; i <= 10; i++)
     {
@@ -255,6 +286,7 @@ int main()
 ```c++
 #include "HashTable.hpp"
 #include "String.hpp"
+
 using namespace mlib;
 
 LOG_INIT_CONSOLE();
@@ -262,7 +294,6 @@ LOG_INIT_CONSOLE();
 int main()
 {
     HashTable<String<>, int> table;
-    RETURN_ERROR(table.Error());
 
     RETURN_ERROR(table.Add({ "Hello", 1 }));
     RETURN_ERROR(table.Add({ "World", 2 }));

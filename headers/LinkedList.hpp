@@ -38,9 +38,9 @@ class LinkedList final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<T>           m_data{1};
-    Buffer<std::size_t> m_next{1};
-    Buffer<std::size_t> m_prev{1};
+    Buffer<T>           m_data(1);
+    Buffer<std::size_t> m_next(1);
+    Buffer<std::size_t> m_prev(1);
 
     String        m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
@@ -390,8 +390,10 @@ public:
      * the header of the html log file
      *
      * @param [in] logFolder where to put logs
+     *
+     * @return err::ErrorCode
      */
-    void InitDump(const char* logFolder) noexcept
+    err::ErrorCode InitDump(const char* logFolder) noexcept
     {
         HardAssert(logFolder, err::ERROR_BAD_FILE);
         m_dumpFolder = logFolder;
@@ -401,6 +403,8 @@ public:
         htmlFilePath += "/log.html";
 
         m_htmlDumpFile.open(htmlFilePath);
+        if (!m_htmlDumpFile)
+            RETURN_ERROR(err::ERROR_BAD_FILE);
 
         m_htmlDumpFile <<
             "<style>\n"

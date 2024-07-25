@@ -285,10 +285,12 @@ private:
         );
 
         HashTable newTable{newCapacity};
-
         for (auto& container : m_containers)
             for (HashTableElement& elem : container)
-                RETURN_ERROR(newTable.Add(std::move(elem)));
+            {
+                std::size_t index = elem.hashKey.val1 % newCapacity;
+                RETURN_ERROR(newTable.m_containers[index].PushBack(std::move(elem)));
+            }
 
         *this = std::move(newTable);
 

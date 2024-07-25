@@ -236,7 +236,7 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 
     auto duration = timer.Stop();
 
-    std::cout << "Test took: "
+    std::cout << "HashTable Speed Test took: "
     << duration.count() / to_ms << "ms\n";
 
     return err::EVERYTHING_FINE;

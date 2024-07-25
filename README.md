@@ -84,9 +84,9 @@ LOG_INIT_CONSOLE();
 int main()
 {
     String a{"Hello"};
-    RETURN_ERROR(a);
+    RETURN_ERROR(a.Error());
     String b{"World"};
-    RETURN_ERROR(b);
+    RETURN_ERROR(b).Error();
 
     // or
 
@@ -96,13 +96,17 @@ int main()
     RETURN_ERROR(bRes);
 
     String c = a + ' ' + b;
+    RETURN_ERROR(c.Error());
 
     std::cout << c << '\n'; //> Hello World
 
     String bebra;
 
     for (std::size_t i = 0; i < 50; i++)
+    {
         bebra += "bebra";
+        RETURN_ERROR(bebra.Error());
+    }
 
     err::Result<std::size_t> countRes = bebra.Count("bebra");
     RETURN_ERROR(countRes);
@@ -113,6 +117,7 @@ int main()
     "Hello, dear readers of this code " // 6 words
     "I know this is some cursed C++, though, " // 8 words
     "don't be to critical."; // 4 words
+    RETURN_ERROR(wordsStr.Error());
 
     err::Result<Vector<String<>>> words = wordsStr.Split(" ");
     RETURN_ERROR(words);
@@ -149,7 +154,10 @@ int main()
     RETURN_ERROR(vecRes);
 
     for (std::size_t i = 1; i <= 10; i++)
+    {
         vec.PushBack(i);
+        RETURN_ERROR(vec.Error());
+    }
 
     for (auto el : vec)
         std::cout << el << ' '; //> 1 2 3 ... 10
@@ -184,7 +192,10 @@ int main()
     list.InitDump("../dump/list");
 
     for (std::size_t i = 1; i <= 10; i++)
+    {
         list.PushBack(i);
+        RETURN_ERROR(list.Error());
+    }
 
     list.Dump(); // Dumps a list to an html file
 
@@ -216,6 +227,7 @@ LOG_INIT_CONSOLE();
 int main()
 {
     BinaryTree<int> tree(0); // Constructs a tree with 0 in root
+    RETURN_ERROR(tree.Error());
 
     BinaryTree<int> emptyTree; // Constructs a tree without any root
 
@@ -229,8 +241,8 @@ int main()
     auto rightRes = BinaryTreeNode<int>::New(2);
     RETURN_ERROR(rightRes, leftRes.value->Delete());
 
-    root->SetLeft (leftRes.value);
-    root->SetRight(rightRes.value);
+    RETURN_ERROR(root->SetLeft (leftRes. value), leftRes .value->Delete());
+    RETURN_ERROR(root->SetRight(rightRes.value), rightRes.value->Delete());
 
     tree.Dump();
     tree.Finish();
@@ -243,13 +255,14 @@ int main()
 ```c++
 #include "HashTable.hpp"
 #include "String.hpp"
+using namespace mlib;
 
 LOG_INIT_CONSOLE();
 
 int main()
 {
     HashTable<String<>, int> table;
-using namespace mlib;
+    RETURN_ERROR(table.Error());
 
     RETURN_ERROR(table.Add({ "Hello", 1 }));
     RETURN_ERROR(table.Add({ "World", 2 }));

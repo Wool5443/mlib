@@ -37,7 +37,7 @@ private:
     T*           m_data     = nullptr;
     std::size_t  m_capacity = 0;
 public:
-    err::ErrorCode error    = err::EVERYTHING_FINE; ///< Buffer error
+    err::ErrorCode error    = err::ERROR_UNINITIALIZED; ///< Buffer error
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
@@ -107,7 +107,8 @@ public:
      * @param [in] other buffer to move
      */
     Buffer(Buffer&& other) noexcept
-        : m_data(other.m_data), m_capacity(other.m_capacity)
+        : m_data(other.m_data), m_capacity(other.m_capacity),
+          error(other.error)
     {
         other.m_data = nullptr;
     }
@@ -138,7 +139,7 @@ public:
 
         m_data     = newData;
         m_capacity = other.m_capacity;
-        error      = {};
+        error      = err::EVERYTHING_FINE;
 
         return *this;
     }
@@ -170,7 +171,7 @@ public:
     }
 private:
     explicit Buffer(std::size_t capacity, bool isValidCapacity) noexcept
-        : m_data(new T[capacity]{}), m_capacity(capacity)
+        : m_data(new T[capacity]{}), m_capacity(capacity), error(err::EVERYTHING_FINE)
     {
         HardAssert(isValidCapacity, err::ERROR_BAD_VALUE);
 
@@ -262,8 +263,8 @@ private:
         static const std::size_t growFactorDenominator = 2;
         static const std::size_t minCapacity           = 2;
 
-        std::size_t capacity = currentCapacity ? currentCapacity :
-                                                 minCapacity;
+
+        std::size_t capacity = std::max(currentCapacity, minCapacity);
 
         while (capacity < hintLength)
             capacity = capacity * growFactorNumerator /
@@ -287,21 +288,27 @@ public:
      */
     err::ErrorCode Realloc(std::size_t newCapacity) noexcept
     {
-        RETURN_ERROR(error);
+        if (error == err::ERROR_UNINITIALIZED)
+            error = err::EVERYTHING_FINE;
+        else
+            RETURN_ERROR(error);
+
+        if (m_capacity >= newCapacity)
+            return err::EVERYTHING_FINE;
 
         std::size_t capacity = calculateCapacity(m_capacity, newCapacity);
 
         T* newData = new T[capacity]{};
 
         if (!newData)
-            RETURN_ERROR(err::ERROR_NO_MEMORY);
+            RETURN_ERROR(err::ERROR_NO_MEMORY, error = err::ERROR_NO_MEMORY);
 
-        std::copy(cebgin(), cend(), newData);
+        std::move(cebgin(), cend(), newData);
 
         delete[] m_data;
 
         m_data     = newData;
-        m_capacity = newCapacity;
+        m_capacity = capacity;
 
         return {};
     }

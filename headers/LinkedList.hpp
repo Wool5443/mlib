@@ -38,9 +38,9 @@ class LinkedList final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<T>           m_data{};
-    Buffer<std::size_t> m_next{};
-    Buffer<std::size_t> m_prev{};
+    Buffer<T>           m_data{1};
+    Buffer<std::size_t> m_next{1};
+    Buffer<std::size_t> m_prev{1};
 
     String        m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
@@ -61,20 +61,20 @@ public:
      *
      * @return std::size_t index of the head
      */
-     std::size_t  Head()     const noexcept { return m_next[0]; }
+     std::size_t  Head()    const noexcept { return m_next[0]; }
     /**
      * @brief Return the tail
      *
      * @return std::size_t index of the tail
      */
-     std::size_t  Tail()     const noexcept { return m_prev[0]; }
+     std::size_t  Tail()    const noexcept { return m_prev[0]; }
 
     /**
      * @brief Return error of the underlying buffers
      *
      * @return err::ErrorCode error
      */
-     err::ErrorCode Error()    const noexcept
+     err::ErrorCode Error() const noexcept
     {
         if (m_data.error) return m_data.error;
         if (m_next.error) return m_next.error;

@@ -259,7 +259,7 @@ do                                                                  \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error_ = error;                                 \
-    if (_error_)                                                    \
+    if (_error_ && _error_ != err::ERROR_UNINITIALIZED)             \
     {                                                               \
         LOG_ERROR(_error_);                                         \
         __VA_ARGS__;                                                \
@@ -274,7 +274,7 @@ do                                                                  \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error_ = error;                                 \
-    if (_error_)                                                    \
+    if (_error_ && _error_ != err::ERROR_UNINITIALIZED)             \
     {                                                               \
         LOG_ERROR(_error_);                                         \
         __VA_ARGS__;                                                \

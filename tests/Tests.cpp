@@ -17,11 +17,15 @@ err::ErrorCode Tests::TestString(std::size_t n)
     std::cout << str8bytes << '\n';
 
     String a{"Hello"};
+    RETURN_ERROR(a.Error());
     String b{"World"};
+    RETURN_ERROR(b.Error());
 
     String c = a + b;
+    RETURN_ERROR(c.Error());
 
     String correct = "HelloWorld";
+    RETURN_ERROR(correct.Error());
 
     if (c != correct)
     {
@@ -35,7 +39,7 @@ err::ErrorCode Tests::TestString(std::size_t n)
         bebra += "bebra";
 
     err::Result<std::size_t> countRes = bebra.Count("bebra");
-    RETURN_ERROR(countRes.error);
+    RETURN_ERROR(countRes);
 
     if (countRes.value != n)
     {
@@ -47,6 +51,7 @@ err::ErrorCode Tests::TestString(std::size_t n)
     "Hello, dear readers of this code " // 6
     "I know this is some cursed C++, though, " // 8
     "don't be to critical."; // 4
+    RETURN_ERROR(wordsStr.Error());
     std::size_t wordsNum = 18;
 
     auto words = wordsStr.Split();
@@ -71,7 +76,10 @@ err::ErrorCode Tests::TestVector(std::size_t n)
     Vector<int> vec;
 
     for (std::size_t i = 0; i < n; i++)
+    {
         vec.PushBack((i + 1) * 10);
+        RETURN_ERROR(vec.Error());
+    }
 
     for (std::size_t i = 0; i < n; i++)
         if (vec[i] != (int)(i + 1) * 10)
@@ -96,7 +104,10 @@ err::ErrorCode Tests::TestList(std::size_t n)
     list.InitDump("../dump/list");
 
     for (std::size_t i = 0; i < n; i++)
+    {
         list.PushBack((i + 1) * 10);
+        RETURN_ERROR(list.Error());
+    }
 
     list.Dump();
 
@@ -134,8 +145,8 @@ err::ErrorCode Tests::TestBTree()
 
     BinaryTreeNode<int>* root = tree.root;
 
-    root->SetLeft(BinaryTreeNode<int>::New(1).value);
-    root->SetRight(BinaryTreeNode<int>::New(2).value);
+    RETURN_ERROR(root->SetLeft(BinaryTreeNode<int>::New(1).value));
+    RETURN_ERROR(root->SetRight(BinaryTreeNode<int>::New(2).value));
 
     tree.Dump();
     tree.FinishDump();
@@ -148,6 +159,7 @@ err::ErrorCode Tests::TestHashTable()
     Utils::Timer timer;
 
     HashTable<CString, int, 4096> wordsCountTable;
+    RETURN_ERROR(wordsCountTable.Error());
 
     char* text = Utils::ReadFileToBuf("../tests/Words.txt");
     if (!text)

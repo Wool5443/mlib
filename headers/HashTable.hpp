@@ -53,8 +53,6 @@ private:
 public:
     err::ErrorCode Error() const noexcept
     {
-        err::ErrorCode error = m_containers.Error();
-        if (error) return error;
         return m_dumpFolder.Error();
     }
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,10 +91,22 @@ private:
     {
         return Hash()(key) % Size;
     }
+
+#define CHECK_CONTAINER(container, poison)              \
+do                                                      \
+{                                                       \
+    if (auto error = (container).Error())               \
+    {                                                   \
+        LOG_ERROR(error);                               \
+        return poison;                                  \
+    }                                                   \
+} while (0)
+
 public:
-    Val* operator[](const Key& key) noexcept
+    Val* operator[](const Key& key) & noexcept
     {
         std::size_t index = getIndex(key);
+        CHECK_CONTAINER(m_containers[index], nullptr);
 
         auto found = findInContainer(m_containers[index], key);
 
@@ -106,7 +116,7 @@ public:
         return &m_containers[index][found.value].val;
     }
 
-    const Val* operator[](const Key& key) const noexcept
+    const Val* operator[](const Key& key) const & noexcept
     {
         return (*this)[key];
     }
@@ -119,6 +129,7 @@ public:
     err::ErrorCode Add(const HashTableElement& keyVal)
     {
         std::size_t index = getIndex(keyVal.key);
+        RETURN_ERROR(m_containers[index].Error());
 
         auto found = findInContainer(m_containers[index], keyVal.key);
 
@@ -135,6 +146,7 @@ public:
     err::ErrorCode Add(HashTableElement&& keyVal)
     {
         std::size_t index = getIndex(keyVal.key);
+        RETURN_ERROR(m_containers[index].Error());
 
         auto found = findInContainer(m_containers[index], keyVal.key);
 
@@ -151,6 +163,7 @@ public:
     err::Result<Val> Pop(const Key& key)
     {
         std::size_t index = getIndex(key);
+        RETURN_ERROR_RESULT(m_containers[index].Error(), {});
 
         auto& container = m_containers[index];
 
@@ -179,6 +192,9 @@ private:
                 return container.GetIndexFromPointer(&keyVal);
         return err::ERROR_NOT_FOUND;
     }
+
+#undef CHECK_CONTAINER
+
 };
 
 } // namespace mlib

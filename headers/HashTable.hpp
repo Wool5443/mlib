@@ -12,11 +12,18 @@ template<typename Key, typename Val, typename GetHash = Hash<Key>>
 
 class HashTable
 {
+    using HashKey = Utils::Pair<HashType, Key>;
 public:
     struct HashTableElement
     {
-        Key key;
-        Val val;
+        HashKey hashKey{};
+        Val     val{};
+
+        HashTableElement() noexcept = default;
+
+        HashTableElement(Key&& key, Val&& val) noexcept
+            : hashKey(GetHash()(key), std::move(key)),
+              val(std::move(val)) {}
 
         friend std::ostream& operator<<(std::ostream& out,
                                         const HashTableElement& el) noexcept
@@ -27,12 +34,14 @@ public:
 
         bool operator==(const HashTableElement& other) const noexcept
         {
-            return key == other.key;
+            return hashKey.hash == other.hashKey.hash
+                && hashKey.key  == other.hashKey.key;
         }
 
         bool operator!=(const HashTableElement& other) const noexcept
         {
-            return key != other.key;
+            return hashKey.hash != other.hashKey.hash
+                || hashKey.key  != other.hashKey.key;
         }
     };
 
@@ -123,22 +132,38 @@ public:
     /**
      * @brief Add a key-value pair to the table if it is not there yet
      *
-     * @param keyVal key-value pair
+     * @param [in] key
+     * @param [in] value
+     *
      * @return err::ErrorCode
      */
-    err::ErrorCode Add(HashTableElement&& keyVal)
+    err::ErrorCode Add(Key&& key, Val&& value)
+    {
+        return Add(HashTableElement(std::move(key), std::move(value)));
+    }
+
+    /**
+     * @brief Add a HashTableElement to the table if it is not there yet
+     *
+     * @param [in] elem
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Add(HashTableElement&& elem)
     {
         RETURN_ERROR(realloc());
 
-        std::size_t index = getIndex(keyVal.key);
+        HardAssert(m_containers.length, err::ERROR_ZERO_DIVISION);
+
+        std::size_t index = elem.hashKey.val1 % m_containers.length;
         RETURN_ERROR(m_containers[index].Error());
 
-        auto found = findInContainer(m_containers[index], keyVal.key);
+        auto found = findInContainer(m_containers[index], elem.hashKey);
 
         if (found)
             return found;
 
-        err::ErrorCode error = m_containers[index].PushBack(std::move(keyVal));
+        err::ErrorCode error = m_containers[index].PushBack(std::move(elem));
         RETURN_ERROR(error);
 
         m_length++;
@@ -157,12 +182,12 @@ public:
     {
         RETURN_ERROR_RESULT(Error(), {});
 
-        std::size_t index = getIndex(key);
-        RETURN_ERROR_RESULT(m_containers[index].Error(), {});
+        Utils::Pair<HashType, std::size_t> hashInd = getHashInd(key);
+        RETURN_ERROR_RESULT(m_containers[hashInd.val2].Error(), {});
 
-        auto& container = m_containers[index];
+        auto& container = m_containers[hashInd.val2];
 
-        auto found = findInContainer(container, key);
+        auto found = findInContainer(container, { hashInd.val1, key });
 
         RETURN_ERROR_RESULT(found, {});
 
@@ -199,19 +224,20 @@ public:
             return nullptr;
         }
 
-        std::size_t index = getIndex(key);
-        if (auto error = m_containers[index].Error())
+        Utils::Pair<HashType, std::size_t> hashInd = getHashInd(key);
+        if (auto error = m_containers[hashInd.val2].Error())
         {
             LOG_ERROR(error);
             return nullptr;
         }
 
-        auto found = findInContainer(m_containers[index], key);
+        auto found = findInContainer(m_containers[hashInd.val2],
+                                     { hashInd.val1, key });
 
         if (!found)
             return nullptr;
 
-        return &m_containers[index][found.value].val;
+        return &m_containers[hashInd.val2][found.value].val;
     }
 
     const Val* operator[](const Key& key) const & noexcept
@@ -220,20 +246,23 @@ public:
     }
 private:
     err::Result<std::size_t>
-    findInContainer(const Container& container, const Key& key)
+    findInContainer(const Container& container, const HashKey& hashKey)
     const noexcept
     {
-        for (const auto& keyVal : container)
-            if (keyVal.key == key)
-                return container.GetIndexFromPointer(&keyVal);
+        for (const auto& tableEnty : container)
+            if (tableEnty.hashKey.val1 == hashKey.val1
+             && tableEnty.hashKey.val2 == hashKey.val2)
+                return container.GetIndexFromPointer(&tableEnty);
         return err::ERROR_NOT_FOUND;
     }
 private:
-    uint64_t getIndex(const Key& key)
+    Utils::Pair<HashType, std::size_t> getHashInd(const Key& key)
     {
         HardAssert(m_containers.length > 0, err::ERROR_ZERO_DIVISION);
 
-        return GetHash()(key) % m_containers.length;
+        HashType hash = GetHash()(key);
+
+        return { hash, hash % m_containers.length };
     }
 
     err::ErrorCode realloc()

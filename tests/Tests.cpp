@@ -177,7 +177,7 @@ err::ErrorCode Tests::TestHashTable()
         if (count)
             *count += 1;
         else
-            RETURN_ERROR(wordsCountTable.Add({ word, 1 }));
+            RETURN_ERROR(wordsCountTable.Add(word, 1));
     }
 
     auto timeSpent = timer.Stop();

@@ -76,13 +76,19 @@ public:
     Buffer() noexcept = default;
 
     /**
-     * @brief Construct a new Buffer object
-     * with capacity of at least hintLength
+     * @brief Construct a Buffer
      *
-     * @param [in] hintLength
+     * @param [in] capacity
      */
-    explicit Buffer(std::size_t hintLength) noexcept
-        : Buffer(calculateCapacity(0, hintLength), true) {}
+    explicit Buffer(std::size_t capacity) noexcept
+        : m_data(new T[capacity]{}), m_capacity(capacity), error(err::EVERYTHING_FINE)
+    {
+        if (!m_data)
+        {
+            error = err::ERROR_NO_MEMORY;
+            LOG_ERROR(error);
+        }
+    }
 
     /**
      * @brief Buffer copy constructor
@@ -90,7 +96,7 @@ public:
      * @param [in] other buffer to copy
      */
     Buffer(const Buffer& other) noexcept
-        : Buffer(other.m_capacity, true)
+        : Buffer(other.m_capacity)
     {
         if (error)
         {
@@ -169,18 +175,6 @@ public:
     {
         delete[] m_data;
     }
-private:
-    explicit Buffer(std::size_t capacity, bool isValidCapacity) noexcept
-        : m_data(new T[capacity]{}), m_capacity(capacity), error(err::EVERYTHING_FINE)
-    {
-        HardAssert(isValidCapacity, err::ERROR_BAD_VALUE);
-
-        if (!m_data)
-        {
-            error = err::ERROR_NO_MEMORY;
-            LOG_ERROR(error);
-        }
-    }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              RESULT CTORS
@@ -188,17 +182,16 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 public:
     /**
-     * @brief Construct a new Buffer object
-     * with capacity of at least hintLength
+     * @brief Construct a Buffer
      *
-     * @param [in] hintLength
+     * @param [in] capacity
      *
      * @return err::Result<Buffer>
      */
-    static err::Result<Buffer> New(std::size_t hintLength)
+    static err::Result<Buffer> New(std::size_t capacity)
     noexcept
     {
-        Buffer buffer(hintLength);
+        Buffer buffer(capacity);
         LOG_ERROR_IF(buffer.error);
         return { buffer, buffer.error };
     }
@@ -206,7 +199,8 @@ public:
     /**
      * @brief Copies a buffer object
      *
-     * @param other buffer to copy
+     * @param [in] other buffer to copy
+     *
      * @return err::Result<Buffer>
      */
     static err::Result<Buffer> New(const Buffer& other) noexcept
@@ -214,6 +208,46 @@ public:
         Buffer buffer(other);
         LOG_ERROR_IF(buffer.error);
         return { buffer, buffer.error };
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Reallocates the buffer
+     * new capacity is at least capacity
+     *
+     * @param [in] newCapacity
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Realloc(std::size_t newCapacity) noexcept
+    {
+        if (error == err::ERROR_UNINITIALIZED)
+            error = err::EVERYTHING_FINE;
+        else
+            RETURN_ERROR(error);
+
+        if (m_capacity >= newCapacity)
+            return err::EVERYTHING_FINE;
+
+        std::size_t capacity = calculateCapacity(m_capacity, newCapacity);
+
+        T* newData = new T[capacity]{};
+
+        if (!newData)
+            RETURN_ERROR(err::ERROR_NO_MEMORY, error = err::ERROR_NO_MEMORY);
+
+        std::move(cebgin(), cend(), newData);
+
+        delete[] m_data;
+
+        m_data     = newData;
+        m_capacity = capacity;
+
+        return err::EVERYTHING_FINE;
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -263,7 +297,6 @@ private:
         static const std::size_t growFactorDenominator = 2;
         static const std::size_t minCapacity           = 2;
 
-
         std::size_t capacity = std::max(currentCapacity, minCapacity);
 
         while (capacity < hintLength)
@@ -271,46 +304,6 @@ private:
                                   growFactorDenominator;
 
         return capacity;
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
-//                              PUBLIC METHODS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Reallocates the buffer
-     * new capacity is at least capacity
-     *
-     * @param [in] newCapacity
-     *
-     * @return err::ErrorCode
-     */
-    err::ErrorCode Realloc(std::size_t newCapacity) noexcept
-    {
-        if (error == err::ERROR_UNINITIALIZED)
-            error = err::EVERYTHING_FINE;
-        else
-            RETURN_ERROR(error);
-
-        if (m_capacity >= newCapacity)
-            return err::EVERYTHING_FINE;
-
-        std::size_t capacity = calculateCapacity(m_capacity, newCapacity);
-
-        T* newData = new T[capacity]{};
-
-        if (!newData)
-            RETURN_ERROR(err::ERROR_NO_MEMORY, error = err::ERROR_NO_MEMORY);
-
-        std::move(cebgin(), cend(), newData);
-
-        delete[] m_data;
-
-        m_data     = newData;
-        m_capacity = capacity;
-
-        return {};
     }
 };
 

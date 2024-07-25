@@ -159,6 +159,131 @@ public:
     static err::Result<String> New(const String& other) noexcept;
 ///////////////////////////////////////////////////////////////////////////////
 //
+//                              PUBLIC METHODS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Reads a file and puts it into a string
+     *
+     * @param [in] filePath path to file to read
+     *
+     * @return err::Result<String>
+     */
+    static err::Result<String> ReadFromFile(const char* filePath) noexcept;
+
+    /**
+     * @brief Finds a char and returns its index
+     *
+     * @param [in] chr char to find
+     *
+     * @return err::Result<std::size_t> index result
+     */
+    err::Result<std::size_t> Find(char chr) const noexcept;
+
+    /**
+     * @brief Finds a substring and returns its index
+     *
+     * @param [in] string
+     *
+     * @return err::Result<std::size_t> index result
+     */
+    err::Result<std::size_t> Find(const char* string) const noexcept;
+
+    /**
+     * @brief Counts occurences of chr
+     *
+     * @param [in] chr char to count
+     *
+     * @return err::Result<std::size_t> count result
+     */
+    err::Result<std::size_t> Count(char chr) const noexcept;
+
+    /**
+     * @brief Counts occurences of string
+     *
+     * @param [in] string string to count
+     *
+     * @return err::Result<std::size_t> count result
+     */
+    err::Result<std::size_t> Count(const char* string) const noexcept;
+private:
+    constexpr static const char* SPACE_CHARS = " \n\t\r\f\v";
+public:
+    /**
+     * @brief Split the string by space characters
+     *
+     * @return err::Result<Vector<String>> vector of strings
+     */
+    err::Result<Vector<String>> Split() const noexcept;
+
+    /**
+     * @brief Split the string by delimeters
+     *
+     * @param [in] delimeters what to split by
+     *
+     * @return err::Result<Vector<String>> vector of strings
+     */
+    err::Result<Vector<String>> Split(const char* delimiters) const noexcept;
+
+    /**
+     * @brief Splits the string in place by space chars.
+     * It's more memory and speed efficient, though,
+     * modifies the string
+     *
+     * @param [in] string
+     *
+     * @return err::Result<Vector<const char*>>
+     */
+    static err::Result<Vector<const char*>>
+    SplitInPlace(char* string) noexcept;
+
+    /**
+     * @brief Splits the string in place.
+     * It's more memory and speed efficient, though,
+     * modifies the string
+     *
+     * @param [in] string
+     * @param [in] delimiters what to split by
+     *
+     * @return err::Result<Vector<const char*>>
+     */
+    static err::Result<Vector<const char*>>
+    SplitInPlace(char* string, const char* delimiters) noexcept;
+
+    /**
+     * @brief Filters out characters
+     *
+     * @param [in] filter characters to filter
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Filter(const char* filter) noexcept;
+
+    /**
+     * @brief Filters out characters
+     *
+     * @param [in] filter characters to filter
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Filter(const String& filter) noexcept;
+
+    /**
+     * @brief Filters out space characters
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Filter() noexcept;
+
+    /**
+     * @brief Clears the string
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Clear() noexcept;
+///////////////////////////////////////////////////////////////////////////////
+//
 //                              INDEXING AND ITERATORS
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -307,131 +432,6 @@ public:
     operator char*()                & noexcept;
     operator const char*()    const & noexcept;
     operator bool()           const   noexcept;
-///////////////////////////////////////////////////////////////////////////////
-//
-//                              PUBLIC METHODS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Reads a file and puts it into a string
-     *
-     * @param [in] filePath path to file to read
-     *
-     * @return err::Result<String>
-     */
-    static err::Result<String> ReadFromFile(const char* filePath) noexcept;
-
-    /**
-     * @brief Finds a char and returns its index
-     *
-     * @param [in] chr char to find
-     *
-     * @return err::Result<std::size_t> index result
-     */
-    err::Result<std::size_t> Find(char chr) const noexcept;
-
-    /**
-     * @brief Finds a substring and returns its index
-     *
-     * @param [in] string
-     *
-     * @return err::Result<std::size_t> index result
-     */
-    err::Result<std::size_t> Find(const char* string) const noexcept;
-
-    /**
-     * @brief Counts occurences of chr
-     *
-     * @param [in] chr char to count
-     *
-     * @return err::Result<std::size_t> count result
-     */
-    err::Result<std::size_t> Count(char chr) const noexcept;
-
-    /**
-     * @brief Counts occurences of string
-     *
-     * @param [in] string string to count
-     *
-     * @return err::Result<std::size_t> count result
-     */
-    err::Result<std::size_t> Count(const char* string) const noexcept;
-private:
-    constexpr static const char* SPACE_CHARS = " \n\t\r\f\v";
-public:
-    /**
-     * @brief Split the string by space characters
-     *
-     * @return err::Result<Vector<String>> vector of strings
-     */
-    err::Result<Vector<String>> Split() const noexcept;
-
-    /**
-     * @brief Split the string by delimeters
-     *
-     * @param [in] delimeters what to split by
-     *
-     * @return err::Result<Vector<String>> vector of strings
-     */
-    err::Result<Vector<String>> Split(const char* delimiters) const noexcept;
-
-    /**
-     * @brief Splits the string in place by space chars.
-     * It's more memory and speed efficient, though,
-     * modifies the string
-     *
-     * @param [in] string
-     *
-     * @return err::Result<Vector<const char*>>
-     */
-    static err::Result<Vector<const char*>>
-    SplitInPlace(char* string) noexcept;
-
-    /**
-     * @brief Splits the string in place.
-     * It's more memory and speed efficient, though,
-     * modifies the string
-     *
-     * @param [in] string
-     * @param [in] delimiters what to split by
-     *
-     * @return err::Result<Vector<const char*>>
-     */
-    static err::Result<Vector<const char*>>
-    SplitInPlace(char* string, const char* delimiters) noexcept;
-
-    /**
-     * @brief Filters out characters
-     *
-     * @param [in] filter characters to filter
-     *
-     * @return err::ErrorCode
-     */
-    err::ErrorCode Filter(const char* filter) noexcept;
-
-    /**
-     * @brief Filters out characters
-     *
-     * @param [in] filter characters to filter
-     *
-     * @return err::ErrorCode
-     */
-    err::ErrorCode Filter(const String& filter) noexcept;
-
-    /**
-     * @brief Filters out space characters
-     *
-     * @return err::ErrorCode
-     */
-    err::ErrorCode Filter() noexcept;
-
-    /**
-     * @brief Clears the string
-     *
-     * @return err::ErrorCode
-     */
-    err::ErrorCode Clear() noexcept;
 };
 
 /** @struct CString

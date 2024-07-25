@@ -102,59 +102,6 @@ public:
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
-//                              INDEXING AND ITERATORS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    using iterator      = T*;
-    using constIterator = const T*;
-
-          T& operator[](std::size_t index)       & noexcept { return m_data[index]; }
-    const T& operator[](std::size_t index) const & noexcept { return m_data[index]; }
-
-    /**
-     * @brief Returns the start of a buffer
-     *
-     * @return iterator
-     */
-    iterator      begin()        & noexcept { return m_data.RawPtr();          }
-
-    /**
-     * @brief Returns the start of a const buffer
-     *
-     * @return constIterator
-     */
-    constIterator begin()  const & noexcept { return m_data.RawPtr();          }
-
-    /**
-     * @brief Returns the start of a const buffer
-     *
-     * @return constIterator
-     */
-    constIterator cbegin() const & noexcept { return m_data.RawPtr();          }
-
-    /**
-     * @brief Returns the end of a buffer
-     *
-     * @return iterator
-     */
-     iterator     end()         & noexcept { return m_data.RawPtr() + length;  }
-
-    /**
-     * @brief Returns the end of a const buffer
-     *
-     * @return constIterator
-     */
-    constIterator end()    const & noexcept { return m_data.RawPtr() + length; }
-
-    /**
-     * @brief Returns the end of a const buffer
-     *
-     * @return constIterator
-     */
-    constIterator cend()   const & noexcept { return m_data.RawPtr() + length; }
-///////////////////////////////////////////////////////////////////////////////
-//
 //                              PUBLIC METHODS
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -223,6 +170,59 @@ public:
 
         return { SIZE_MAX, err::ERROR_NOT_FOUND };
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              INDEXING AND ITERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    using iterator      = T*;
+    using constIterator = const T*;
+
+          T& operator[](std::size_t index)       & noexcept { return m_data[index]; }
+    const T& operator[](std::size_t index) const & noexcept { return m_data[index]; }
+
+    /**
+     * @brief Returns the start of a buffer
+     *
+     * @return iterator
+     */
+    iterator      begin()        & noexcept { return m_data.RawPtr();          }
+
+    /**
+     * @brief Returns the start of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator begin()  const & noexcept { return m_data.RawPtr();          }
+
+    /**
+     * @brief Returns the start of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator cbegin() const & noexcept { return m_data.RawPtr();          }
+
+    /**
+     * @brief Returns the end of a buffer
+     *
+     * @return iterator
+     */
+     iterator     end()         & noexcept { return m_data.RawPtr() + length;  }
+
+    /**
+     * @brief Returns the end of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator end()    const & noexcept { return m_data.RawPtr() + length; }
+
+    /**
+     * @brief Returns the end of a const buffer
+     *
+     * @return constIterator
+     */
+    constIterator cend()   const & noexcept { return m_data.RawPtr() + length; }
 };
 
 template<typename T>

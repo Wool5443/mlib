@@ -45,7 +45,7 @@ private:
     String        m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
 
-    std::size_t   m_freeHead = 1;
+    std::size_t   m_freeHead = 0;
 public:
     std::size_t   length = 1; ///< length
                               ///< Notice that there is always a fictional
@@ -149,115 +149,6 @@ public:
         LOG_ERROR_IF(list.Error());
         return { list, list.Error() };
     }
-///////////////////////////////////////////////////////////////////////////////
-//
-//                              INDEXING AND ITERATORS
-//
-///////////////////////////////////////////////////////////////////////////////
-private:
-    template<typename ListType>
-    struct iteratorBase
-    {
-        ListType    l;
-        std::size_t i;
-
-        iteratorBase& operator++()
-        {
-            i = l.m_next[i];
-            return *this;
-        }
-
-        iteratorBase& operator--()
-        {
-            i = l.m_prev[i];
-            return *this;
-        }
-
-        iteratorBase operator++(int dummy)
-        {
-            iteratorBase copy = *this;
-            i                 = l.m_next[i];
-            return copy;
-        }
-
-        iteratorBase operator--(int dummy)
-        {
-            iteratorBase copy = *this;
-            i                 = l.m_prev[i];
-            return copy;
-        }
-
-        bool operator==(const iteratorBase& other) const noexcept
-        {
-            return &l == &other.l && i == other.i;
-        }
-
-        bool operator!=(const iteratorBase& other) const noexcept
-        {
-            return !(*this == other);
-        }
-    };
-public:
-    struct iterator: public iteratorBase<LinkedList&>
-    {
-        T& operator*()
-        {
-            return this->l.m_data[this->i];
-        }
-    };
-
-    struct constIterator : public iteratorBase<const LinkedList&>
-    {
-        const T& operator*()
-        {
-            return this->l.m_data[this->i];
-        }
-    };
-
-          T& operator[](std::size_t index)       & noexcept { return m_data[index]; }
-    const T& operator[](std::size_t index) const & noexcept { return m_data[index]; }
-
-    /**
-     * @brief Returns the start of a list
-     *
-     * @return iterator
-     */
-    iterator      begin()        & noexcept { return { *this, Head() }; }
-
-    /**
-     * @brief Returns the start of a const list
-     *
-     * @return constIterator
-     */
-    constIterator begin()  const & noexcept { return { *this, Head() }; }
-
-    /**
-     * @brief Returns the start of a const list
-     *
-     * @return constIterator
-     */
-    constIterator cbegin() const & noexcept { return { *this, Head() }; }
-
-    /**
-     * @brief Returns the end of a list
-     *
-     * @return iterator
-     */
-    iterator      end()          & noexcept { return { *this, 0 }; }
-
-    /**
-     * @brief Returns the end of a const list
-     *
-     * @return constIterator
-     */
-    constIterator end()    const & noexcept { return { *this, 0 }; }
-
-    /**
-     * @brief Returns the end of a const list
-     *
-     * @return constIterator
-     */
-    constIterator cend()   const & noexcept { return { *this, 0 }; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS
@@ -591,6 +482,115 @@ public:
 
         return Error();
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              INDEXING AND ITERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
+private:
+    template<typename ListType>
+    struct iteratorBase
+    {
+        ListType    l;
+        std::size_t i;
+
+        iteratorBase& operator++()
+        {
+            i = l.m_next[i];
+            return *this;
+        }
+
+        iteratorBase& operator--()
+        {
+            i = l.m_prev[i];
+            return *this;
+        }
+
+        iteratorBase operator++(int dummy)
+        {
+            iteratorBase copy = *this;
+            i                 = l.m_next[i];
+            return copy;
+        }
+
+        iteratorBase operator--(int dummy)
+        {
+            iteratorBase copy = *this;
+            i                 = l.m_prev[i];
+            return copy;
+        }
+
+        bool operator==(const iteratorBase& other) const noexcept
+        {
+            return &l == &other.l && i == other.i;
+        }
+
+        bool operator!=(const iteratorBase& other) const noexcept
+        {
+            return !(*this == other);
+        }
+    };
+public:
+    struct iterator: public iteratorBase<LinkedList&>
+    {
+        T& operator*()
+        {
+            return this->l.m_data[this->i];
+        }
+    };
+
+    struct constIterator : public iteratorBase<const LinkedList&>
+    {
+        const T& operator*()
+        {
+            return this->l.m_data[this->i];
+        }
+    };
+
+          T& operator[](std::size_t index)       & noexcept { return m_data[index]; }
+    const T& operator[](std::size_t index) const & noexcept { return m_data[index]; }
+
+    /**
+     * @brief Returns the start of a list
+     *
+     * @return iterator
+     */
+    iterator      begin()        & noexcept { return { *this, Head() }; }
+
+    /**
+     * @brief Returns the start of a const list
+     *
+     * @return constIterator
+     */
+    constIterator begin()  const & noexcept { return { *this, Head() }; }
+
+    /**
+     * @brief Returns the start of a const list
+     *
+     * @return constIterator
+     */
+    constIterator cbegin() const & noexcept { return { *this, Head() }; }
+
+    /**
+     * @brief Returns the end of a list
+     *
+     * @return iterator
+     */
+    iterator      end()          & noexcept { return { *this, 0 }; }
+
+    /**
+     * @brief Returns the end of a const list
+     *
+     * @return constIterator
+     */
+    constIterator end()    const & noexcept { return { *this, 0 }; }
+
+    /**
+     * @brief Returns the end of a const list
+     *
+     * @return constIterator
+     */
+    constIterator cend()   const & noexcept { return { *this, 0 }; }
 private:
      err::ErrorCode realloc(std::size_t newLength)
     {

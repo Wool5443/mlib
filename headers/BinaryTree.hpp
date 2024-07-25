@@ -304,8 +304,8 @@ public:
      */
     err::Result<BinaryTreeNode*> Clone()
     {
-        err::Result<BinaryTreeNode*> left {};
-        err::Result<BinaryTreeNode*> right{};
+        err::Result<BinaryTreeNode*> left;
+        err::Result<BinaryTreeNode*> right;
 
         if (left)
         {

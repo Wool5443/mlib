@@ -63,12 +63,12 @@ public:
 public:
     HashTable() noexcept = default;
 
-    HashTable(std::size_t hintLength)
-        : m_containers{hintLength}
+    HashTable(std::size_t size)
+        : m_containers(size)
     {
         if (auto error = Error())
             LOG_ERROR(error);
-        m_containers.length = hintLength;
+        m_containers.length = size;
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -76,9 +76,9 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    static err::Result<HashTable> New() noexcept
+    static err::Result<HashTable> New(std::size_t size) noexcept
     {
-        HashTable tab;
+        HashTable tab(size);
         LOG_ERROR_IF(tab.Error());
         return { tab, tab.Error() };
     }
@@ -88,55 +88,6 @@ public:
         HashTable tab(other);
         LOG_ERROR_IF(tab.Error());
         return { tab, tab.Error() };
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
-//                              INDEXING AND ITERATORS
-//
-///////////////////////////////////////////////////////////////////////////////
-private:
-    uint64_t getIndex(const Key& key)
-    {
-        HardAssert(m_containers.length > 0, err::ERROR_ZERO_DIVISION);
-
-        return GetHash()(key) % m_containers.length;
-    }
-
-#define CHECK_CONTAINER(container, poison)              \
-do                                                      \
-{                                                       \
-    if (auto error = (container).Error())               \
-    {                                                   \
-        LOG_ERROR(error);                               \
-        return poison;                                  \
-    }                                                   \
-} while (0)
-
-public:
-    Val* operator[](const Key& key) & noexcept
-    {
-        if (auto error = Error())
-        {
-            if (error == err::ERROR_UNINITIALIZED)
-                return nullptr;
-            LOG_ERROR(error);
-            return nullptr;
-        }
-
-        std::size_t index = getIndex(key);
-        CHECK_CONTAINER(m_containers[index], nullptr);
-
-        auto found = findInContainer(m_containers[index], key);
-
-        if (!found)
-            return nullptr;
-
-        return &m_containers[index][found.value].val;
-    }
-
-    const Val* operator[](const Key& key) const & noexcept
-    {
-        return (*this)[key];
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -188,6 +139,49 @@ public:
     {
         return Pop(key).error;
     }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              INDEXING AND ITERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
+private:
+    uint64_t getIndex(const Key& key)
+    {
+        HardAssert(m_containers.length > 0, err::ERROR_ZERO_DIVISION);
+
+        return GetHash()(key) % m_containers.length;
+    }
+
+public:
+    Val* operator[](const Key& key) & noexcept
+    {
+        if (auto error = Error())
+        {
+            if (error == err::ERROR_UNINITIALIZED)
+                return nullptr;
+            LOG_ERROR(error);
+            return nullptr;
+        }
+
+        std::size_t index = getIndex(key);
+        if (auto error = m_containers[index].Error())
+        {
+            LOG_ERROR(error);
+            return nullptr;
+        }
+
+        auto found = findInContainer(m_containers[index], key);
+
+        if (!found)
+            return nullptr;
+
+        return &m_containers[index][found.value].val;
+    }
+
+    const Val* operator[](const Key& key) const & noexcept
+    {
+        return (*this)[key];
+    }
 private:
     err::Result<std::size_t>
     findInContainer(const Container& container, const Key& key)
@@ -198,8 +192,6 @@ private:
                 return container.GetIndexFromPointer(&keyVal);
         return err::ERROR_NOT_FOUND;
     }
-
-#undef CHECK_CONTAINER
 private:
     err::ErrorCode realloc()
     {

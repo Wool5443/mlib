@@ -493,7 +493,11 @@ struct Hash<CString>
 {
     HashType operator()(const CString& cstring)
     {
+        #ifdef __linux__
         return CRC32(cstring.data, cstring.length);
+        #else
+        return MurMur(cstring.data, cstring.length);
+        #endif
     }
 };
 
@@ -502,7 +506,11 @@ struct Hash<String>
 {
     HashType operator()(const String& string)
     {
+        #ifdef __linux__
         return CRC32(string.RawPtr(), string.length);
+        #else
+        return MurMur(string.RawPtr(), string.length);
+        #endif
     }
 };
 

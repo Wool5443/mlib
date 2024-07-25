@@ -3,7 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __linux__
 extern "C" uint64_t CRC32(const void* data, size_t size, uint64_t seed = 0xBEBDA);
+#endif
+extern "C" uint64_t MurMur(const void* data, size_t size, uint64_t seed = 0xBEBDA);
 
 namespace mlib {
 

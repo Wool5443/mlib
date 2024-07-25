@@ -2,11 +2,17 @@ cmake_minimum_required(VERSION 3.5)
 set(projectName "mlib")
 project(${projectName} CXX ASM_NASM)
 
+set(default_build_type "Release")
+
+if(Linux)
+
 set(CMAKE_NASM_LINK_EXECUTABLE "ld <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 set(CAN_USE_ASSEMBLER TRUE)
 set(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
 
 enable_language(ASM_NASM)
+
+endif(Linux)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
@@ -35,9 +41,13 @@ set(CMAKE_CXX_FLAGS_RELEASE
 -Wno-conversion -Wno-unused-variable -Wno-pointer-arith -Wextra -march=native       \
 -mavx512f -O3 -DNDEBUG")
 
-FILE(GLOB SOURCES_CPP src/*.cpp src/*.asm Utils/*.cpp example/main.cpp
+FILE(GLOB SOURCES_CPP src/*.cpp Utils/*.cpp example/main.cpp
                       tests/Tests.cpp libs/Utils/*.cpp)
 FILE(GLOB SOURCES_HPP headers/*.hpp Utils/*.hpp tests/Tests.hpp libs/Utils/*.hpp)
+
+if(Linux)
+FILE(GLOB SOURCES_CPP ${SOURCE_CPP} src/*.asm)
+endif(Linux)
 
 file(MAKE_DIRECTORY "dump/list")
 file(MAKE_DIRECTORY "dump/list/txt")

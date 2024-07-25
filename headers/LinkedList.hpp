@@ -38,9 +38,9 @@ class LinkedList final
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Buffer<T>           m_data(1);
-    Buffer<std::size_t> m_next(1);
-    Buffer<std::size_t> m_prev(1);
+    Buffer<T>           m_data{1};
+    Buffer<std::size_t> m_next{1};
+    Buffer<std::size_t> m_prev{1};
 
     String        m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
@@ -415,6 +415,8 @@ public:
             "</style>,\n"
             "<body>\n"
             "<div class=\"content\">";
+
+        return err::EVERYTHING_FINE;
     }
 
     /**

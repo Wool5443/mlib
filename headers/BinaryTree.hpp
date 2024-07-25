@@ -584,6 +584,8 @@ public:
         "</style>,\n"
         "<body>\n"
         "<div class=\"content\">";
+
+        return err::EVERYTHING_FINE;
     }
 
     /**

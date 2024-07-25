@@ -51,6 +51,11 @@ private:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    /**
+     * @brief Get error
+     *
+     * @return err::ErrorCode
+     */
     err::ErrorCode Error() const noexcept
     {
         return m_containers.Error();
@@ -61,8 +66,16 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    /**
+     * @brief Construct an empty Hash Table
+     */
     HashTable() noexcept = default;
 
+    /**
+     * @brief Construct a Hash Table of some size
+     *
+     * @param [in] size
+     */
     HashTable(std::size_t size)
         : m_containers(size)
     {
@@ -76,6 +89,12 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    /**
+     * @brief Create a Hash Table of some size
+     *
+     * @param [in] size
+     * @return err::Result<HashTable>
+     */
     static err::Result<HashTable> New(std::size_t size) noexcept
     {
         HashTable tab(size);
@@ -83,6 +102,12 @@ public:
         return { tab, tab.Error() };
     }
 
+    /**
+     * @brief Copy a Hash Table
+     *
+     * @param [in] other
+     * @return err::Result<HashTable>
+     */
     static err::Result<HashTable> New(const HashTable& other) noexcept
     {
         HashTable tab(other);
@@ -95,6 +120,12 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
+    /**
+     * @brief Add a key-value pair to the table if it is not there yet
+     *
+     * @param keyVal key-value pair
+     * @return err::ErrorCode
+     */
     err::ErrorCode Add(HashTableElement&& keyVal)
     {
         RETURN_ERROR(realloc());
@@ -115,6 +146,13 @@ public:
         return err::EVERYTHING_FINE;
     }
 
+    /**
+     * @brief Remove a table entry and return its value
+     *
+     * @param [in] key
+     *
+     * @return err::Result<Val>
+     */
     err::Result<Val> Pop(const Key& key)
     {
         RETURN_ERROR_RESULT(Error(), {});
@@ -135,6 +173,12 @@ public:
         return { result.value.val, result.error };
     }
 
+    /**
+     * @brief Remove a key from the table
+     *
+     * @param key
+     * @return err::ErrorCode
+     */
     err::ErrorCode Remove(const Key& key)
     {
         return Pop(key).error;
@@ -144,14 +188,6 @@ public:
 //                              INDEXING AND ITERATORS
 //
 ///////////////////////////////////////////////////////////////////////////////
-private:
-    uint64_t getIndex(const Key& key)
-    {
-        HardAssert(m_containers.length > 0, err::ERROR_ZERO_DIVISION);
-
-        return GetHash()(key) % m_containers.length;
-    }
-
 public:
     Val* operator[](const Key& key) & noexcept
     {
@@ -193,6 +229,13 @@ private:
         return err::ERROR_NOT_FOUND;
     }
 private:
+    uint64_t getIndex(const Key& key)
+    {
+        HardAssert(m_containers.length > 0, err::ERROR_ZERO_DIVISION);
+
+        return GetHash()(key) % m_containers.length;
+    }
+
     err::ErrorCode realloc()
     {
         static const double whenToResizeFactor   = 1.0 / 3.0;
@@ -222,7 +265,6 @@ private:
 
         return err::EVERYTHING_FINE;
     }
-
 };
 
 } // namespace mlib

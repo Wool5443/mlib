@@ -158,7 +158,7 @@ err::ErrorCode Tests::TestHashTable()
 {
     Utils::Timer timer;
 
-    HashTable<CString, int, 4096> wordsCountTable;
+    HashTable<CString, int> wordsCountTable;
     RETURN_ERROR(wordsCountTable.Error());
 
     char* text = Utils::ReadFileToBuf("../tests/Words.txt");
@@ -182,7 +182,10 @@ err::ErrorCode Tests::TestHashTable()
 
     auto timeSpent = timer.Stop();
 
-    std::cout << "Hashtable spent: " << static_cast<uint64_t>(timeSpent.count() / 1000000) << " ms" << '\n';
+    std::cout
+    << "Hashtable spent: "
+    << static_cast<uint64_t>(timeSpent.count() / 1000000)
+    << " ms" << '\n';
 
     std::ofstream out("../tests/HashTableResult.txt");
     if (!out)

@@ -3,12 +3,12 @@
 
 #include <ostream>
 
+#include "Utils.hpp"
 #include "Hash.hpp"
 
 namespace mlib {
 
-template<typename Key, typename Val, std::size_t Size = 8,
-         typename Hash = Hash<Key>>
+template<typename Key, typename Val, typename GetHash = Hash<Key>>
 
 class HashTable
 {
@@ -43,8 +43,8 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    Container m_containers[Size]{};
-    String    m_dumpFolder{};
+    Vector<Container> m_containers{};
+    std::size_t       m_length = 0;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
@@ -53,7 +53,7 @@ private:
 public:
     err::ErrorCode Error() const noexcept
     {
-        return m_dumpFolder.Error();
+        return m_containers.Error();
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -61,7 +61,15 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    HashTable() noexcept {}
+    HashTable() noexcept = default;
+
+    HashTable(std::size_t hintLength)
+        : m_containers{hintLength}
+    {
+        if (auto error = Error())
+            LOG_ERROR(error);
+        m_containers.length = hintLength;
+    }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              RESULT CTORS
@@ -87,9 +95,11 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 private:
-    static uint64_t getIndex(const Key& key)
+    uint64_t getIndex(const Key& key)
     {
-        return Hash()(key) % Size;
+        HardAssert(m_containers.length > 0, err::ERROR_ZERO_DIVISION);
+
+        return GetHash()(key) % m_containers.length;
     }
 
 #define CHECK_CONTAINER(container, poison)              \
@@ -105,6 +115,14 @@ do                                                      \
 public:
     Val* operator[](const Key& key) & noexcept
     {
+        if (auto error = Error())
+        {
+            if (error == err::ERROR_UNINITIALIZED)
+                return nullptr;
+            LOG_ERROR(error);
+            return nullptr;
+        }
+
         std::size_t index = getIndex(key);
         CHECK_CONTAINER(m_containers[index], nullptr);
 
@@ -126,25 +144,10 @@ public:
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    err::ErrorCode Add(const HashTableElement& keyVal)
-    {
-        std::size_t index = getIndex(keyVal.key);
-        RETURN_ERROR(m_containers[index].Error());
-
-        auto found = findInContainer(m_containers[index], keyVal.key);
-
-        if (found)
-            return found;
-
-        err::ErrorCode error = m_containers[index].PushBack(keyVal);
-
-        LOG_ERROR_IF(error);
-
-        return error;
-    }
-
     err::ErrorCode Add(HashTableElement&& keyVal)
     {
+        RETURN_ERROR(realloc());
+
         std::size_t index = getIndex(keyVal.key);
         RETURN_ERROR(m_containers[index].Error());
 
@@ -154,14 +157,17 @@ public:
             return found;
 
         err::ErrorCode error = m_containers[index].PushBack(std::move(keyVal));
+        RETURN_ERROR(error);
 
-        LOG_ERROR_IF(error);
+        m_length++;
 
-        return error;
+        return err::EVERYTHING_FINE;
     }
 
     err::Result<Val> Pop(const Key& key)
     {
+        RETURN_ERROR_RESULT(Error(), {});
+
         std::size_t index = getIndex(key);
         RETURN_ERROR_RESULT(m_containers[index].Error(), {});
 
@@ -194,6 +200,36 @@ private:
     }
 
 #undef CHECK_CONTAINER
+private:
+    err::ErrorCode realloc()
+    {
+        static const double whenToResizeFactor   = 1.0 / 3.0;
+        static const std::size_t growNumerator   = 3;
+        static const std::size_t growDenominator = 2;
+        static const std::size_t minCapacity     = 9;
+
+        std::size_t capacity = m_containers.length;
+
+        if (capacity
+            && static_cast<double>(m_length) / capacity
+            < whenToResizeFactor)
+            return err::EVERYTHING_FINE;
+
+        std::size_t newCapacity = std::max(
+            minCapacity,
+            capacity * growNumerator / growDenominator
+        );
+
+        HashTable newTable{newCapacity};
+
+        for (auto& container : m_containers)
+            for (HashTableElement& elem : container)
+                RETURN_ERROR(newTable.Add(std::move(elem)));
+
+        *this = std::move(newTable);
+
+        return err::EVERYTHING_FINE;
+    }
 
 };
 

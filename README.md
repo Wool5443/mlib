@@ -6,6 +6,16 @@ Some very basic templated containers plus logging system.
 First add the repo to your project.
 ```bash
 git clone https://github.com/Wool5443/mlib
+
+cd mlib
+
+mkdir build
+cd build
+
+cmake ..
+ninja -j8
+
+./mlib
 ```
 Then add the source and header files to your build system.
 

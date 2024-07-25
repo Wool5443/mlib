@@ -156,8 +156,6 @@ err::ErrorCode Tests::TestBTree()
 
 err::ErrorCode Tests::TestHashTable()
 {
-    Utils::Timer timer;
-
     HashTable<CString, int> wordsCountTable;
     RETURN_ERROR(wordsCountTable.Error());
 
@@ -177,15 +175,8 @@ err::ErrorCode Tests::TestHashTable()
         if (count)
             *count += 1;
         else
-            RETURN_ERROR(wordsCountTable.Add(word, 1));
+            RETURN_ERROR(wordsCountTable.Add({ word, 1 }));
     }
-
-    auto timeSpent = timer.Stop();
-
-    std::cout
-    << "Hashtable spent: "
-    << static_cast<uint64_t>(timeSpent.count() / 1000000)
-    << " ms" << '\n';
 
     std::ofstream out("../tests/HashTableResult.txt");
     if (!out)
@@ -204,6 +195,49 @@ err::ErrorCode Tests::TestHashTable()
     out.close();
 
     system("diff ../tests/HashTableResult.txt ../tests/ResultsPython.txt");
+
+    return err::EVERYTHING_FINE;
+}
+
+err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
+{
+    static const std::size_t to_ms = 1000000;
+
+    char* text = Utils::ReadFileToBuf("../tests/Words.txt");
+    if (!text)
+        RETURN_ERROR(err::ERROR_NO_MEMORY);
+
+    auto wordsRes = String::SplitInPlace(text);
+    RETURN_ERROR(wordsRes);
+    Vector<const char*>& words = wordsRes.value;
+
+    Utils::Timer timer;
+    for (std::size_t i = 0; i < numberOfTests; i++)
+    {
+        HashTable<CString, int> wordsCountTable;
+        RETURN_ERROR(wordsCountTable.Error());
+
+        for (const char* word : words)
+        {
+            int* count = wordsCountTable[word];
+
+            if (count)
+                *count += 1;
+            else
+                RETURN_ERROR(wordsCountTable.Add({ word, 1 }));
+        }
+
+        for (const char* word : words)
+        {
+            int* count = wordsCountTable[word];
+            *count += 1;
+        }
+    }
+
+    auto duration = timer.Stop();
+
+    std::cout << "Test took: "
+    << duration.count() / to_ms << "ms\n";
 
     return err::EVERYTHING_FINE;
 }

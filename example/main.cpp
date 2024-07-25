@@ -19,7 +19,7 @@ int main()
         GetErrorName(Tests::TestBTree()),
         GetErrorName(Tests::TestHashTable()),
     };
-    std::cout << "\n\n";
+    std::cout << '\n';
 
     std::cout << "String:    " << TEST_RESULTS[0] << "\n";
     std::cout << "Vector:    " << TEST_RESULTS[1] << "\n";

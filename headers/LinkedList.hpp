@@ -550,10 +550,10 @@ public:
      */
     err::ErrorCode Dump() noexcept
     {
-        static const std::size_t NUM_STR_MAX_LENGTH = 21;
-        static std::size_t       dumpIteration      = 0;
+        static const std::size_t numStrMaxLength = 21;
+        static std::size_t       dumpIteration   = 0;
 
-        char iterString[NUM_STR_MAX_LENGTH] = "";
+        char iterString[numStrMaxLength] = "";
         sprintf(iterString, "%zu", dumpIteration);
 
         err::ErrorCode error = Error();

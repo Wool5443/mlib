@@ -491,7 +491,7 @@ struct CString final
 template<>
 struct Hash<CString>
 {
-    uint64_t operator()(const CString& cstring)
+    HashType operator()(const CString& cstring)
     {
         return CRC32(cstring.data, cstring.length);
     }
@@ -500,7 +500,7 @@ struct Hash<CString>
 template<>
 struct Hash<String>
 {
-    uint64_t operator()(const String& string)
+    HashType operator()(const String& string)
     {
         return CRC32(string.RawPtr(), string.length);
     }

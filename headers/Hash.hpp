@@ -7,10 +7,12 @@ extern "C" uint64_t CRC32(const void* data, size_t size, uint64_t seed = 0xBEBDA
 
 namespace mlib {
 
+using HashType = uint64_t;
+
 template<typename T>
 struct Hash
 {
-    uint64_t operator()()
+    HashType operator()()
     {
         return 0;
     }

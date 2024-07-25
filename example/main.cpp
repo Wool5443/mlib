@@ -27,6 +27,8 @@ int main()
     std::cout << "BTree:     " << TEST_RESULTS[3] << "\n";
     std::cout << "HashTable: " << TEST_RESULTS[4] << "\n";
 
+    RETURN_ERROR(Tests::TestHashTableSpeed(10));
+
     LOG("Hello, friends");
 
     return 0;

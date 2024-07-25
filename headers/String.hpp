@@ -82,8 +82,7 @@ public:
      * @param [in] hintLength legnth to ensure capacity
      * for less reallocations
      */
-    explicit String(std::size_t hintLength) noexcept
-        : m_data(hintLength + 1) {}
+    explicit String(std::size_t hintLength) noexcept;
 
     /**
      * @brief Construct a new String object
@@ -92,17 +91,7 @@ public:
      * @param [in] string
      * @param [in] length
      */
-    String(const char* string, std::size_t length) noexcept
-        : m_data(length + 1), length(length)
-    {
-        if (auto err = Error())
-        {
-            LOG_ERROR(err);
-            return;
-        }
-
-        std::memcpy(RawPtr(), string, length);
-    }
+    String(const char* string, std::size_t length) noexcept;
 
     /**
      * @brief Construct a new String object
@@ -110,8 +99,7 @@ public:
      *
      * @param [in] string
      */
-    String(const char* string) noexcept
-        : String(string, strlen(string)) {}
+    String(const char* string) noexcept;
 
     /**
      * @brief Construct a new String object
@@ -119,8 +107,7 @@ public:
      *
      * @param [in] chr
      */
-    String(const char chr) noexcept
-        : String(&chr, 1) {}
+    String(const char chr) noexcept;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              RESULT CTORS
@@ -135,12 +122,7 @@ public:
      *
      * @return err::Result<String>
      */
-    static err::Result<String> New(const char* string) noexcept
-    {
-        String str(string);
-        LOG_ERROR_IF(str.Error());
-        return { str, str.Error() };
-    }
+    static err::Result<String> New(const char* string) noexcept;
 
     /**
      * @brief Constructs a new String object
@@ -150,12 +132,8 @@ public:
      *
      * @return err::Result<String>
      */
-    static err::Result<String> New(const char* string, std::size_t length) noexcept
-    {
-        String str(string, length);
-        LOG_ERROR_IF(str.Error());
-        return { str, str.Error() };
-    }
+    static err::Result<String> New(const char* string, std::size_t length)
+    noexcept;
 
     /**
      * @brief Construct a new String object
@@ -168,12 +146,7 @@ public:
      *
      * @return err::Result<String>
      */
-    static err::Result<String> New(std::size_t hintLength) noexcept
-    {
-        String str(hintLength);
-        LOG_ERROR_IF(str.Error());
-        return { str, str.Error() };
-    }
+    static err::Result<String> New(std::size_t hintLength) noexcept;
 
     /**
      * @brief Construct a new String object
@@ -183,12 +156,7 @@ public:
      *
      * @return err::Result<String>
      */
-    static err::Result<String> New(const String& other) noexcept
-    {
-        String str(other);
-        LOG_ERROR_IF(str.Error());
-        return { str, str.Error() };
-    }
+    static err::Result<String> New(const String& other) noexcept;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              INDEXING AND ITERATORS
@@ -198,55 +166,57 @@ public:
     using iterator      = char*;
     using constIterator = const char*;
 
-          char& operator[](std::size_t index)       & noexcept { return m_data[index]; }
-    const char& operator[](std::size_t index) const & noexcept { return m_data[index]; }
+          char& operator[](std::size_t index)       & noexcept;
+    const char& operator[](std::size_t index) const & noexcept;
 
     /**
      * @brief Returns the start of a buffer
      *
      * @return iterator
      */
-    iterator      begin()        & noexcept { return m_data.RawPtr();          }
+    iterator      begin()        & noexcept;
 
     /**
      * @brief Returns the start of a const buffer
      *
      * @return constIterator
      */
-    constIterator begin()  const & noexcept { return m_data.RawPtr();          }
+    constIterator begin()  const & noexcept;
 
     /**
      * @brief Returns the start of a const buffer
      *
      * @return constIterator
      */
-    constIterator cbegin() const & noexcept { return m_data.RawPtr();          }
+    constIterator cbegin() const & noexcept;
 
     /**
      * @brief Returns the end of a buffer
      *
      * @return iterator
      */
-     iterator     end()         & noexcept { return m_data.RawPtr() + length;  }
+     iterator     end()          & noexcept;
 
     /**
      * @brief Returns the end of a const buffer
      *
      * @return constIterator
      */
-    constIterator end()    const & noexcept { return m_data.RawPtr() + length; }
+    constIterator end()    const & noexcept;
 
     /**
      * @brief Returns the end of a const buffer
      *
      * @return constIterator
      */
-    constIterator cend()   const & noexcept { return m_data.RawPtr() + length; }
+    constIterator cend()   const & noexcept;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              MATH OPERATORS
 //
 ///////////////////////////////////////////////////////////////////////////////
+private:
+    String& append(const char* string, std::size_t strLength) noexcept;
 public:
     /**
      * @brief Operator spaceship comparison
@@ -255,16 +225,7 @@ public:
      *
      * @return std::strong_ordering
      */
-    std::strong_ordering operator<=>(const char* other) const noexcept
-    {
-        int result = std::strcmp(*this, other);
-
-        if (result < 0)
-            return std::strong_ordering::less;
-        else if (result == 0)
-            return std::strong_ordering::equal;
-        return std::strong_ordering::greater;
-    }
+    std::strong_ordering operator<=>(const char* other) const noexcept;
 
     /**
      * @brief Compares string for equality
@@ -274,15 +235,8 @@ public:
      * @return true equal
      * @return false not equal
      */
-    bool operator==(const String& other) const noexcept
-    {
-        return length == other.length &&
-               strcmp(RawPtr(), other.RawPtr()) == 0;
-    }
-    bool operator==(const char* other) const noexcept
-    {
-        return strcmp(RawPtr(), other) == 0;
-    }
+    bool operator==(const String& other) const noexcept;
+    bool operator==(const char* other)   const noexcept;
 
     /**
      * @brief Compares string for inequality
@@ -292,14 +246,8 @@ public:
      * @return true not equal
      * @return false equal
      */
-    bool operator!=(const String& other) const noexcept
-    {
-        return !operator==(other);
-    }
-    bool operator!=(const char* other) const noexcept
-    {
-        return !operator==(other);
-    }
+    bool operator!=(const String& other) const noexcept;
+    bool operator!=(const char* other)   const noexcept;
 
     /**
      * @brief appends other
@@ -308,74 +256,33 @@ public:
      *
      * @return String& result
      */
-    String& operator+=(const char* other) noexcept
-    {
-        return append(other, strlen(other));
-    }
-    String& operator+=(const String& other) noexcept
-    {
-        return append(other.RawPtr(), other.length);
-    }
-
-    #define OPERATOR_PLUS_CODE                              \
-    {                                                       \
-        String result{lhs};                                 \
-        result += rhs;                                      \
-        return result;                                      \
-    }
-
-    #define RVAL_OPERATOR_PLUS_CODE                         \
-    {                                                       \
-        lhs += rhs;                                         \
-        return lhs;                                         \
-    }
+    String& operator+=(const char* other) noexcept;
+    String& operator+=(const String& other) noexcept;
 
     /**
      * @brief Adds s2 strings
      */
-    friend String operator+(const char* lhs, const String& rhs) noexcept
-    OPERATOR_PLUS_CODE
+    friend String operator+(const char* lhs, const String& rhs) noexcept;
+
     /**
      * @brief Adds s2 strings
      */
-    friend String operator+(const String& lhs, const char* rhs) noexcept
-    OPERATOR_PLUS_CODE
+    friend String operator+(const String& lhs, const char* rhs) noexcept;
+
     /**
      * @brief Adds s2 strings
      */
-    friend String operator+(const String& lhs, const String& rhs) noexcept
-    OPERATOR_PLUS_CODE
+    friend String operator+(const String& lhs, const String& rhs) noexcept;
+
     /**
      * @brief Adds s2 strings
      */
-    friend String operator+(String&& lhs, const char* rhs) noexcept
-    RVAL_OPERATOR_PLUS_CODE
+    friend String operator+(String&& lhs, const char* rhs) noexcept;
+
     /**
      * @brief Adds s2 strings
      */
-    friend String operator+(String&& lhs, const String& rhs) noexcept
-    RVAL_OPERATOR_PLUS_CODE
-
-    #undef OPERATOR_PLUS_CODE
-    #undef RVAL_OPERATOR_PLUS_CODE
-private:
-    String& append(const char* string, std::size_t strLength) noexcept
-    {
-        std::size_t newLength = length + strLength;
-
-        m_data.Realloc(newLength + 1);
-        if (auto err = Error())
-        {
-            LOG_ERROR(err);
-            return *this;
-        }
-
-        std::memcpy(RawPtr() + length, string, strLength);
-
-        length = newLength;
-
-        return *this;
-    }
+    friend String operator+(String&& lhs, const String& rhs) noexcept;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              STREAM OPERATORS
@@ -390,19 +297,16 @@ public:
      *
      * @return std::ostream&
      */
-    friend std::ostream& operator<<(std::ostream& out, const String& string)
-    {
-        return out << string.RawPtr();
-    }
+    friend std::ostream& operator<<(std::ostream& out, const String& string);
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              IMPLICIT CASTS
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
-    operator char*()              noexcept { return RawPtr(); }
-    operator const char*()  const noexcept { return RawPtr(); }
-    operator bool()         const noexcept { return Error();  }
+    operator char*()                & noexcept;
+    operator const char*()    const & noexcept;
+    operator bool()           const   noexcept;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS
@@ -416,26 +320,7 @@ public:
      *
      * @return err::Result<String>
      */
-    static err::Result<String> ReadFromFile(const char* filePath)
-    {
-        HardAssert(filePath, err::ERROR_NULLPTR);
-
-        struct stat result = {};
-        stat(filePath, &result);
-
-        std::ifstream input(filePath);
-        if (!input)
-            return err::ERROR_BAD_FILE;
-
-        auto strRes = String::New(result.st_size);
-        RETURN_RESULT(strRes);
-
-        input.read(strRes.value, result.st_size);
-
-        strRes.value.length = result.st_size;
-
-        return strRes;
-    }
+    static err::Result<String> ReadFromFile(const char* filePath) noexcept;
 
     /**
      * @brief Finds a char and returns its index
@@ -444,17 +329,7 @@ public:
      *
      * @return err::Result<std::size_t> index result
      */
-    err::Result<std::size_t> Find(char chr) const noexcept
-    {
-        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
-
-        const char* buf   = RawPtr();
-        const char* found = strchr(buf, chr);
-        if (!found)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
-
-        return found - buf;
-    }
+    err::Result<std::size_t> Find(char chr) const noexcept;
 
     /**
      * @brief Finds a substring and returns its index
@@ -463,20 +338,7 @@ public:
      *
      * @return err::Result<std::size_t> index result
      */
-    err::Result<std::size_t> Find(const char* string) const noexcept
-    {
-        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
-
-        SoftAssertResult(string, SIZE_MAX, err::ERROR_NULLPTR);
-
-        const char* data  = RawPtr();
-        const char* found = strstr(data, string);
-
-        if (!found)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
-
-        return found - data;
-    }
+    err::Result<std::size_t> Find(const char* string) const noexcept;
 
     /**
      * @brief Counts occurences of chr
@@ -485,18 +347,7 @@ public:
      *
      * @return err::Result<std::size_t> count result
      */
-    err::Result<std::size_t> Count(char chr) const noexcept
-    {
-        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
-
-        std::size_t count = 0;
-
-        for (std::size_t i = 0; i < length; i++)
-            if (m_data[i] == chr)
-                count++;
-
-        return count;
-    }
+    err::Result<std::size_t> Count(char chr) const noexcept;
 
     /**
      * @brief Counts occurences of string
@@ -505,24 +356,7 @@ public:
      *
      * @return err::Result<std::size_t> count result
      */
-    err::Result<std::size_t> Count(const char* string) const noexcept
-    {
-        if (!string)
-            RETURN_ERROR_RESULT(err::ERROR_NULLPTR, SIZE_MAX);
-
-        RETURN_ERROR_RESULT(Error(), SIZE_MAX);
-
-        std::size_t count = 0;
-        const char* found = strstr(RawPtr(), string);
-
-        while (found)
-        {
-            count++;
-            found = strstr(found + 1, string);
-        }
-
-        return count;
-    }
+    err::Result<std::size_t> Count(const char* string) const noexcept;
 private:
     static constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
 public:
@@ -531,10 +365,7 @@ public:
      *
      * @return err::Result<Vector<String>> vector of strings
      */
-    err::Result<Vector<String>> Split() const noexcept
-    {
-        return Split(SPACE_CHARS);
-    }
+    err::Result<Vector<String>> Split() const noexcept;
 
     /**
      * @brief Split the string by delimeters
@@ -543,31 +374,7 @@ public:
      *
      * @return err::Result<Vector<String>> vector of strings
      */
-    err::Result<Vector<String>> Split(const char* delimiters) const noexcept
-    {
-        RETURN_ERROR_RESULT(Error(), {});
-
-        char* buf = strdup(RawPtr());
-
-        if (!buf)
-            RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, {});
-
-        Vector<String> words;
-
-        const char* token = strtok(buf, delimiters);
-
-        std::size_t i = 0;
-
-        while (token)
-        {
-            RETURN_ERROR_RESULT(words.PushBack(token), {}, free(buf));
-            token = strtok(nullptr, delimiters);
-        }
-
-        free(buf);
-
-        return words;
-    }
+    err::Result<Vector<String>> Split(const char* delimiters) const noexcept;
 
     /**
      * @brief Splits the string in place by space chars.
@@ -579,10 +386,7 @@ public:
      * @return err::Result<Vector<const char*>>
      */
     static err::Result<Vector<const char*>>
-    SplitInPlace(char* string)
-    {
-        return SplitInPlace(string, SPACE_CHARS);
-    }
+    SplitInPlace(char* string) noexcept;
 
     /**
      * @brief Splits the string in place.
@@ -595,20 +399,7 @@ public:
      * @return err::Result<Vector<const char*>>
      */
     static err::Result<Vector<const char*>>
-    SplitInPlace(char* string, const char* delimiters)
-    {
-        Vector<const char*> words;
-
-        const char* token = strtok(string, delimiters);
-
-        while (token)
-        {
-            words.PushBack(token);
-            token = strtok(nullptr, delimiters);
-        }
-
-        return words;
-    }
+    SplitInPlace(char* string, const char* delimiters) noexcept;
 
     /**
      * @brief Filters out characters
@@ -617,27 +408,7 @@ public:
      *
      * @return err::ErrorCode
      */
-    err::ErrorCode Filter(const char* filter) noexcept
-    {
-        RETURN_ERROR(Error());
-
-        SoftAssert(filter, err::ERROR_NULLPTR);
-
-        char*       writePtr = RawPtr();
-        const char* readPtr  = writePtr;
-
-        while (*readPtr)
-        {
-            char c = *readPtr++;
-
-            if (!std::strchr(filter, c))
-                *writePtr++ = c;
-        }
-
-        *writePtr = '\0';
-
-        return err::EVERYTHING_FINE;
-    }
+    err::ErrorCode Filter(const char* filter) noexcept;
 
     /**
      * @brief Filters out characters
@@ -646,26 +417,21 @@ public:
      *
      * @return err::ErrorCode
      */
-    err::ErrorCode Filter(const String& filter) noexcept
-    {
-        return Filter(filter.RawPtr());
-    }
+    err::ErrorCode Filter(const String& filter) noexcept;
 
     /**
      * @brief Filters out space characters
      *
      * @return err::ErrorCode
      */
-    err::ErrorCode Filter() noexcept
-    {
-        return Filter(SPACE_CHARS);
-    }
+    err::ErrorCode Filter() noexcept;
 
-    void Clear() noexcept
-    {
-        m_data[0] = '\0';
-        length = 0;
-    }
+    /**
+     * @brief Clears the string
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Clear() noexcept;
 };
 
 /** @struct CString

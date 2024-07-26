@@ -65,6 +65,7 @@ public:
 
         return err::EVERYTHING_FINE;
     }
+
     /**
      * @brief Set the right child
      *
@@ -86,188 +87,12 @@ public:
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
-//                              CTOR/DTOR AND =
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Construct a new Binary Tree Node object
-     */
-    BinaryTreeNode() noexcept {}
-
-    /**
-     * @brief Construct a new Binary Tree Node object
-     *
-     * @param [in] value init value
-     */
-    BinaryTreeNode(const T& value) noexcept
-        : value(value) {}
-
-    /**
-     * @brief Construct a new Binary Tree Node object
-     *
-     * @param [in] value init value
-     */
-    BinaryTreeNode(T&& value) noexcept
-        : value(value) {}
-
-    /**
-     * @brief Construct a new Binary Tree Node object
-     *
-     * @param [in] value init value
-     * @param [in] left left child
-     * @param [in] right right child
-     */
-    BinaryTreeNode(const T& value,
-                   BinaryTreeNode* left, BinaryTreeNode* right) noexcept
-        : value(value), left(left), right(right)
-    {
-        if (left)
-            left->parent  = this;
-        if (right)
-            right->parent = this;
-    }
-
-    /**
-     * @brief Construct a new Binary Tree Node object
-     *
-     * @param [in] value init value
-     * @param [in] left left child
-     * @param [in] right right child
-     */
-    BinaryTreeNode(T&& value,
-                   BinaryTreeNode* left, BinaryTreeNode* right) noexcept
-        : value(value), left(left), right(right)
-    {
-        if (left)
-            left->parent  = this;
-        if (right)
-            right->parent = this;
-    }
-
-    /**
-     * @brief BinaryTreeNode copy constructore
-     *
-     * @param [in] other node to copy
-     */
-    BinaryTreeNode(const BinaryTreeNode& other)
-        : value(other.value)
-    {
-        if (other.error)
-        {
-            LOG_ERROR(other.error);
-            return;
-        }
-
-        auto left = other.left->Clone();
-        if (!left)
-        {
-            error = left;
-            LOG_ERROR(error);
-            return;
-        }
-
-        auto right = other.right->Clone();
-        if (!right)
-        {
-            error = right;
-            LOG_ERROR(error);
-            return;
-        }
-
-        left  = left;
-        right = right;
-    }
-
-    /**
-     * @brief BinaryTreeNode move constructor
-     *
-     * @param [in] other node to move
-     */
-    BinaryTreeNode(BinaryTreeNode&& other)
-        : value(std::move(other.value)),
-          left(other.left), right(other.right),
-          parent(other.parent),
-          id(other.id)
-    {
-        if (other.parent)
-        {
-            if (other.parent->left == &other)
-                other.parent->left = this;
-            other.parent->right = this;
-        }
-
-        other.left   = nullptr;
-        other.right  = nullptr;
-        other.parent = nullptr;
-    }
-
-    /**
-     * @brief Copy assignment is forbidden
-     *
-     * @param [in] other node to copy
-     *
-     * @return BinaryTreeNode&
-     */
-    BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
-
-    /**
-     * @brief Move assignment is cool
-     *
-     * @param [in] other node to move
-     *
-     * @return BinaryTreeNode&
-     */
-    BinaryTreeNode& operator=(BinaryTreeNode&& other)
-    {
-        if (this == &other) return *this;
-
-        value    = std::move(other.value);
-        left     = other.left;
-        right    = other.right;
-        parent   = other.parent;
-        id       = other.id;
-
-        if (other.parent)
-        {
-            if (other.parent->left == &other)
-                other.parent->left = this;
-            other.parent->right = this;
-        }
-
-        other.left     = nullptr;
-        other.right    = nullptr;
-        other.parent   = nullptr;
-
-        return *this;
-    }
-
-    /**
-     * @brief Recursively deletes the node
-     *
-     * @return err::ErrorCode
-     */
-    err::ErrorCode Delete()
-    {
-        if (id == BAD_ID)
-            RETURN_ERROR(err::ERROR_BAD_ID);
-        if (left)
-            RETURN_ERROR(left->Delete());
-        if (right)
-            RETURN_ERROR(right->Delete());
-
-        delete this;
-
-        return err::EVERYTHING_FINE;
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
 //                              RESULT CTORS
 //
 ///////////////////////////////////////////////////////////////////////////////
 public:
     /**
-     * @brief Allocates memory for the node and returns a pointer
+     * @brief The valid way of creating a node
      *
      * @param [in] value init value
      * @param [in] left left child
@@ -275,11 +100,11 @@ public:
      *
      * @return err::Result<BinaryTreeNode*> new node
      */
-    static err::Result<BinaryTreeNode*> New(const T& value = {},
+    static err::Result<BinaryTreeNode*> New(T&& value = {},
                                             BinaryTreeNode* left  = nullptr,
                                             BinaryTreeNode* right = nullptr)
     {
-        auto node = new BinaryTreeNode(value, left, right);
+        auto node = new BinaryTreeNode(std::move(value), left, right);
 
         if (!node)
             RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, nullptr);
@@ -321,7 +146,72 @@ public:
 
         return BinaryTreeNode::New(value, left.value, right.value);
     }
+
+    /**
+     * @brief Recursively deletes the node
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode Delete()
+    {
+        if (id == BAD_ID)
+            RETURN_ERROR(err::ERROR_BAD_ID);
+        if (left)
+            RETURN_ERROR(left->Delete());
+        if (right)
+            RETURN_ERROR(right->Delete());
+
+        delete this;
+
+        return err::EVERYTHING_FINE;
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTOR/DTOR AND =
+//
+///////////////////////////////////////////////////////////////////////////////
 private:
+    /**
+     * @brief Construct a new Binary Tree Node object
+     *
+     * @param [in] value init value
+     * @param [in] left left child
+     * @param [in] right right child
+     */
+    BinaryTreeNode(const T& value,
+                   BinaryTreeNode* left, BinaryTreeNode* right) noexcept
+        : value(value), left(left), right(right)
+    {
+        if (left)
+            left->parent  = this;
+        if (right)
+            right->parent = this;
+    }
+
+    /**
+     * @brief Construct a new Binary Tree Node object
+     *
+     * @param [in] value init value
+     * @param [in] left left child
+     * @param [in] right right child
+     */
+    BinaryTreeNode(T&& value,
+                   BinaryTreeNode* left, BinaryTreeNode* right) noexcept
+        : value(std::move(value)), left(left), right(right)
+    {
+        if (left)
+            left->parent  = this;
+        if (right)
+            right->parent = this;
+    }
+
+    BinaryTreeNode(const BinaryTreeNode& other)            = delete;
+    BinaryTreeNode(BinaryTreeNode&& other)                 = delete;
+    BinaryTreeNode& operator=(const BinaryTreeNode& other) = delete;
+    BinaryTreeNode& operator=(BinaryTreeNode&& other)      = delete;
+
+    ~BinaryTreeNode() = default;
+
     std::size_t getNewId()
     {
         static std::size_t id = 1;
@@ -406,7 +296,7 @@ public:
      */
     BinaryTree(T&& value)
     {
-        auto _root = BinaryTreeNode<T>::New(value);
+        auto _root = BinaryTreeNode<T>::New(std::move(value));
         if (_root.error)
         {
             LOG_ERROR(_root.error);
@@ -581,7 +471,7 @@ public:
         "max-width: 500px;\n"
         "margin: auto;\n"
         "}\n"
-        "</style>,\n"
+        "</style>\n"
         "<body>\n"
         "<div class=\"content\">";
 
@@ -605,9 +495,9 @@ public:
      */
     err::ErrorCode Dump()
     {
-        static const std::size_t numStrMaxLength = 21;
-        static       std::size_t dumpIteration   = 0;
+        static       std::size_t dumpIteration = 0;
 
+        static const std::size_t numStrMaxLength = 21;
         char iterString[numStrMaxLength] = "";
         sprintf(iterString, "%zu", dumpIteration);
 
@@ -618,7 +508,7 @@ public:
         "max-width: 500px;\n"
         "margin: auto;\n"
         "}\n"
-        "</style>,\n";
+        "</style>\n";
 
         String outGraphPath = m_dumpFolder;
         outGraphPath += "/dot/iter";
@@ -640,8 +530,15 @@ public:
                         "<root>Root}\"];"
         "\nNODE_" << root << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
-        "label = \"{Value:\\n|" << root->value <<
-        "|{<left>Left|<right>Right}}\"];\n";
+        "label = \"{Value:\\n|" << root->value
+        << "|id:\\n";
+
+        if (root->id == BinaryTreeNode<T>::BAD_ID)
+            outGraphFile << "BAD_ID";
+        else
+            outGraphFile << root->id;
+
+        outGraphFile << "|{<left>Left|<right>Right}}\"];\n";
 
         std::size_t MAX_DEPTH = MaxSize;
 
@@ -672,7 +569,11 @@ public:
 
         system(command);
 
-        m_htmlDumpFile << "<img src = \"" << outImgPath << "\"/>\n";
+        static const std::size_t maxPathLength = 256;
+        char absoluteOutImgPath[maxPathLength];
+        realpath(outImgPath, absoluteOutImgPath);
+
+        m_htmlDumpFile << "<img src = \"" << absoluteOutImgPath << "\"/>\n";
 
         dumpIteration++;
 

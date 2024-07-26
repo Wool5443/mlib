@@ -400,7 +400,7 @@ public:
 
         String htmlFilePath = logFolder;
 
-        htmlFilePath += "/log.html";
+        htmlFilePath += "/dump.html";
 
         m_htmlDumpFile.open(htmlFilePath);
         if (!m_htmlDumpFile)
@@ -447,9 +447,9 @@ public:
      */
     err::ErrorCode Dump() noexcept
     {
-        static const std::size_t numStrMaxLength = 21;
-        static std::size_t       dumpIteration   = 0;
+        static std::size_t       dumpIteration = 0;
 
+        static const std::size_t numStrMaxLength = 21;
         char iterString[numStrMaxLength] = "";
         sprintf(iterString, "%zu", dumpIteration);
 
@@ -482,7 +482,12 @@ public:
 
         system(command);
 
-        m_htmlDumpFile << "<img src = \"" << outImgPath << "\"/>\n";
+        static const std::size_t maxPathLength = 256;
+        char absoluteOutImgPath[maxPathLength];
+        if (!realpath(outImgPath, absoluteOutImgPath))
+            RETURN_ERROR(err::ERROR_BAD_FILE);
+
+        m_htmlDumpFile << "<img src = \"" << absoluteOutImgPath << "\"/>\n";
 
         dumpIteration++;
 

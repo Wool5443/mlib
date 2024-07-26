@@ -98,7 +98,6 @@ public:
     Buffer(const Buffer& other) noexcept
         : Buffer(other.m_capacity)
     {
-        std::cerr << "BUFFER COPIED\n";
         if (error)
         {
             LOG_ERROR(error);
@@ -117,7 +116,6 @@ public:
         : m_data(other.m_data), m_capacity(other.m_capacity),
           error(other.error)
     {
-        std::cerr << "BUFFER MOVED\n";
         other.m_data = nullptr;
     }
 

@@ -116,41 +116,6 @@ public:
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
-//                              RESULT CTORS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Construct a new Buffer object
-     * with capacity of at least hintLength
-     *
-     * @param [in] hintLength
-     *
-     * @return err::Result<LinkedList>
-     */
-    static err::Result<LinkedList> New(std::size_t hintLength = 1)
-    {
-        LinkedList list(hintLength);
-        LOG_ERROR_IF(list.Error());
-        return { list, list.Error() };
-    }
-
-    /**
-     * @brief Construct a new LinkedList object
-     * by copying
-     *
-     * @param other list to copy
-     *
-     * @return err::Result<String>
-     */
-    static err::Result<LinkedList> New(const LinkedList& other) noexcept
-    {
-        LinkedList list(other);
-        LOG_ERROR_IF(list.Error());
-        return { list, list.Error() };
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
 //                              PUBLIC METHODS
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -286,9 +251,11 @@ public:
      */
     err::Result<T> Pop(std::size_t index) noexcept
     {
+        RETURN_ERROR_RESULT(Error(), {}, T);
+
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, {});
+            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, {}, T);
 
         T value = std::move(m_data[index]);
 
@@ -299,7 +266,7 @@ public:
         m_next[index] = m_freeHead;
         m_freeHead    = index;
 
-        return { value, Error() };
+        return value;
     }
 
     /**
@@ -335,7 +302,7 @@ public:
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, FREE_ELEM);
+            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, SIZE_MAX, std::size_t);
 
         std::size_t curEl = Head();
         std::size_t i     = 1;
@@ -347,9 +314,9 @@ public:
         }
 
         if (!curEl)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
+            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
-        return { curEl, err::EVERYTHING_FINE };
+        return curEl;
     }
 
     /**
@@ -367,9 +334,9 @@ public:
             curEl = m_next[curEl];
 
         if (!curEl)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX);
+            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
-        return { curEl, err::EVERYTHING_FINE };
+        return curEl;
     }
 
     /**
@@ -491,7 +458,7 @@ public:
 
         dumpIteration++;
 
-        return Error();
+        return err::EVERYTHING_FINE;
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -603,7 +570,7 @@ public:
      */
     constIterator cend()   const & noexcept { return { *this, 0 }; }
 private:
-     err::ErrorCode realloc(std::size_t newLength)
+    err::ErrorCode realloc(std::size_t newLength)
     {
         std::size_t oldCapacity = m_data.GetCapacity();
 
@@ -622,7 +589,7 @@ private:
 
         return err::EVERYTHING_FINE;
     }
-private:
+
     #define PRINT_DUMP(...)                 \
     do                                      \
     {                                       \

@@ -16,7 +16,7 @@ using HashType = uint64_t;
 template<typename T>
 struct Hash
 {
-    HashType operator()()
+    constexpr HashType operator()()
     {
         return 0;
     }

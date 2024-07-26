@@ -73,16 +73,14 @@ public:
     /**
      * @brief Construct a new String object
      */
-    String() noexcept = default;
+    constexpr String() noexcept = default;
 
     /**
-     * @brief Construct a new String object
-     * with known length
+     * @brief Construct a String with set capacity
      *
-     * @param [in] hintLength legnth to ensure capacity
-     * for less reallocations
+     * @param [in] capacity
      */
-    explicit String(std::size_t hintLength) noexcept;
+    explicit String(std::size_t capcity) noexcept;
 
     /**
      * @brief Construct a new String object
@@ -108,55 +106,6 @@ public:
      * @param [in] chr
      */
     String(const char chr) noexcept;
-///////////////////////////////////////////////////////////////////////////////
-//
-//                              RESULT CTORS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Constructs a new String object
-     * from a cstring
-     *
-     * @param [in] string
-     *
-     * @return err::Result<String>
-     */
-    static err::Result<String> New(const char* string) noexcept;
-
-    /**
-     * @brief Constructs a new String object
-     * from a cstring knowing its length
-     *
-     * @param [in] string
-     *
-     * @return err::Result<String>
-     */
-    static err::Result<String> New(const char* string, std::size_t length)
-    noexcept;
-
-    /**
-     * @brief Construct a new String object
-     * and ensures that the capacity is enougth
-     * for hintLength elements, thus, avoiding
-     * reallocations
-     *
-     * @param [in] hintLength length to ensure big enough capacity
-     * for less reallocations
-     *
-     * @return err::Result<String>
-     */
-    static err::Result<String> New(std::size_t hintLength) noexcept;
-
-    /**
-     * @brief Construct a new String object
-     * by copying
-     *
-     * @param [in] other string to copy
-     *
-     * @return err::Result<String>
-     */
-    static err::Result<String> New(const String& other) noexcept;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS
@@ -446,14 +395,15 @@ struct CString final
     /**
      * @brief Construct a new CString object
      */
-    CString() noexcept = default;
+    constexpr CString() noexcept = default;
 
     /**
      * @brief Construct a new CString object
      *
      * @param [in] string
      */
-    CString(const char* string) noexcept;
+    constexpr CString(const char* string) noexcept
+        : data(string), length(strlen(string)) {}
 
     /**
      * @brief Construct a new CString object
@@ -461,7 +411,7 @@ struct CString final
      * @param [in] string
      * @param [in] length
      */
-    CString(const char* string, std::size_t length) noexcept;
+    constexpr CString(const char* string, std::size_t length) noexcept;
 
     /**
      * @brief CString comparator
@@ -470,7 +420,16 @@ struct CString final
      *
      * @return std::strong_ordering
      */
-    std::strong_ordering operator<=>(const CString& other) const noexcept;
+    constexpr std::strong_ordering operator<=>(const CString& other) const noexcept
+    {
+        int result = std::strcmp(this->data, other.data);
+
+        if (result < 0)
+            return std::strong_ordering::less;
+        else if (result == 0)
+            return std::strong_ordering::equal;
+        return std::strong_ordering::greater;
+    }
 
     /**
      * @brief
@@ -480,10 +439,13 @@ struct CString final
      * @return true equal
      * @return false not equal
      */
-    bool operator==(const CString& other) const noexcept;
+    constexpr bool operator==(const CString& other) const noexcept
+    {
+        return *this <=> other == std::strong_ordering::equal;
+    }
 
-    operator const char*() const noexcept;
-    operator bool()        const noexcept;
+    constexpr operator const char*() const noexcept;
+    constexpr operator bool()        const noexcept;
 
     friend std::ostream& operator<<(std::ostream& out, const CString& cstring);
 };

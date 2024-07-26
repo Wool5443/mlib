@@ -98,6 +98,7 @@ public:
     Buffer(const Buffer& other) noexcept
         : Buffer(other.m_capacity)
     {
+        std::cerr << "BUFFER COPIED\n";
         if (error)
         {
             LOG_ERROR(error);
@@ -116,6 +117,7 @@ public:
         : m_data(other.m_data), m_capacity(other.m_capacity),
           error(other.error)
     {
+        std::cerr << "BUFFER MOVED\n";
         other.m_data = nullptr;
     }
 
@@ -174,40 +176,6 @@ public:
     ~Buffer()
     {
         delete[] m_data;
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
-//                              RESULT CTORS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Construct a Buffer
-     *
-     * @param [in] capacity
-     *
-     * @return err::Result<Buffer>
-     */
-    static err::Result<Buffer> New(std::size_t capacity)
-    noexcept
-    {
-        Buffer buffer(capacity);
-        LOG_ERROR_IF(buffer.error);
-        return { buffer, buffer.error };
-    }
-
-    /**
-     * @brief Copies a buffer object
-     *
-     * @param [in] other buffer to copy
-     *
-     * @return err::Result<Buffer>
-     */
-    static err::Result<Buffer> New(const Buffer& other) noexcept
-    {
-        Buffer buffer(other);
-        LOG_ERROR_IF(buffer.error);
-        return { buffer, buffer.error };
     }
 ///////////////////////////////////////////////////////////////////////////////
 //

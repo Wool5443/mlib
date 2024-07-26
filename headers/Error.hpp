@@ -114,10 +114,12 @@ struct Result
 
     Result(ErrorCode error)
         : error(error) {}
-    Result(const T& value)
-        : value(value), error(EVERYTHING_FINE) {}
-    Result(const T& value, ErrorCode error)
-        : value(value), error(error) {}
+
+    Result(T&& value)
+        : value(std::move(value)), error(EVERYTHING_FINE) {}
+
+    Result(T&& value, ErrorCode error)
+        : value(std::move(value)), error(error) {}
 
     operator bool()      { return !error; }
     operator ErrorCode() { return error;  }
@@ -270,7 +272,7 @@ do                                                                  \
 /**
  * @brief returns error and poison if it is not EVERYTHING_FINE
  */
-#define RETURN_ERROR_RESULT(error, poison, ...)                     \
+#define RETURN_ERROR_RESULT(error, poison, poisonType, ...)         \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error_ = error;                                 \
@@ -278,7 +280,7 @@ do                                                                  \
     {                                                               \
         LOG_ERROR(_error_);                                         \
         __VA_ARGS__;                                                \
-        return { poison, _error_ };                                 \
+        return err::Result<poisonType>(poison, _error_);            \
     }                                                               \
 } while(0)
 
@@ -288,7 +290,7 @@ do                                                                  \
 #define RETURN_RESULT(result, ...)                                  \
 do                                                                  \
 {                                                                   \
-    __typeof__(result) _result_ = result;                           \
+    auto _result_ = result;                                         \
     if (!_result_)                                                  \
     {                                                               \
         LOG_ERROR(_result_);                                        \

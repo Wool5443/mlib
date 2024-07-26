@@ -34,7 +34,7 @@ always handle the error via these macros:
 ```c++
 // ... is for code to do before returning
 RETURN_ERROR(error, ...)
-RETURN_ERROR_RESULT(error, poison, ...)
+RETURN_ERROR_RESULT(error, poison, poisonType, ...)
 RETURN_RESULT(result, ...)
 ```
 
@@ -74,14 +74,11 @@ err::Result<int> bar()
     err::ErrorCode error = foo();
 
     // return and log result with error and poison if error occured
-    RETURN_ERROR_RESULT(error, INT_MIN);
-
-    // or
-
-    LOG_ERROR(error);
-    return { INT_MIN, error };
+    RETURN_ERROR_RESULT(error, INT_MIN, int);
 
     /* some code */
+
+    return 5;
 }
 
 int main()
@@ -107,15 +104,13 @@ err::ErrorCode foo()
     String str;
     static_assert(str.Error() == err::ERROR_UNINITIALIZED);
 
-    // Then there are 3 ways of createing a non-empty object
+    // Then there are 2 ways of createing a non-empty object
+
     String strCommonWay("Hello");
     RETURN_ERROR(strCommonWay.Error());
 
     String strAssign = "Hello";
     RETURN_ERROR(strAssign.Error());
-
-    err::Result<String> strResult = String::New("Hello");
-    RETURN_ERROR(strResult);
 
     // Do not forget to check for errors!!!!
 }
@@ -135,13 +130,6 @@ int main()
     RETURN_ERROR(a.Error());
     String b("World");
     RETURN_ERROR(b).Error();
-
-    // or
-
-    err::Result<String<>> aRes = String::New("Hello");
-    RETURN_ERROR(aRes);
-    err::Result<String<>> bRes = String::New("World");
-    RETURN_ERROR(bRes);
 
     String c = a + ' ' + b;
     RETURN_ERROR(c.Error());
@@ -225,11 +213,6 @@ int main()
     LinkedList<int> list;
     RETURN_ERROR(list.Error());
 
-    // or more safely
-
-    err::Result<LinkedList<int>> listRes = LinkedList<int>::New();
-    RETURN_ERROR(listRes);
-
     RETURN_ERROR(list.InitDump("../dump/list"));
 
     for (std::size_t i = 1; i <= 10; i++)
@@ -272,7 +255,7 @@ int main()
 
     BinaryTree<int> emptyTree; // Constructs a tree without any root
 
-    tree.InitDump("../dump/tree");
+    RETURN_ERROR(tree.InitDump("../dump/tree"));
 
     BinaryTreeNode<int>* root = tree.root;
 
@@ -285,8 +268,9 @@ int main()
     RETURN_ERROR(root->SetLeft (leftRes. value), leftRes .value->Delete());
     RETURN_ERROR(root->SetRight(rightRes.value), rightRes.value->Delete());
 
-    tree.Dump();
-    tree.Finish();
+    RETURN_ERROR(tree.Dump());
+
+    RETURN_ERROR(tree.Finish());
 
     return err::EVERYTHING_FINE;
 }
@@ -296,7 +280,6 @@ int main()
 ```c++
 #include "HashTable.hpp"
 #include "String.hpp"
-
 using namespace mlib;
 
 LOG_INIT_CONSOLE();

@@ -83,25 +83,6 @@ public:
         : m_data(hintLength) {}
 ///////////////////////////////////////////////////////////////////////////////
 //
-//                              RESULT CTORS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    static err::Result<Vector> New(std::size_t hintLength) noexcept
-    {
-        Vector vec(hintLength);
-        LOG_ERROR_IF(vec.Error());
-        return { vec, vec.Error() };
-    }
-
-    static err::Result<Vector> New(const Vector& other) noexcept
-    {
-        Vector vec(other);
-        LOG_ERROR_IF(vec.Error());
-        return { vec, vec.Error() };
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
 //                              PUBLIC METHODS
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -165,7 +146,7 @@ public:
         for (std::size_t i = 0; i < length; i++)
         {
             if (m_data[i] == value)
-                return { i, {} };
+                return i;
         }
 
         return { SIZE_MAX, err::ERROR_NOT_FOUND };

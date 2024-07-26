@@ -94,37 +94,6 @@ public:
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
-//                              RESULT CTORS
-//
-///////////////////////////////////////////////////////////////////////////////
-public:
-    /**
-     * @brief Create a Hash Table of some size
-     *
-     * @param [in] size
-     * @return err::Result<HashTable>
-     */
-    static err::Result<HashTable> New(std::size_t size) noexcept
-    {
-        HashTable tab(size);
-        LOG_ERROR_IF(tab.Error());
-        return { tab, tab.Error() };
-    }
-
-    /**
-     * @brief Copy a Hash Table
-     *
-     * @param [in] other
-     * @return err::Result<HashTable>
-     */
-    static err::Result<HashTable> New(const HashTable& other) noexcept
-    {
-        HashTable tab(other);
-        LOG_ERROR_IF(tab.Error());
-        return { tab, tab.Error() };
-    }
-///////////////////////////////////////////////////////////////////////////////
-//
 //                              PUBLIC METHODS
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,22 +149,22 @@ public:
      */
     err::Result<Val> Pop(const Key& key)
     {
-        RETURN_ERROR_RESULT(Error(), {});
+        RETURN_ERROR_RESULT(Error(), {}, Val);
 
         Utils::Pair<HashType, std::size_t> hashInd = getHashInd(key);
-        RETURN_ERROR_RESULT(m_containers[hashInd.val2].Error(), {});
+        RETURN_ERROR_RESULT(m_containers[hashInd.val2].Error(), {}, Val);
 
         auto& container = m_containers[hashInd.val2];
 
         auto found = findInContainer(container, { hashInd.val1, key });
 
-        RETURN_ERROR_RESULT(found, {});
+        RETURN_ERROR_RESULT(found, {}, Val);
 
         err::Result<HashTableElement> result = container.Pop(found.value);
 
         LOG_ERROR_IF(result);
 
-        return { result.value.val, result.error };
+        return { std::move(result.value.val), result.error };
     }
 
     /**

@@ -192,6 +192,7 @@ err::ErrorCode Tests::TestHashTable()
             RETURN_ERROR(err::ERROR_BAD_VALUE);
     }
 
+    free(text);
     out.close();
 
     system("diff ../tests/HashTableResult.txt ../tests/ResultsPython.txt");
@@ -224,7 +225,7 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
             if (count)
                 *count += 1;
             else
-                RETURN_ERROR(wordsCountTable.Add({ word, 1 }));
+                RETURN_ERROR(wordsCountTable.Add(word, 1));
         }
 
         for (const char* word : words)
@@ -235,6 +236,8 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
     }
 
     auto duration = timer.Stop();
+
+    free(text);
 
     std::cout << "HashTable Speed Test took: "
     << duration.count() / to_ms << "ms\n";

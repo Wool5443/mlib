@@ -107,14 +107,14 @@ public:
         auto node = new BinaryTreeNode(std::move(value), left, right);
 
         if (!node)
-            RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, nullptr);
+            RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, nullptr, BinaryTreeNode*);
 
         if (left)
             left->parent  = node;
         if (right)
             right->parent = node;
 
-        return { node, err::EVERYTHING_FINE };
+        return node;
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -135,13 +135,13 @@ public:
         if (left)
         {
             left = left->Clone();
-            RETURN_RESULT(left);
+            RETURN_ERROR_RESULT(left, nullptr, BinaryTreeNode*);
         }
 
         if (right)
         {
             right = right->Clone();
-            RETURN_RESULT(right, left.value->Delete());
+            RETURN_ERROR_RESULT(right, nullptr, BinaryTreeNode*, left->Delete());
         }
 
         return BinaryTreeNode::New(value, left.value, right.value);

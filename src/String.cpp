@@ -2,9 +2,6 @@
 
 using namespace mlib;
 
-constexpr CString::CString(const char* string, std::size_t length) noexcept
-    : data(string), length(length) {}
-
 constexpr CString::operator const char*() const noexcept
 {
     return data;
@@ -343,11 +340,6 @@ err::Result<std::size_t> String::Count(const char* string) const noexcept
     }
 
     return count;
-}
-
-err::Result<Vector<String>> String::Split() const noexcept
-{
-    return Split(SPACE_CHARS);
 }
 
 err::Result<Vector<String>> String::Split(const char* delimiters) const noexcept

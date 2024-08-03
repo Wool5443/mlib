@@ -160,32 +160,13 @@ private:
     constexpr static const char* SPACE_CHARS = " \n\t\r\f\v";
 public:
     /**
-     * @brief Split the string by space characters
-     *
-     * @return err::Result<Vector<String>> vector of strings
-     */
-    err::Result<Vector<String>> Split() const noexcept;
-
-    /**
      * @brief Split the string by delimeters
      *
-     * @param [in] delimeters what to split by
+     * @param [in] delimeters what to split by or SPACE_CHARS
      *
      * @return err::Result<Vector<String>> vector of strings
      */
-    err::Result<Vector<String>> Split(const char* delimiters) const noexcept;
-
-    /**
-     * @brief Splits the string in place by space chars.
-     * It's more memory and speed efficient, though,
-     * modifies the string
-     *
-     * @param [in] string
-     *
-     * @return err::Result<Vector<const char*>>
-     */
-    static err::Result<Vector<const char*>>
-    SplitInPlace(char* string) noexcept;
+    err::Result<Vector<String>> Split(const char* delimiters = SPACE_CHARS) const noexcept;
 
     /**
      * @brief Splits the string in place.
@@ -193,12 +174,12 @@ public:
      * modifies the string
      *
      * @param [in] string
-     * @param [in] delimiters what to split by
+     * @param [in] delimiters what to split by or SPACE_CHARS
      *
      * @return err::Result<Vector<const char*>>
      */
     static err::Result<Vector<const char*>>
-    SplitInPlace(char* string, const char* delimiters) noexcept;
+    SplitInPlace(char* string, const char* delimiters = SPACE_CHARS) noexcept;
 
     /**
      * @brief Filters out characters
@@ -411,7 +392,8 @@ struct CString final
      * @param [in] string
      * @param [in] length
      */
-    constexpr CString(const char* string, std::size_t length) noexcept;
+    constexpr CString(const char* string, std::size_t length) noexcept
+        : data(string), length(length) {}
 
     /**
      * @brief CString comparator
@@ -444,8 +426,8 @@ struct CString final
         return *this <=> other == std::strong_ordering::equal;
     }
 
-    constexpr operator const char*() const noexcept;
-    constexpr operator bool()        const noexcept;
+    constexpr operator const char*() const noexcept { return data; }
+    constexpr operator bool()        const noexcept { return data; }
 
     friend std::ostream& operator<<(std::ostream& out, const CString& cstring);
 };

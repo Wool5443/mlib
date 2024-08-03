@@ -2,16 +2,6 @@
 
 using namespace mlib;
 
-constexpr CString::operator const char*() const noexcept
-{
-    return data;
-}
-
-constexpr CString::operator bool() const noexcept
-{
-    return data;
-}
-
 String::String(std::size_t hintLength) noexcept
     : m_data(hintLength + 1) {}
 
@@ -366,12 +356,6 @@ err::Result<Vector<String>> String::Split(const char* delimiters) const noexcept
     free(buf);
 
     return words;
-}
-
-err::Result<Vector<const char*>>
-String::SplitInPlace(char* string) noexcept
-{
-    return SplitInPlace(string, SPACE_CHARS);
 }
 
 err::Result<Vector<const char*>>

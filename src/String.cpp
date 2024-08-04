@@ -1,5 +1,6 @@
 #include "String.hpp"
 
+using namespace err;
 using namespace mlib;
 
 String::String(std::size_t hintLength) noexcept
@@ -162,7 +163,7 @@ String& String::append(const char* string, std::size_t strLength) noexcept
 {
     if (auto error = Error())
     {
-        if (error != err::ERROR_UNINITIALIZED)
+        if (error != ERROR_UNINITIALIZED)
         {
             LOG_ERROR(error);
             return *this;
@@ -252,16 +253,16 @@ String::operator char*()                & noexcept { return RawPtr(); }
 String::operator const char*()    const & noexcept { return RawPtr(); }
 String::operator bool()           const   noexcept { return Error();  }
 
-err::Result<String> String::ReadFromFile(const char* filePath) noexcept
+Result<String> String::ReadFromFile(const char* filePath) noexcept
 {
-    HardAssert(filePath, err::ERROR_NULLPTR);
+    HardAssert(filePath, ERROR_NULLPTR);
 
     struct stat result = {};
     stat(filePath, &result);
 
     std::ifstream input(filePath);
     if (!input)
-        return err::ERROR_BAD_FILE;
+        return ERROR_BAD_FILE;
 
     String str(static_cast<std::size_t>(result.st_size));
     RETURN_ERROR_RESULT(str.Error(), {}, String);
@@ -273,34 +274,34 @@ err::Result<String> String::ReadFromFile(const char* filePath) noexcept
     return str;
 }
 
-err::Result<std::size_t> String::Find(char chr) const noexcept
+Result<std::size_t> String::Find(char chr) const noexcept
 {
     RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
 
     const char* buf   = RawPtr();
     const char* found = strchr(buf, chr);
     if (!found)
-        RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
+        RETURN_ERROR_RESULT(ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
     return found - buf;
 }
 
-err::Result<std::size_t> String::Find(const char* string) const noexcept
+Result<std::size_t> String::Find(const char* string) const noexcept
 {
     RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
 
-    SoftAssertResult(string, SIZE_MAX, err::ERROR_NULLPTR);
+    SoftAssertResult(string, SIZE_MAX, ERROR_NULLPTR);
 
     const char* data  = RawPtr();
     const char* found = strstr(data, string);
 
     if (!found)
-        RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
+        RETURN_ERROR_RESULT(ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
     return found - data;
 }
 
-err::Result<std::size_t> String::Count(char chr) const noexcept
+Result<std::size_t> String::Count(char chr) const noexcept
 {
     RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
 
@@ -313,10 +314,10 @@ err::Result<std::size_t> String::Count(char chr) const noexcept
     return count;
 }
 
-err::Result<std::size_t> String::Count(const char* string) const noexcept
+Result<std::size_t> String::Count(const char* string) const noexcept
 {
     if (!string)
-        RETURN_ERROR_RESULT(err::ERROR_NULLPTR, SIZE_MAX, std::size_t);
+        RETURN_ERROR_RESULT(ERROR_NULLPTR, SIZE_MAX, std::size_t);
 
     RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
 
@@ -332,14 +333,14 @@ err::Result<std::size_t> String::Count(const char* string) const noexcept
     return count;
 }
 
-err::Result<Vector<String>> String::Split(const char* delimiters) const noexcept
+Result<Vector<String>> String::Split(const char* delimiters) const noexcept
 {
     RETURN_ERROR_RESULT(Error(), {}, Vector<String>);
 
     char* buf = strdup(RawPtr());
 
     if (!buf)
-        RETURN_ERROR_RESULT(err::ERROR_NO_MEMORY, {}, Vector<String>);
+        RETURN_ERROR_RESULT(ERROR_NO_MEMORY, {}, Vector<String>);
 
     Vector<String> words;
 
@@ -358,30 +359,11 @@ err::Result<Vector<String>> String::Split(const char* delimiters) const noexcept
     return words;
 }
 
-err::Result<Vector<const char*>>
-String::SplitInPlace(char* string, const char* delimiters) noexcept
-{
-    HardAssert(string,     err::ERROR_NULLPTR);
-    HardAssert(delimiters, err::ERROR_NULLPTR);
-
-    Vector<const char*> words;
-
-    const char* token = strtok(string, delimiters);
-
-    while (token)
-    {
-        words.PushBack(token);
-        token = strtok(nullptr, delimiters);
-    }
-
-    return words;
-}
-
-err::ErrorCode String::Filter(const char* filter) noexcept
+ErrorCode String::Filter(const char* filter) noexcept
 {
     RETURN_ERROR(Error());
 
-    SoftAssert(filter, err::ERROR_NULLPTR);
+    SoftAssert(filter, ERROR_NULLPTR);
 
     char*       writePtr = RawPtr();
     const char* readPtr  = writePtr;
@@ -396,25 +378,41 @@ err::ErrorCode String::Filter(const char* filter) noexcept
 
     *writePtr = '\0';
 
-    return err::EVERYTHING_FINE;
+    return EVERYTHING_FINE;
 }
 
-err::ErrorCode String::Filter(const String& filter) noexcept
+ErrorCode String::Filter(const String& filter) noexcept
 {
     return Filter(filter.RawPtr());
 }
 
-err::ErrorCode String::Filter() noexcept
+ErrorCode String::Filter() noexcept
 {
     return Filter(SPACE_CHARS);
 }
 
-err::ErrorCode String::Clear() noexcept
+ErrorCode String::Clear() noexcept
 {
     RETURN_ERROR(Error());
 
     m_data[0] = '\0';
     length    = 0;
 
-    return err::EVERYTHING_FINE;
+    return EVERYTHING_FINE;
+}
+
+Result<Vector<CString>> mlib::Split(const CString string, const CString delimiters) noexcept
+{
+    Vector<CString> words;
+
+    CString tempStr  = string;
+    CString nextWord = tempStr.getNextWord(delimiters);
+
+    while (nextWord)
+    {
+        RETURN_ERROR_RESULT(words.PushBack(nextWord), {}, Vector<CString>);
+        nextWord = tempStr.getNextWord(delimiters);
+    }
+
+    return words;
 }

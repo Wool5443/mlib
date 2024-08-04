@@ -22,6 +22,170 @@
 
 namespace mlib {
 
+constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
+
+/** @struct CString
+ * @brief Represents a simple static string
+ * with some useful methods and operators
+ */
+class CString final
+{
+    const char* m_data   = nullptr;
+    std::size_t m_length = 0;
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              GETTERS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Return pointer to its data
+     *
+     * @return const char*
+     */
+    constexpr const char* RawPtr() const noexcept { return m_data;   }
+
+    /**
+     * @brief Length
+     *
+     * @return std::size_t
+     */
+    constexpr std::size_t Length() const noexcept { return m_length; }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              CTOR/DTOR
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief Construct a new CString object
+     */
+    constexpr CString() noexcept = default;
+
+    /**
+     * @brief Construct a new CString object
+     * from a c-style string
+     *
+     * @param [in] string
+     */
+    constexpr CString(const char* string) noexcept
+        : m_data(string), m_length(strlen(string)) {}
+
+    /**
+     * @brief Construct a new CString object
+     *
+     * @param [in] string
+     * @param [in] length
+     */
+    constexpr CString(const char* string, std::size_t length) noexcept
+        : m_data(string), m_length(length) {}
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              OPERATORS
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief operator[]
+     *
+     * @param i
+     * @return constexpr char
+     */
+    constexpr char operator[](std::size_t i) const noexcept { return m_data[i]; }
+
+    /**
+     * @brief Careful, the string may be not null-terminated
+     *
+     * @return cconst char*
+     */
+    constexpr operator const char*() const noexcept { return m_data; }
+    constexpr operator bool()        const noexcept { return m_data; }
+
+    /**
+     * @brief Stream print
+     *
+     * @param out stream
+     * @param cstring string
+     * @return std::ostream&
+     */
+    friend std::ostream& operator<<(std::ostream& out, const CString& string)
+    {
+        for (std::size_t i = 0; i < string.Length(); i++)
+            out << string[i];
+        return out;
+    }
+///////////////////////////////////////////////////////////////////////////////
+//
+//                              COMPARISON
+//
+///////////////////////////////////////////////////////////////////////////////
+public:
+    /**
+     * @brief CString comparator
+     *
+     * @param [in] other
+     *
+     * @return std::strong_ordering
+     */
+    constexpr std::strong_ordering operator<=>(const CString& other) const noexcept
+    {
+        int result = std::memcmp(
+            m_data, other.m_data, std::min(m_length, other.m_length)
+        );
+
+        if (result < 0)
+            return std::strong_ordering::less;
+        else if (result == 0)
+            return std::strong_ordering::equal;
+        return std::strong_ordering::greater;
+    }
+
+    /**
+     * @brief
+     *
+     * @param [in] other
+     *
+     * @return true equal
+     * @return false not equal
+     */
+    constexpr bool operator==(const CString& other) const noexcept
+    {
+        return *this <=> other == std::strong_ordering::equal;
+    }
+    constexpr bool operator==(const char* other) const noexcept
+    {
+        return *this == CString(other);
+    }
+
+    friend err::Result<Vector<CString>>
+    Split
+    (const CString str, const CString delimiters) noexcept;
+private:
+    constexpr CString getNextWord(const CString& delimiters) noexcept
+    {
+        std::size_t i;
+        for (i = 0; i < m_length; i++)
+        {
+            for (std::size_t di = 0; di < delimiters.m_length; di++)
+            {
+                if (m_data[i] == delimiters[di])
+                {
+                    CString result{m_data, i};
+                    m_length -= i + 1;
+                    m_data   += i + 1;
+                    return result;
+                }
+            }
+        }
+
+        // last word
+        CString result{m_data, i};
+        m_length = 0;
+        m_data   = nullptr;
+        return result;
+    }
+};
+
 /** @class String
  * @brief A resizeable string
  *
@@ -156,8 +320,6 @@ public:
      * @return err::Result<std::size_t> count result
      */
     err::Result<std::size_t> Count(const char* string) const noexcept;
-private:
-    constexpr static const char* SPACE_CHARS = " \n\t\r\f\v";
 public:
     /**
      * @brief Split the string by delimeters
@@ -166,20 +328,8 @@ public:
      *
      * @return err::Result<Vector<String>> vector of strings
      */
-    err::Result<Vector<String>> Split(const char* delimiters = SPACE_CHARS) const noexcept;
-
-    /**
-     * @brief Splits the string in place.
-     * It's more memory and speed efficient, though,
-     * modifies the string
-     *
-     * @param [in] string
-     * @param [in] delimiters what to split by or SPACE_CHARS
-     *
-     * @return err::Result<Vector<const char*>>
-     */
-    static err::Result<Vector<const char*>>
-    SplitInPlace(char* string, const char* delimiters = SPACE_CHARS) noexcept;
+    err::Result<Vector<String>> Split(const char* delimiters = SPACE_CHARS)
+    const noexcept;
 
     /**
      * @brief Filters out characters
@@ -364,81 +514,13 @@ public:
     operator bool()           const   noexcept;
 };
 
-/** @struct CString
- * @brief Represents a simple static string
- * with some useful methods and operators
- */
-struct CString final
-{
-    const char* data   = nullptr; ///< data null-terminated string
-    std::size_t length = 0; ///< length
-
-    /**
-     * @brief Construct a new CString object
-     */
-    constexpr CString() noexcept = default;
-
-    /**
-     * @brief Construct a new CString object
-     *
-     * @param [in] string
-     */
-    constexpr CString(const char* string) noexcept
-        : data(string), length(strlen(string)) {}
-
-    /**
-     * @brief Construct a new CString object
-     *
-     * @param [in] string
-     * @param [in] length
-     */
-    constexpr CString(const char* string, std::size_t length) noexcept
-        : data(string), length(length) {}
-
-    /**
-     * @brief CString comparator
-     *
-     * @param [in] other
-     *
-     * @return std::strong_ordering
-     */
-    constexpr std::strong_ordering operator<=>(const CString& other) const noexcept
-    {
-        int result = std::strcmp(this->data, other.data);
-
-        if (result < 0)
-            return std::strong_ordering::less;
-        else if (result == 0)
-            return std::strong_ordering::equal;
-        return std::strong_ordering::greater;
-    }
-
-    /**
-     * @brief
-     *
-     * @param [in] other
-     *
-     * @return true equal
-     * @return false not equal
-     */
-    constexpr bool operator==(const CString& other) const noexcept
-    {
-        return *this <=> other == std::strong_ordering::equal;
-    }
-
-    constexpr operator const char*() const noexcept { return data; }
-    constexpr operator bool()        const noexcept { return data; }
-
-    friend std::ostream& operator<<(std::ostream& out, const CString& cstring);
-};
-
 template<>
 struct Hash<CString>
 {
     HashType operator()(const CString& cstring)
     {
         #ifdef __linux__
-        return CRC32(cstring.data, cstring.length);
+        return CRC32(cstring.RawPtr(), cstring.Length());
         #else
         return MurMur(cstring.data, cstring.length);
         #endif
@@ -457,6 +539,9 @@ struct Hash<String>
         #endif
     }
 };
+
+err::Result<Vector<CString>>
+Split(const CString string, const CString delimiters = SPACE_CHARS) noexcept;
 
 } // namespace mlib
 

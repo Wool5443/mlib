@@ -163,26 +163,25 @@ err::ErrorCode Tests::TestHashTable()
     if (!text)
         RETURN_ERROR(err::ERROR_NO_MEMORY);
 
-    auto wordsRes = String::SplitInPlace(text);
+    auto wordsRes = Split(text);
     RETURN_ERROR(wordsRes);
 
-    Vector<const char*>& words = wordsRes.value;
-
-    for (const char* word : words)
+    Vector<CString>& words = wordsRes.value;
+    for (CString word : words)
     {
         int* count = wordsCountTable[word];
 
         if (count)
             *count += 1;
         else
-            RETURN_ERROR(wordsCountTable.Add({ word, 1 }));
+            RETURN_ERROR(wordsCountTable.Add(CString{word}, 1));
     }
 
     std::ofstream out("../tests/HashTableResult.txt");
     if (!out)
         RETURN_ERROR(err::ERROR_BAD_FILE);
 
-    for (const auto& word : wordsRes.value)
+    for (CString word : wordsRes.value)
     {
         int* count = wordsCountTable[word];
 
@@ -208,9 +207,9 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
     if (!text)
         RETURN_ERROR(err::ERROR_NO_MEMORY);
 
-    auto wordsRes = String::SplitInPlace(text);
+    auto wordsRes = Split(text);
     RETURN_ERROR(wordsRes);
-    Vector<const char*>& words = wordsRes.value;
+    Vector<CString>& words = wordsRes.value;
 
     Utils::Timer timer;
     for (std::size_t i = 0; i < numberOfTests; i++)
@@ -218,17 +217,17 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
         HashTable<CString, int> wordsCountTable;
         RETURN_ERROR(wordsCountTable.Error());
 
-        for (const char* word : words)
+        for (CString word : words)
         {
             int* count = wordsCountTable[word];
 
             if (count)
                 *count += 1;
             else
-                RETURN_ERROR(wordsCountTable.Add(word, 1));
+                RETURN_ERROR(wordsCountTable.Add(CString{word}, 1));
         }
 
-        for (const char* word : words)
+        for (CString word : words)
         {
             int* count = wordsCountTable[word];
             *count += 1;

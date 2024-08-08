@@ -401,6 +401,11 @@ ErrorCode String::Clear() noexcept
     return EVERYTHING_FINE;
 }
 
+Result<Vector<CString>> CString::Split(const CString delimiters) const noexcept
+{
+    return mlib::Split(*this, delimiters);
+}
+
 Result<Vector<CString>> mlib::Split(const CString string, const CString delimiters) noexcept
 {
     Vector<CString> words;

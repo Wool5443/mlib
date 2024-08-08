@@ -42,7 +42,7 @@ private:
     Buffer<std::size_t> m_next{1};
     Buffer<std::size_t> m_prev{1};
 
-    String        m_dumpFolder{};
+    str           m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
 
     std::size_t   m_freeHead = 0;
@@ -365,8 +365,7 @@ public:
         HardAssert(logFolder, err::ERROR_BAD_FILE);
         m_dumpFolder = logFolder;
 
-        String htmlFilePath = logFolder;
-
+        String htmlFilePath = m_dumpFolder;
         htmlFilePath += "/dump.html";
 
         m_htmlDumpFile.open(htmlFilePath);

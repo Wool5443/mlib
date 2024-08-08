@@ -21,6 +21,9 @@ String::String(const char* string, std::size_t length) noexcept
 String::String(const char* string) noexcept
     : String(string, strlen(string)) {}
 
+String::String(const str string) noexcept
+    : String(string, string.length) {}
+
 String::String(const char chr) noexcept
     : String(&chr, 1) {}
 

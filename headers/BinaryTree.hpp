@@ -235,7 +235,7 @@ class BinaryTree final
 public:
     BinaryTreeNode<T>* root = nullptr; ///< root
 private:
-    String        m_dumpFolder{};
+    str           m_dumpFolder{};
     std::ofstream m_htmlDumpFile{};
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -460,7 +460,10 @@ public:
 
         m_dumpFolder = dumpFolder;
 
-        m_htmlDumpFile.open(m_dumpFolder + "/dump.html");
+        String dumpFile{m_dumpFolder};
+        dumpFile += "/dump.html";
+
+        m_htmlDumpFile.open(dumpFile);
         if (!m_htmlDumpFile)
             RETURN_ERROR(err::ERROR_BAD_FILE);
 

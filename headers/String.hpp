@@ -29,8 +29,9 @@ constexpr const char* SPACE_CHARS = " \n\t\r\f\v";
  */
 class str final
 {
-    const char* m_data   = nullptr;
-    std::size_t m_length = 0;
+    const char* m_data = nullptr;
+public:
+    std::size_t length = 0;
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              GETTERS
@@ -43,13 +44,6 @@ public:
      * @return const char*
      */
     constexpr const char* RawPtr() const noexcept { return m_data;   }
-
-    /**
-     * @brief Length
-     *
-     * @return std::size_t
-     */
-    constexpr std::size_t Length() const noexcept { return m_length; }
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS
@@ -82,7 +76,7 @@ public:
      * @param [in] string
      */
     constexpr str(const char* string) noexcept
-        : m_data(string), m_length(strlen(string)) {}
+        : m_data(string), length(strlen(string)) {}
 
     /**
      * @brief Construct a new str object
@@ -91,7 +85,7 @@ public:
      * @param [in] length
      */
     constexpr str(const char* string, std::size_t length) noexcept
-        : m_data(string), m_length(length) {}
+        : m_data(string), length(length) {}
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              OPERATORS
@@ -123,7 +117,7 @@ public:
      */
     friend std::ostream& operator<<(std::ostream& out, const str& string)
     {
-        for (std::size_t i = 0; i < string.Length(); i++)
+        for (std::size_t i = 0; i < string.length; i++)
             out << string[i];
         return out;
     }
@@ -143,7 +137,7 @@ public:
     constexpr std::strong_ordering operator<=>(const str& other) const noexcept
     {
         int result = std::memcmp(
-            m_data, other.m_data, std::min(m_length, other.m_length)
+            m_data, other.m_data, std::min(length, other.length)
         );
 
         if (result < 0)
@@ -172,19 +166,19 @@ public:
 
     friend err::Result<Vector<str>>
     Split
-    (const str str, const str delimiters) noexcept;
+    (const str string, const str delimiters) noexcept;
 private:
     constexpr str getNextWord(const str& delimiters) noexcept
     {
         std::size_t i;
-        for (i = 0; i < m_length; i++)
+        for (i = 0; i < length; i++)
         {
-            for (std::size_t di = 0; di < delimiters.m_length; di++)
+            for (std::size_t di = 0; di < delimiters.length; di++)
             {
                 if (m_data[i] == delimiters[di])
                 {
                     str result{m_data, i};
-                    m_length -= i + 1;
+                    length -= i + 1;
                     m_data   += i + 1;
                     return result;
                 }
@@ -193,7 +187,7 @@ private:
 
         // last word
         str result{m_data, i};
-        m_length = 0;
+        length = 0;
         m_data   = nullptr;
         return result;
     }
@@ -275,6 +269,13 @@ public:
      * @param [in] string
      */
     String(const char* string) noexcept;
+
+    /**
+     * @brief Construct a String form a str
+     *
+     * @param [in] string
+     */
+    String(const str string) noexcept;
 
     /**
      * @brief Construct a new String object
@@ -533,7 +534,7 @@ struct Hash<str>
     HashType operator()(const str& cstring)
     {
         #ifdef __linux__
-        return CRC32(cstring.RawPtr(), cstring.Length());
+        return CRC32(cstring.RawPtr(), cstring.length);
         #else
         return MurMur(cstring.data, cstring.length);
         #endif

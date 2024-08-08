@@ -401,21 +401,21 @@ ErrorCode String::Clear() noexcept
     return EVERYTHING_FINE;
 }
 
-Result<Vector<CString>> CString::Split(const CString delimiters) const noexcept
+Result<Vector<str>> str::Split(const str delimiters) const noexcept
 {
     return mlib::Split(*this, delimiters);
 }
 
-Result<Vector<CString>> mlib::Split(const CString string, const CString delimiters) noexcept
+Result<Vector<str>> mlib::Split(const str string, const str delimiters) noexcept
 {
-    Vector<CString> words;
+    Vector<str> words;
 
-    CString tempStr  = string;
-    CString nextWord = tempStr.getNextWord(delimiters);
+    str tempStr  = string;
+    str nextWord = tempStr.getNextWord(delimiters);
 
     while (nextWord)
     {
-        RETURN_ERROR_RESULT(words.PushBack(nextWord), {}, Vector<CString>);
+        RETURN_ERROR_RESULT(words.PushBack(nextWord), {}, Vector<str>);
         nextWord = tempStr.getNextWord(delimiters);
     }
 

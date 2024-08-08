@@ -156,7 +156,7 @@ err::ErrorCode Tests::TestBTree()
 
 err::ErrorCode Tests::TestHashTable()
 {
-    HashTable<CString, int> wordsCountTable;
+    HashTable<str, int> wordsCountTable;
     RETURN_ERROR(wordsCountTable.Error());
 
     char* text = Utils::ReadFileToBuf("../tests/Words.txt");
@@ -166,22 +166,22 @@ err::ErrorCode Tests::TestHashTable()
     auto wordsRes = Split(text);
     RETURN_ERROR(wordsRes);
 
-    Vector<CString>& words = wordsRes.value;
-    for (CString word : words)
+    Vector<str>& words = wordsRes.value;
+    for (str word : words)
     {
         int* count = wordsCountTable[word];
 
         if (count)
             *count += 1;
         else
-            RETURN_ERROR(wordsCountTable.Add(CString{word}, 1));
+            RETURN_ERROR(wordsCountTable.Add(str{word}, 1));
     }
 
     std::ofstream out("../tests/HashTableResult.txt");
     if (!out)
         RETURN_ERROR(err::ERROR_BAD_FILE);
 
-    for (CString word : wordsRes.value)
+    for (str word : wordsRes.value)
     {
         int* count = wordsCountTable[word];
 
@@ -209,25 +209,25 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 
     auto wordsRes = Split(text);
     RETURN_ERROR(wordsRes);
-    Vector<CString>& words = wordsRes.value;
+    Vector<str>& words = wordsRes.value;
 
     Utils::Timer timer;
     for (std::size_t i = 0; i < numberOfTests; i++)
     {
-        HashTable<CString, int> wordsCountTable;
+        HashTable<str, int> wordsCountTable;
         RETURN_ERROR(wordsCountTable.Error());
 
-        for (CString word : words)
+        for (str word : words)
         {
             int* count = wordsCountTable[word];
 
             if (count)
                 *count += 1;
             else
-                RETURN_ERROR(wordsCountTable.Add(CString{word}, 1));
+                RETURN_ERROR(wordsCountTable.Add(str{word}, 1));
         }
 
-        for (CString word : words)
+        for (str word : words)
         {
             int* count = wordsCountTable[word];
             *count += 1;

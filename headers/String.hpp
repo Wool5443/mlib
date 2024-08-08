@@ -17,7 +17,6 @@
 #include <cstring>
 #include <sys/stat.h>
 #include "Hash.hpp"
-#include "Error.hpp"
 #include "Vector.hpp"
 
 namespace mlib {

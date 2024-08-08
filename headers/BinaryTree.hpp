@@ -15,7 +15,6 @@
 
 #include <fstream>
 #include "String.hpp"
-#include "Error.hpp"
 
 namespace mlib {
 

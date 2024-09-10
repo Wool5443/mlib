@@ -75,12 +75,12 @@ public:
 
     /**
      * @brief Construct a new Buffer object
-     * with capacity of at least hintLength
+     * with capacity of at least capacity
      *
-     * @param [in] hintLength expected number of elements
+     * @param [in] capacity expected number of elements
      */
-    explicit Vector(std::size_t hintLength) noexcept
-        : m_data(hintLength) {}
+    explicit Vector(std::size_t capacity) noexcept
+        : m_data(capacity) {}
 ///////////////////////////////////////////////////////////////////////////////
 //
 //                              PUBLIC METHODS

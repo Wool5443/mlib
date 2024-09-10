@@ -94,13 +94,13 @@ public:
     /**
      * @brief Construct a new Linked List object
      * and ensures that the capacity is enougth
-     * for hintLength elements, thus, avoiding
+     * for capacity elements, thus, avoiding
      * reallocations
      *
-     * @param [in] hintLength length to ensure big enough capacity
+     * @param [in] capacity length to ensure big enough capacity
      */
-    explicit LinkedList(std::size_t hintLength) noexcept
-        : m_data(hintLength), m_next(hintLength), m_prev(hintLength),
+    explicit LinkedList(std::size_t capacity) noexcept
+        : m_data(capacity), m_next(capacity), m_prev(capacity),
           m_freeHead(1)
     {
         if (auto err = Error())

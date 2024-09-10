@@ -32,7 +32,7 @@ namespace mlib {
  * @tparam FixedSize if true, adding new element in full list will delete
  * the last element. Used for caches.
  */
-template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2, bool FixedSize = false>
+template<typename T, bool FixedSize = false>
 class LinkedList final
 {
 ///////////////////////////////////////////////////////////////////////////////

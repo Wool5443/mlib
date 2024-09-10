@@ -302,6 +302,19 @@ public:
         return PopFront(Head());
     }
 
+    err::ErrorCode MoveToFront(std::size_t index) noexcept
+    {
+        if (index >= m_data.GetCapacity())
+            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
+        if (m_prev[index] == FREE_ELEM)
+            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
+
+        err::Result<T> result = Pop(index);
+        RETURN_ERROR(result);
+
+        return PushFront(std::move(result.value));
+    }
+
     /**
      * @brief Slowly iterates over the list until it gets
      * to the element you want(don't use it)

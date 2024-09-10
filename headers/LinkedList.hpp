@@ -138,14 +138,17 @@ public:
 
         err::ErrorCode error = err::EVERYTHING_FINE;
 
-        if (FixedSize)
+        if (!m_freeHead)
         {
-            RETURN_ERROR(PopBack().error);
-            error = err::ERROR_NO_MEMORY;
-        }
-        else if (!m_freeHead)
-        {
-            RETURN_ERROR(realloc(length + 1));
+            if (FixedSize)
+            {
+                RETURN_ERROR(PopBack().error);
+                error = err::ERROR_NO_MEMORY;
+            }
+            else
+            {
+                RETURN_ERROR(realloc(length + 1));
+            }
         }
 
         std::size_t insertIndex = m_freeHead;

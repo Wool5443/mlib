@@ -16,6 +16,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
+#include "Utils.hpp"
 
 namespace err {
 
@@ -98,7 +99,7 @@ struct Error
      * @param [in] file where to print
      */
 
-    void        Print(std::ostream& out = std::cerr) const noexcept;
+    void Print(FILE* file = stderr) const noexcept;
 };
 
 /** @struct Result
@@ -135,10 +136,13 @@ struct Logger
 
     Error         errorStack[MAX_ERRORS]{}; ///< stack of errors
     std::size_t   length = 0; ///< length of the stack
-    std::ostream& logStream; ///< stream for log emitting
-public:
-    Logger(std::ostream& logStream)
-        : logStream(logStream) {}
+    mlib::File    logFile; ///< file for log emitting
+
+    Logger(FILE* logFile)
+        : logFile(logFile) {}
+
+    Logger(const char* filePath)
+        : logFile(filePath, "w") {}
 
     void PushErrorLogPleaseUseMacro(Error&& error);
     void Dump();
@@ -156,11 +160,11 @@ extern err::Logger* LOGGER;
 #define CREATE_ERROR(errorCode) err::Error((errorCode),\
                                 GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
-#define LOG(message)                                                \
+#define LOG(...)                                                    \
 do                                                                  \
 {                                                                   \
-    if (LOGGER)                                                     \
-        LOGGER->PushErrorLogPleaseUseMacro(message);                \
+    if (LOGGER && LOGGER->logFile)                                  \
+        fprintf(LOGGER->logFile, __VA_ARGS__);                      \
 } while (0)
 
 /**
@@ -169,7 +173,7 @@ do                                                                  \
 #define LOG_ERROR(errorCode)                                        \
 do                                                                  \
 {                                                                   \
-    if (LOGGER)                                                     \
+    if (LOGGER && LOGGER->logFile)                                  \
         LOGGER->PushErrorLogPleaseUseMacro(                         \
                     CREATE_ERROR(errorCode));                       \
 } while (0)
@@ -191,15 +195,15 @@ do                                                                  \
 #define LOG_DISABLE() err::Logger* LOGGER = nullptr;
 
 /**
- * @brief Initialize logger to log in std::cerr
+ * @brief Initialize logger to log in stderr
  */
-#define LOG_INIT_CONSOLE() LOG_INIT_FILE(std::cerr)
+#define LOG_INIT_CONSOLE() LOG_INIT_FILE(stderr)
 
 /**
  * @brief Initialize logger to log in fileStream
  */
-#define LOG_INIT_FILE(fileStream)                                   \
-    err::Logger _logger_{fileStream};                               \
+#define LOG_INIT_FILE(filePath)                                   \
+    err::Logger _logger_{filePath};                               \
     err::Logger* LOGGER = &_logger_;
 
 #ifdef NDEBUG

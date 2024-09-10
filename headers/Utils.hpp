@@ -32,6 +32,29 @@ struct Pair
     T2 val2;
 };
 
+struct File
+{
+    FILE* file = nullptr;
+
+    File(FILE* file)
+        : file(file) {}
+
+    File(const char* path, const char* readMode = "r")
+        : file(std::fopen(path, readMode)) {}
+
+    operator FILE*() noexcept { return file; }
+
+    ~File()
+    {
+        fclose(file);
+    }
+
+    File(const File& other) = delete;
+    File(File&& other) = delete;
+    File& operator=(const File& other) = delete;
+    File& operator=(File&& other) = delete;
+};
+
 #define ArrayLength(array) sizeof(array) / sizeof(*(array))
 
 /**

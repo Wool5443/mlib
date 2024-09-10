@@ -26,6 +26,11 @@ enum class ConsoleColor
     WHITE,
 };
 
+void SetConsoleColor(FILE* file, ConsoleColor color)
+{
+    fprintf(file, "\033[0;%dm", static_cast<int>(color));
+}
+
 void SetConsoleColor(std::ostream& out, ConsoleColor color)
 {
     out << "\033[0;" << (int)color << "m";
@@ -43,20 +48,21 @@ const char* err::Error::GetErrorName() const noexcept
     return ERROR_CODE_NAMES[static_cast<std::size_t>(code)];
 }
 
-void err::Error::Print(std::ostream& out) const noexcept
+void err::Error::Print(FILE* file) const noexcept
 {
-    if (&out == &std::cerr || &out == &std::cout)
-        SetConsoleColor(out, code ? ConsoleColor::RED :
-                                    ConsoleColor::GREEN);
+    if (file == stderr || file == stdout)
+        SetConsoleColor(file, code ? ConsoleColor::RED :
+                                     ConsoleColor::GREEN);
 
-    if (isMessage)
-        out << message << '\n';
-    else
-        out << GetErrorName() << " in " << file <<
-        ":" << line << " in " << function << '\n';
+    fprintf(file, "%s in %s:%zu in %s\n",
+            GetErrorName(),
+            this->file,
+            line,
+            function
+    );
 
-    if (&out == &std::cerr || &out == &std::cout)
-        SetConsoleColor(out, ConsoleColor::WHITE);
+    if (file == stderr || file == stdout)
+        SetConsoleColor(file, ConsoleColor::WHITE);
 }
 
 void err::Logger::PushErrorLogPleaseUseMacro(Error&& error)
@@ -70,7 +76,7 @@ void err::Logger::PushErrorLogPleaseUseMacro(Error&& error)
 void err::Logger::Dump()
 {
     for (std::size_t i = 0; i < length; i++)
-        errorStack[i].Print(logStream);
+        errorStack[i].Print(logFile);
     length = 0;
 }
 

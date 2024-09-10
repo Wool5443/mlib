@@ -27,8 +27,6 @@ namespace mlib {
  * @brief LinkedList class using arrays
  *
  * @tparam T value type
- * @tparam DefaultCapacity
- * @tparam GrowFactor
  * @tparam FixedSize if true, adding new element in full list will delete
  * the last element. Used for caches.
  */

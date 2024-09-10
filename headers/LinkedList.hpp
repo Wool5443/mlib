@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <fstream>
 #include "GeneralBuffer.hpp"
+#include "String.hpp"
 
 namespace mlib {
 

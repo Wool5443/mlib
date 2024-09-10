@@ -159,7 +159,7 @@ err::ErrorCode Tests::TestHashTable()
     HashTable<str, int> wordsCountTable;
     RETURN_ERROR(wordsCountTable.Error());
 
-    char* text = Utils::ReadFileToBuf("../tests/Words.txt");
+    char* text = mlib::ReadFileToBuf("../tests/Words.txt");
     if (!text)
         RETURN_ERROR(err::ERROR_NO_MEMORY);
 
@@ -203,7 +203,7 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 {
     static const std::size_t to_ms = 1000000;
 
-    char* text = Utils::ReadFileToBuf("../tests/Words.txt");
+    char* text = mlib::ReadFileToBuf("../tests/Words.txt");
     if (!text)
         RETURN_ERROR(err::ERROR_NO_MEMORY);
 
@@ -211,7 +211,7 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
     RETURN_ERROR(wordsRes);
     Vector<str>& words = wordsRes.value;
 
-    Utils::Timer timer;
+    mlib::Timer timer;
     for (std::size_t i = 0; i < numberOfTests; i++)
     {
         HashTable<str, int> wordsCountTable;

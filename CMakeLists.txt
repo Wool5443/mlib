@@ -41,9 +41,9 @@ set(CMAKE_CXX_FLAGS_RELEASE
 -Wno-conversion -Wno-unused-variable -Wno-pointer-arith -Wextra -march=native       \
 -mavx512f -O3 -DNDEBUG")
 
-FILE(GLOB SOURCES_CPP src/*.cpp Utils/*.cpp example/main.cpp
-                      tests/Tests.cpp libs/Utils/*.cpp)
-FILE(GLOB SOURCES_HPP headers/*.hpp Utils/*.hpp tests/Tests.hpp libs/Utils/*.hpp)
+FILE(GLOB SOURCES_CPP src/*.cpp example/main.cpp
+                      tests/Tests.cpp)
+FILE(GLOB SOURCES_HPP headers/*.hpp tests/Tests.hpp)
 
 if(LINUX)
 FILE(GLOB SOURCES_ASM src/*.asm)

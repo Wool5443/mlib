@@ -12,7 +12,7 @@ template<typename Key, typename Val, typename GetHash = Hash<Key>>
 
 class HashTable
 {
-    using HashKey = Utils::Pair<HashType, Key>;
+    using HashKey = mlib::Pair<HashType, Key>;
 public:
     struct HashTableElement
     {
@@ -151,7 +151,7 @@ public:
     {
         RETURN_ERROR_RESULT(Error(), {}, Val);
 
-        Utils::Pair<HashType, std::size_t> hashInd = getHashInd(key);
+        mlib::Pair<HashType, std::size_t> hashInd = getHashInd(key);
         RETURN_ERROR_RESULT(m_containers[hashInd.val2].Error(), {}, Val);
 
         auto& container = m_containers[hashInd.val2];
@@ -193,7 +193,7 @@ public:
             return nullptr;
         }
 
-        Utils::Pair<HashType, std::size_t> hashInd = getHashInd(key);
+        mlib::Pair<HashType, std::size_t> hashInd = getHashInd(key);
         if (auto error = m_containers[hashInd.val2].Error())
         {
             LOG_ERROR(error);
@@ -225,7 +225,7 @@ private:
         return err::ERROR_NOT_FOUND;
     }
 private:
-    Utils::Pair<HashType, std::size_t> getHashInd(const Key& key)
+    mlib::Pair<HashType, std::size_t> getHashInd(const Key& key)
     {
         HardAssert(m_containers.length > 0, err::ERROR_ZERO_DIVISION);
 

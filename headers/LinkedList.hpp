@@ -29,8 +29,10 @@ namespace mlib {
  * @tparam T value type
  * @tparam DefaultCapacity
  * @tparam GrowFactor
+ * @tparam FixedSize if true, adding new element in full list will delete
+ * the last element. Used for caches.
  */
-template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2>
+template<typename T, std::size_t DefaultCapacity = 8, std::size_t GrowFactor = 2, bool FixedSize = false>
 class LinkedList final
 {
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,7 +138,9 @@ public:
         if (m_prev[index] == FREE_ELEM)
             RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
 
-        if (!m_freeHead)
+        if (FixedSize)
+            return PopBack().error;
+        else if (!m_freeHead)
             RETURN_ERROR(realloc(length + 1));
 
         std::size_t insertIndex = m_freeHead;

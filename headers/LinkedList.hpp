@@ -138,10 +138,17 @@ public:
         if (m_prev[index] == FREE_ELEM)
             RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
 
+        err::ErrorCode error = err::EVERYTHING_FINE;
+
         if (FixedSize)
-            return PopBack().error;
+        {
+            RETURN_ERROR(PopBack().error);
+            error = err::ERROR_NO_MEMORY;
+        }
         else if (!m_freeHead)
+        {
             RETURN_ERROR(realloc(length + 1));
+        }
 
         std::size_t insertIndex = m_freeHead;
         m_freeHead              = m_next[m_freeHead];
@@ -156,7 +163,7 @@ public:
 
         length++;
 
-        return {};
+        return error;
     }
 
     /**

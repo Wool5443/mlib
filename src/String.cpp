@@ -3,106 +3,6 @@
 using namespace err;
 using namespace mlib;
 
-String::String(std::size_t hintLength) noexcept
-    : m_data(hintLength + 1) {}
-
-String::String(const char* string, std::size_t length) noexcept
-    : m_data(length + 1), length(length)
-{
-    if (auto err = Error())
-    {
-        LOG_ERROR(err);
-        return;
-    }
-
-    std::memcpy(RawPtr(), string, length);
-}
-
-String::String(const char* string) noexcept
-    : String(string, strlen(string)) {}
-
-String::String(const str string) noexcept
-    : String(string, string.length) {}
-
-String::String(const char chr) noexcept
-    : String(&chr, 1) {}
-
-char& String::operator[](std::size_t index) & noexcept
-{
-    return m_data[index];
-}
-
-const char& String::operator[](std::size_t index) const & noexcept
-{
-    return m_data[index];
-}
-
-String::iterator String::begin() & noexcept
-{
-    if (auto error = Error())
-    {
-        LOG_ERROR(error);
-        return nullptr;
-    }
-
-    return m_data.RawPtr();
-}
-
-String::constIterator String::begin() const & noexcept
-{
-    if (auto error = Error())
-    {
-        LOG_ERROR(error);
-        return nullptr;
-    }
-
-    return m_data.RawPtr();
-}
-
-String::constIterator String::cbegin() const & noexcept
-{
-    if (auto error = Error())
-    {
-        LOG_ERROR(error);
-        return nullptr;
-    }
-
-    return m_data.RawPtr();
-}
-
-String::iterator String::end() & noexcept
-{
-    if (auto error = Error())
-    {
-        LOG_ERROR(error);
-        return nullptr;
-    }
-
-    return m_data.RawPtr() + length;
-}
-
-String::constIterator String::end() const & noexcept
-{
-    if (auto error = Error())
-    {
-        LOG_ERROR(error);
-        return nullptr;
-    }
-
-    return m_data.RawPtr() + length;
-}
-
-String::constIterator String::cend() const & noexcept
-{
-    if (auto error = Error())
-    {
-        LOG_ERROR(error);
-        return nullptr;
-    }
-
-    return m_data.RawPtr() + length;
-}
-
 std::strong_ordering String::operator<=>(const char* other) const noexcept
 {
     if (auto error = Error())
@@ -151,17 +51,6 @@ bool String::operator==(const char* other) const noexcept
     return strcmp(RawPtr(), other) == 0;
 }
 
-
-bool String::operator!=(const String& other) const noexcept
-{
-    return !operator==(other);
-}
-
-bool String::operator!=(const char* other) const noexcept
-{
-    return !operator==(other);
-}
-
 String& String::append(const char* string, std::size_t strLength) noexcept
 {
     if (auto error = Error())
@@ -189,53 +78,8 @@ String& String::append(const char* string, std::size_t strLength) noexcept
     return *this;
 }
 
-String& String::operator+=(const char* other) noexcept
-{
-    return append(other, strlen(other));
-}
 
-String& String::operator+=(const String& other) noexcept
-{
-    return append(other.RawPtr(), other.length);
-}
-
-#define OPERATOR_PLUS_CODE                              \
-{                                                       \
-    String result{lhs};                                 \
-    LOG_ERROR_IF(result.Error());                       \
-    result += rhs;                                      \
-    return result;                                      \
-}
-
-#define RVAL_OPERATOR_PLUS_CODE                         \
-{                                                       \
-    lhs += rhs;                                         \
-    return lhs;                                         \
-}
 namespace mlib {
-
-String operator+(const char* lhs, const String& rhs) noexcept
-OPERATOR_PLUS_CODE
-/**
- * @brief Adds s2 strings
- */
-String operator+(const String& lhs, const char* rhs) noexcept
-OPERATOR_PLUS_CODE
-/**
- * @brief Adds s2 strings
- */
-String operator+(const String& lhs, const String& rhs) noexcept
-OPERATOR_PLUS_CODE
-/**
- * @brief Adds s2 strings
- */
-String operator+(String&& lhs, const char* rhs) noexcept
-RVAL_OPERATOR_PLUS_CODE
-/**
- * @brief Adds s2 strings
- */
-String operator+(String&& lhs, const String& rhs) noexcept
-RVAL_OPERATOR_PLUS_CODE
 
 std::ostream& operator<<(std::ostream& out, const String& string)
 {
@@ -249,12 +93,6 @@ std::ostream& operator<<(std::ostream& out, const String& string)
 
 } // namespace mlib
 
-#undef OPERATOR_PLUS_CODE
-#undef RVAL_OPERATOR_PLUS_CODE
-
-String::operator char*()                & noexcept { return RawPtr(); }
-String::operator const char*()    const & noexcept { return RawPtr(); }
-String::operator bool()           const   noexcept { return Error();  }
 
 Result<String> String::ReadFromFile(const char* filePath) noexcept
 {
@@ -384,16 +222,6 @@ ErrorCode String::Filter(const char* filter) noexcept
     return EVERYTHING_FINE;
 }
 
-ErrorCode String::Filter(const String& filter) noexcept
-{
-    return Filter(filter.RawPtr());
-}
-
-ErrorCode String::Filter() noexcept
-{
-    return Filter(SPACE_CHARS);
-}
-
 ErrorCode String::Clear() noexcept
 {
     RETURN_ERROR(Error());
@@ -402,11 +230,6 @@ ErrorCode String::Clear() noexcept
     length    = 0;
 
     return EVERYTHING_FINE;
-}
-
-Result<Vector<str>> str::Split(const str delimiters) const noexcept
-{
-    return mlib::Split(*this, delimiters);
 }
 
 Result<Vector<str>> mlib::Split(const str string, const str delimiters) noexcept

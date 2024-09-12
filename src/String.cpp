@@ -106,7 +106,7 @@ Result<String> String::ReadFromFile(const char* filePath) noexcept
         return ERROR_BAD_FILE;
 
     String str(static_cast<std::size_t>(result.st_size));
-    RETURN_ERROR_RESULT(str.Error(), {}, String);
+    RETURN_ERROR_RESULT_IF(str.Error(), {}, String);
 
     input.read(str, result.st_size);
 
@@ -117,19 +117,19 @@ Result<String> String::ReadFromFile(const char* filePath) noexcept
 
 Result<std::size_t> String::Find(char chr) const noexcept
 {
-    RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
+    RETURN_ERROR_RESULT_IF(Error(), SIZE_MAX, std::size_t);
 
     const char* buf   = RawPtr();
     const char* found = strchr(buf, chr);
     if (!found)
-        RETURN_ERROR_RESULT(ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
+        RETURN_ERROR_RESULT_IF(ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
     return found - buf;
 }
 
 Result<std::size_t> String::Find(const char* string) const noexcept
 {
-    RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
+    RETURN_ERROR_RESULT_IF(Error(), SIZE_MAX, std::size_t);
 
     SoftAssertResult(string, SIZE_MAX, ERROR_NULLPTR);
 
@@ -137,14 +137,14 @@ Result<std::size_t> String::Find(const char* string) const noexcept
     const char* found = strstr(data, string);
 
     if (!found)
-        RETURN_ERROR_RESULT(ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
+        RETURN_ERROR_RESULT_IF(ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
     return found - data;
 }
 
 Result<std::size_t> String::Count(char chr) const noexcept
 {
-    RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
+    RETURN_ERROR_RESULT_IF(Error(), SIZE_MAX, std::size_t);
 
     std::size_t count = 0;
 
@@ -158,9 +158,9 @@ Result<std::size_t> String::Count(char chr) const noexcept
 Result<std::size_t> String::Count(const char* string) const noexcept
 {
     if (!string)
-        RETURN_ERROR_RESULT(ERROR_NULLPTR, SIZE_MAX, std::size_t);
+        RETURN_ERROR_RESULT_IF(ERROR_NULLPTR, SIZE_MAX, std::size_t);
 
-    RETURN_ERROR_RESULT(Error(), SIZE_MAX, std::size_t);
+    RETURN_ERROR_RESULT_IF(Error(), SIZE_MAX, std::size_t);
 
     std::size_t count = 0;
     const char* found = strstr(RawPtr(), string);
@@ -176,12 +176,12 @@ Result<std::size_t> String::Count(const char* string) const noexcept
 
 Result<Vector<String>> String::Split(const char* delimiters) const noexcept
 {
-    RETURN_ERROR_RESULT(Error(), {}, Vector<String>);
+    RETURN_ERROR_RESULT_IF(Error(), {}, Vector<String>);
 
     char* buf = strdup(RawPtr());
 
     if (!buf)
-        RETURN_ERROR_RESULT(ERROR_NO_MEMORY, {}, Vector<String>);
+        RETURN_ERROR_RESULT_IF(ERROR_NO_MEMORY, {}, Vector<String>);
 
     Vector<String> words;
 
@@ -191,7 +191,7 @@ Result<Vector<String>> String::Split(const char* delimiters) const noexcept
 
     while (token)
     {
-        RETURN_ERROR_RESULT(words.PushBack(token), {}, Vector<String>, free(buf));
+        RETURN_ERROR_RESULT_IF(words.PushBack(token), {}, Vector<String>, free(buf));
         token = strtok(nullptr, delimiters);
     }
 
@@ -241,7 +241,7 @@ Result<Vector<str>> mlib::Split(const str string, const str delimiters) noexcept
 
     while (nextWord)
     {
-        RETURN_ERROR_RESULT(words.PushBack(nextWord), {}, Vector<str>);
+        RETURN_ERROR_RESULT_IF(words.PushBack(nextWord), {}, Vector<str>);
         nextWord = tempStr.getNextWord(delimiters);
     }
 

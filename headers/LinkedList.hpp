@@ -264,11 +264,11 @@ public:
      */
     err::Result<T> Pop(std::size_t index) noexcept
     {
-        RETURN_ERROR_RESULT(Error(), {}, T);
+        RETURN_ERROR_RESULT_IF(Error(), {}, T);
 
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, {}, T);
+            RETURN_ERROR_RESULT_IF(err::ERROR_INDEX_OUT_OF_BOUNDS, {}, T);
 
         T value = std::move(m_data[index]);
 
@@ -328,7 +328,7 @@ public:
     {
         if (index < 1 || index >= m_data.GetCapacity() ||
             m_prev[index] == FREE_ELEM)
-            RETURN_ERROR_RESULT(err::ERROR_INDEX_OUT_OF_BOUNDS, SIZE_MAX, std::size_t);
+            RETURN_ERROR_RESULT_IF(err::ERROR_INDEX_OUT_OF_BOUNDS, SIZE_MAX, std::size_t);
 
         std::size_t curEl = Head();
         std::size_t i     = 1;
@@ -340,7 +340,7 @@ public:
         }
 
         if (!curEl)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
+            RETURN_ERROR_RESULT_IF(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
         return curEl;
     }
@@ -360,7 +360,7 @@ public:
             curEl = m_next[curEl];
 
         if (!curEl)
-            RETURN_ERROR_RESULT(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
+            RETURN_ERROR_RESULT_IF(err::ERROR_NOT_FOUND, SIZE_MAX, std::size_t);
 
         return curEl;
     }

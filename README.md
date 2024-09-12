@@ -34,7 +34,7 @@ always handle the error via these macros:
 ```c++
 // ... is for code to do before returning
 RETURN_ERROR_IF(error, ...)
-RETURN_ERROR_RESULT(error, poison, poisonType, ...)
+RETURN_ERROR_RESULT_IF(error, poison, poisonType, ...)
 RETURN_RESULT_IF(result, ...)
 ```
 
@@ -74,7 +74,7 @@ err::Result<int> bar()
     err::ErrorCode error = foo();
 
     // return and log result with error and poison if error occured
-    RETURN_ERROR_RESULT(error, INT_MIN, int);
+    RETURN_ERROR_RESULT_IF(error, INT_MIN, int);
 
     /* some code */
 

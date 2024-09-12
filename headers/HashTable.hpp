@@ -149,16 +149,16 @@ public:
      */
     err::Result<Val> Pop(const Key& key)
     {
-        RETURN_ERROR_RESULT(Error(), {}, Val);
+        RETURN_ERROR_RESULT_IF(Error(), {}, Val);
 
         mlib::Pair<HashType, std::size_t> hashInd = getHashInd(key);
-        RETURN_ERROR_RESULT(m_containers[hashInd.val2].Error(), {}, Val);
+        RETURN_ERROR_RESULT_IF(m_containers[hashInd.val2].Error(), {}, Val);
 
         auto& container = m_containers[hashInd.val2];
 
         auto found = findInContainer(container, { hashInd.val1, key });
 
-        RETURN_ERROR_RESULT(found, {}, Val);
+        RETURN_ERROR_RESULT_IF(found, {}, Val);
 
         err::Result<HashTableElement> result = container.Pop(found.value);
 

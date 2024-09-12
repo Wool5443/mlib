@@ -276,7 +276,7 @@ do                                                                  \
 /**
  * @brief returns error and poison if it is not EVERYTHING_FINE
  */
-#define RETURN_ERROR_RESULT(error, poison, poisonType, ...)         \
+#define RETURN_ERROR_RESULT_IF(error, poison, poisonType, ...)         \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error_ = error;                                 \

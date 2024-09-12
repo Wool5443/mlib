@@ -17,20 +17,20 @@ err::ErrorCode Tests::TestString(std::size_t n)
     std::cout << str8bytes << '\n';
 
     String a{"Hello"};
-    RETURN_ERROR(a.Error());
+    RETURN_ERROR_IF(a.Error());
     String b{"World"};
-    RETURN_ERROR(b.Error());
+    RETURN_ERROR_IF(b.Error());
 
     String c = a + b;
-    RETURN_ERROR(c.Error());
+    RETURN_ERROR_IF(c.Error());
 
     String correct = "HelloWorld";
-    RETURN_ERROR(correct.Error());
+    RETURN_ERROR_IF(correct.Error());
 
     if (c != correct)
     {
         std::cout << "Got: " << c << ", expected: " << correct << '\n';
-        RETURN_ERROR(err::ERROR_BAD_VALUE);
+        RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
     }
 
     String bebra;
@@ -39,23 +39,23 @@ err::ErrorCode Tests::TestString(std::size_t n)
         bebra += "bebra";
 
     err::Result<std::size_t> countRes = bebra.Count("bebra");
-    RETURN_ERROR(countRes);
+    RETURN_ERROR_IF(countRes);
 
     if (countRes.value != n)
     {
         std::cout << "Got: " << countRes.value << ", expected: " << n << '\n';
-        RETURN_ERROR(err::ERROR_BAD_VALUE);
+        RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
     }
 
     String wordsStr =
     "Hello, dear readers of this code " // 6
     "I know this is some cursed C++, though, " // 8
     "don't be to critical."; // 4
-    RETURN_ERROR(wordsStr.Error());
+    RETURN_ERROR_IF(wordsStr.Error());
     std::size_t wordsNum = 18;
 
     auto words = wordsStr.Split();
-    RETURN_ERROR(words);
+    RETURN_ERROR_IF(words);
 
     for (const String& word : words.value)
         std::cout << word << ' ';
@@ -65,7 +65,7 @@ err::ErrorCode Tests::TestString(std::size_t n)
     if (words.value.length != wordsNum)
     {
         std::cout << "Got: " << words.value.length << ", expected: " << wordsNum << '\n';
-        RETURN_ERROR(err::ERROR_BAD_VALUE);
+        RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
     }
 
     return err::EVERYTHING_FINE;
@@ -78,7 +78,7 @@ err::ErrorCode Tests::TestVector(std::size_t n)
     for (std::size_t i = 0; i < n; i++)
     {
         vec.PushBack((i + 1) * 10);
-        RETURN_ERROR(vec.Error());
+        RETURN_ERROR_IF(vec.Error());
     }
 
     for (std::size_t i = 0; i < n; i++)
@@ -86,11 +86,11 @@ err::ErrorCode Tests::TestVector(std::size_t n)
         {
             std::cout << "Got: " << vec[i] << ", expected: " <<
                           (int)(i + 1) * 10 << '\n';
-            RETURN_ERROR(err::ERROR_BAD_VALUE);
+            RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
         }
 
     auto find50 = vec.Find(50);
-    RETURN_ERROR(find50);
+    RETURN_ERROR_IF(find50);
 
     std::cout << vec[find50.value] << '\n';
 
@@ -106,7 +106,7 @@ err::ErrorCode Tests::TestList(std::size_t n)
     for (std::size_t i = 0; i < n; i++)
     {
         list.PushBack((i + 1) * 10);
-        RETURN_ERROR(list.Error());
+        RETURN_ERROR_IF(list.Error());
     }
 
     list.Dump();
@@ -115,18 +115,18 @@ err::ErrorCode Tests::TestList(std::size_t n)
         if (list[i] != (int)(i) * 10)
         {
             std::cout << list[i] << " != " << (int)(i) * 10 << '\n';
-            RETURN_ERROR(err::ERROR_BAD_VALUE);
+            RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
         }
 
     for (std::size_t i = 0; i < n; i++)
     {
         err::Result<int> res = list.PopBack();
-        RETURN_ERROR(res);
+        RETURN_ERROR_IF(res);
 
         if (res.value != ((int)n - (int)i) * 10)
         {
             std::cout << res.value << " != " << (n - i) * 10 << '\n';
-            RETURN_ERROR(err::ERROR_BAD_VALUE);
+            RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
         }
     }
 
@@ -145,8 +145,8 @@ err::ErrorCode Tests::TestBTree()
 
     BinaryTreeNode<int>* root = tree.root;
 
-    RETURN_ERROR(root->SetLeft(BinaryTreeNode<int>::New(1).value));
-    RETURN_ERROR(root->SetRight(BinaryTreeNode<int>::New(2).value));
+    RETURN_ERROR_IF(root->SetLeft(BinaryTreeNode<int>::New(1).value));
+    RETURN_ERROR_IF(root->SetRight(BinaryTreeNode<int>::New(2).value));
 
     tree.Dump();
     tree.FinishDump();
@@ -157,14 +157,14 @@ err::ErrorCode Tests::TestBTree()
 err::ErrorCode Tests::TestHashTable()
 {
     HashTable<str, int> wordsCountTable;
-    RETURN_ERROR(wordsCountTable.Error());
+    RETURN_ERROR_IF(wordsCountTable.Error());
 
     char* text = mlib::ReadFileToBuf("../tests/Words.txt");
     if (!text)
-        RETURN_ERROR(err::ERROR_NO_MEMORY);
+        RETURN_ERROR_IF(err::ERROR_NO_MEMORY);
 
     auto wordsRes = Split(text);
-    RETURN_ERROR(wordsRes);
+    RETURN_ERROR_IF(wordsRes);
 
     Vector<str>& words = wordsRes.value;
     for (str word : words)
@@ -174,12 +174,12 @@ err::ErrorCode Tests::TestHashTable()
         if (count)
             *count += 1;
         else
-            RETURN_ERROR(wordsCountTable.Add(str{word}, 1));
+            RETURN_ERROR_IF(wordsCountTable.Add(str{word}, 1));
     }
 
     std::ofstream out("../tests/HashTableResult.txt");
     if (!out)
-        RETURN_ERROR(err::ERROR_BAD_FILE);
+        RETURN_ERROR_IF(err::ERROR_BAD_FILE);
 
     for (str word : wordsRes.value)
     {
@@ -188,7 +188,7 @@ err::ErrorCode Tests::TestHashTable()
         if (count)
             out << word << ": " << *count << '\n';
         else
-            RETURN_ERROR(err::ERROR_BAD_VALUE);
+            RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
     }
 
     free(text);
@@ -205,17 +205,17 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 
     char* text = mlib::ReadFileToBuf("../tests/Words.txt");
     if (!text)
-        RETURN_ERROR(err::ERROR_NO_MEMORY);
+        RETURN_ERROR_IF(err::ERROR_NO_MEMORY);
 
     auto wordsRes = Split(text);
-    RETURN_ERROR(wordsRes);
+    RETURN_ERROR_IF(wordsRes);
     Vector<str>& words = wordsRes.value;
 
     mlib::Timer timer;
     for (std::size_t i = 0; i < numberOfTests; i++)
     {
         HashTable<str, int> wordsCountTable;
-        RETURN_ERROR(wordsCountTable.Error());
+        RETURN_ERROR_IF(wordsCountTable.Error());
 
         for (str word : words)
         {
@@ -224,7 +224,7 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
             if (count)
                 *count += 1;
             else
-                RETURN_ERROR(wordsCountTable.Add(str{word}, 1));
+                RETURN_ERROR_IF(wordsCountTable.Add(str{word}, 1));
         }
 
         for (str word : words)

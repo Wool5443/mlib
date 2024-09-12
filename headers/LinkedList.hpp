@@ -132,9 +132,9 @@ public:
     err::ErrorCode InsertAfter(T&& value, std::size_t index)
     {
         if (index >= m_data.GetCapacity())
-            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
+            RETURN_ERROR_IF(err::ERROR_INDEX_OUT_OF_BOUNDS);
         if (m_prev[index] == FREE_ELEM)
-            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
+            RETURN_ERROR_IF(err::ERROR_INDEX_OUT_OF_BOUNDS);
 
         err::ErrorCode error = err::EVERYTHING_FINE;
 
@@ -142,12 +142,12 @@ public:
         {
             if (FixedSize)
             {
-                RETURN_ERROR(PopBack().error);
+                RETURN_ERROR_IF(PopBack().error);
                 error = err::ERROR_NO_MEMORY;
             }
             else
             {
-                RETURN_ERROR(realloc(length + 1));
+                RETURN_ERROR_IF(realloc(length + 1));
             }
         }
 
@@ -305,12 +305,12 @@ public:
     err::ErrorCode MoveToFront(std::size_t index) noexcept
     {
         if (index >= m_data.GetCapacity())
-            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
+            RETURN_ERROR_IF(err::ERROR_INDEX_OUT_OF_BOUNDS);
         if (m_prev[index] == FREE_ELEM)
-            RETURN_ERROR(err::ERROR_INDEX_OUT_OF_BOUNDS);
+            RETURN_ERROR_IF(err::ERROR_INDEX_OUT_OF_BOUNDS);
 
         err::Result<T> result = Pop(index);
-        RETURN_ERROR(result);
+        RETURN_ERROR_IF(result);
 
         return PushFront(std::move(result.value));
     }
@@ -396,7 +396,7 @@ public:
 
         m_htmlDumpFile.open(htmlFilePath);
         if (!m_htmlDumpFile)
-            RETURN_ERROR(err::ERROR_BAD_FILE);
+            RETURN_ERROR_IF(err::ERROR_BAD_FILE);
 
         m_htmlDumpFile <<
             "<style>\n"
@@ -459,11 +459,11 @@ public:
 
         m_htmlDumpFile << "<h1>Iteration" << iterString << "</h1>\n<pre>\n";
 
-        RETURN_ERROR(dumpListText(outTextPath, error));
+        RETURN_ERROR_IF(dumpListText(outTextPath, error));
 
         m_htmlDumpFile << "</pre>\n";
 
-        RETURN_ERROR(dumpListGraph(outGraphPath));
+        RETURN_ERROR_IF(dumpListGraph(outGraphPath));
 
         String outImgPath = m_dumpFolder;
         outImgPath += "/img/iter";
@@ -477,7 +477,7 @@ public:
         static const std::size_t maxPathLength = 256;
         char absoluteOutImgPath[maxPathLength];
         if (!realpath(outImgPath, absoluteOutImgPath))
-            RETURN_ERROR(err::ERROR_BAD_FILE);
+            RETURN_ERROR_IF(err::ERROR_BAD_FILE);
 
         m_htmlDumpFile << "<img src = \"" << absoluteOutImgPath << "\"/>\n";
 
@@ -599,9 +599,9 @@ private:
     {
         std::size_t oldCapacity = m_data.GetCapacity();
 
-        RETURN_ERROR(m_data.Realloc(newLength));
-        RETURN_ERROR(m_next.Realloc(newLength));
-        RETURN_ERROR(m_prev.Realloc(newLength));
+        RETURN_ERROR_IF(m_data.Realloc(newLength));
+        RETURN_ERROR_IF(m_next.Realloc(newLength));
+        RETURN_ERROR_IF(m_prev.Realloc(newLength));
 
         std::size_t newCapcity = m_data.GetCapacity();
 
@@ -626,7 +626,7 @@ private:
     {
         std::ofstream outTextFile{outTextPath};
         if (!outTextFile)
-            RETURN_ERROR(err::ERROR_BAD_FILE);
+            RETURN_ERROR_IF(err::ERROR_BAD_FILE);
 
         PRINT_DUMP("List[" << this << "]\n");
         PRINT_DUMP("List condition - " << GetErrorName(error) << "[" <<
@@ -685,7 +685,7 @@ private:
     {
         std::ofstream outGraphFile{outGraphPath};
         if (!outGraphFile)
-            RETURN_ERROR(err::ERROR_BAD_FILE);
+            RETURN_ERROR_IF(err::ERROR_BAD_FILE);
 
         std::size_t head = Head(), tail = Tail();
 

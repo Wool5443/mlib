@@ -194,7 +194,7 @@ public:
         if (error == err::ERROR_UNINITIALIZED)
             error = err::EVERYTHING_FINE;
         else
-            RETURN_ERROR(error);
+            RETURN_ERROR_IF(error);
 
         if (m_capacity >= newCapacity)
             return err::EVERYTHING_FINE;
@@ -204,7 +204,7 @@ public:
         T* newData = new T[capacity]{};
 
         if (!newData)
-            RETURN_ERROR(err::ERROR_NO_MEMORY, error = err::ERROR_NO_MEMORY);
+            RETURN_ERROR_IF(err::ERROR_NO_MEMORY, error = err::ERROR_NO_MEMORY);
 
         std::move(cebgin(), cend(), newData);
 

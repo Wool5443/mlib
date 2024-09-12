@@ -54,7 +54,7 @@ public:
      */
     err::ErrorCode SetLeft(BinaryTreeNode* node)
     {
-        RETURN_ERROR(error);
+        RETURN_ERROR_IF(error);
 
         if (left)
             left->parent = nullptr;
@@ -74,7 +74,7 @@ public:
      */
     err::ErrorCode SetRight(BinaryTreeNode* node)
     {
-        RETURN_ERROR(error);
+        RETURN_ERROR_IF(error);
 
         if (right)
             right->parent = nullptr;
@@ -154,11 +154,11 @@ public:
     err::ErrorCode Delete()
     {
         if (id == BAD_ID)
-            RETURN_ERROR(err::ERROR_BAD_ID);
+            RETURN_ERROR_IF(err::ERROR_BAD_ID);
         if (left)
-            RETURN_ERROR(left->Delete());
+            RETURN_ERROR_IF(left->Delete());
         if (right)
-            RETURN_ERROR(right->Delete());
+            RETURN_ERROR_IF(right->Delete());
 
         delete this;
 
@@ -465,7 +465,7 @@ public:
 
         m_htmlDumpFile.open(dumpFile);
         if (!m_htmlDumpFile)
-            RETURN_ERROR(err::ERROR_BAD_FILE);
+            RETURN_ERROR_IF(err::ERROR_BAD_FILE);
 
         m_htmlDumpFile <<
         "<style>\n"
@@ -545,13 +545,13 @@ public:
         std::size_t MAX_DEPTH = MaxSize;
 
         if (root->left)
-            RETURN_ERROR(recBuildCellTemplatesGraph(root->left,
+            RETURN_ERROR_IF(recBuildCellTemplatesGraph(root->left,
                          outGraphFile, 0, MAX_DEPTH));
         if (root->right)
-            RETURN_ERROR(recBuildCellTemplatesGraph(root->right,
+            RETURN_ERROR_IF(recBuildCellTemplatesGraph(root->right,
                          outGraphFile, 0, MAX_DEPTH));
 
-        RETURN_ERROR(recDrawGraph(root, outGraphFile, 0, MAX_DEPTH));
+        RETURN_ERROR_IF(recDrawGraph(root, outGraphFile, 0, MAX_DEPTH));
 
         outGraphFile << "\n"
         << "TREE:root->NODE_" << root <<"\n"
@@ -590,7 +590,7 @@ private:
         std::size_t nodeId = node->id;
 
         if (curDepth > maxDepth)
-            RETURN_ERROR(err::ERROR_BAD_RECURSION);
+            RETURN_ERROR_IF(err::ERROR_BAD_RECURSION);
 
         outGraphFile << "NODE_" << node << "[style = \"filled\", "
         "fillcolor = " NODE_COLOR ", "
@@ -605,10 +605,10 @@ private:
         outGraphFile << "|{<left>left|<right>right}}\"];\n";
 
         if (node->left)
-            RETURN_ERROR(recBuildCellTemplatesGraph(node->left,
+            RETURN_ERROR_IF(recBuildCellTemplatesGraph(node->left,
                          outGraphFile, curDepth + 1, maxDepth));
         if (node->right)
-            RETURN_ERROR(recBuildCellTemplatesGraph(node->right,
+            RETURN_ERROR_IF(recBuildCellTemplatesGraph(node->right,
                          outGraphFile, curDepth + 1, maxDepth));
 
         return err::EVERYTHING_FINE;
@@ -620,18 +620,18 @@ private:
                                        std::size_t maxDepth)
     {
         if (curDepth > maxDepth)
-            RETURN_ERROR(err::ERROR_BAD_RECURSION);
+            RETURN_ERROR_IF(err::ERROR_BAD_RECURSION);
 
         if (node->left)
         {
             outGraphFile << "NODE_" << node << ":left->NODE_" << node->left << ";\n";
-            RETURN_ERROR(recDrawGraph(node->left,
+            RETURN_ERROR_IF(recDrawGraph(node->left,
                          outGraphFile, curDepth + 1, maxDepth));
         }
         if (node->right)
         {
             outGraphFile << "NODE_" << node << ":right->NODE_" << node->right << ";\n";
-            RETURN_ERROR(recDrawGraph(node->right,
+            RETURN_ERROR_IF(recDrawGraph(node->right,
                          outGraphFile, curDepth + 1, maxDepth));
         }
 

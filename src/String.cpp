@@ -202,7 +202,7 @@ Result<Vector<String>> String::Split(const char* delimiters) const noexcept
 
 ErrorCode String::Filter(const char* filter) noexcept
 {
-    RETURN_ERROR(Error());
+    RETURN_ERROR_IF(Error());
 
     SoftAssert(filter, ERROR_NULLPTR);
 
@@ -224,7 +224,7 @@ ErrorCode String::Filter(const char* filter) noexcept
 
 ErrorCode String::Clear() noexcept
 {
-    RETURN_ERROR(Error());
+    RETURN_ERROR_IF(Error());
 
     m_data[0] = '\0';
     length    = 0;

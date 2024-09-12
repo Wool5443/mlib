@@ -261,7 +261,7 @@ do                                                                  \
 /**
  * @brief returns error if it is not EVERYTHING_FINE
  */
-#define RETURN_ERROR(error, ...)                                    \
+#define RETURN_ERROR_IF(error, ...)                                    \
 do                                                                  \
 {                                                                   \
     err::ErrorCode _error_ = error;                                 \
@@ -291,7 +291,7 @@ do                                                                  \
 /**
  * @brief returns result if it contains an error
  */
-#define RETURN_RESULT(result, ...)                                  \
+#define RETURN_RESULT_IF(result, ...)                                  \
 do                                                                  \
 {                                                                   \
     auto _result_ = result;                                         \

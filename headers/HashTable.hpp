@@ -120,12 +120,12 @@ public:
      */
     err::ErrorCode Add(HashTableElement&& elem)
     {
-        RETURN_ERROR(realloc());
+        RETURN_ERROR_IF(realloc());
 
         HardAssert(m_containers.length, err::ERROR_ZERO_DIVISION);
 
         std::size_t index = elem.hashKey.val1 % m_containers.length;
-        RETURN_ERROR(m_containers[index].Error());
+        RETURN_ERROR_IF(m_containers[index].Error());
 
         auto found = findInContainer(m_containers[index], elem.hashKey);
 
@@ -133,7 +133,7 @@ public:
             return found;
 
         err::ErrorCode error = m_containers[index].PushBack(std::move(elem));
-        RETURN_ERROR(error);
+        RETURN_ERROR_IF(error);
 
         m_length++;
 
@@ -258,7 +258,7 @@ private:
             for (HashTableElement& elem : container)
             {
                 std::size_t index = elem.hashKey.val1 % newCapacity;
-                RETURN_ERROR(newTable.m_containers[index].PushBack(std::move(elem)));
+                RETURN_ERROR_IF(newTable.m_containers[index].PushBack(std::move(elem)));
             }
 
         *this = std::move(newTable);

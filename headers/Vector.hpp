@@ -97,7 +97,7 @@ public:
     err::ErrorCode PushBack(const T& element)
     {
         if (length == m_data.GetCapacity())
-            RETURN_ERROR(m_data.Realloc(length + 1));
+            RETURN_ERROR_IF(m_data.Realloc(length + 1));
 
         m_data[length++] = element;
 
@@ -114,7 +114,7 @@ public:
     err::ErrorCode PushBack(T&& element)
     {
         if (length == m_data.GetCapacity())
-            RETURN_ERROR(m_data.Realloc(length + 1));
+            RETURN_ERROR_IF(m_data.Realloc(length + 1));
 
         m_data[length++] = std::move(element);
 
@@ -134,7 +134,7 @@ public:
     err::ErrorCode EmplaceBack(Args&&... args)
     {
         if (length == m_data.GetCapacity())
-            RETURN_ERROR(m_data.Realloc(length + 1));
+            RETURN_ERROR_IF(m_data.Realloc(length + 1));
 
         new(&m_data[length++]) T(std::forward<Args>(args)...);
 

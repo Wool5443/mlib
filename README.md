@@ -33,9 +33,9 @@ Note that all methods return either ErrorCode or a Result so you should
 always handle the error via these macros:
 ```c++
 // ... is for code to do before returning
-RETURN_ERROR(error, ...)
+RETURN_ERROR_IF(error, ...)
 RETURN_ERROR_RESULT(error, poison, poisonType, ...)
-RETURN_RESULT(result, ...)
+RETURN_RESULT_IF(result, ...)
 ```
 
 ## How to use
@@ -62,7 +62,7 @@ err::ErrorCode foo()
     int* array = new int[10000000];
 
     if (!array)
-        RETURN_ERROR(err::ERROR_NO_MEMORY); // return and log error
+        RETURN_ERROR_IF(err::ERROR_NO_MEMORY); // return and log error
 
     /* some code */
 
@@ -83,10 +83,10 @@ err::Result<int> bar()
 
 int main()
 {
-    RETURN_ERROR(foo); // returns and logs if foo fails
+    RETURN_ERROR_IF(foo); // returns and logs if foo fails
 
     err::Result<int> res = bar();
-    RETURN_ERROR(res); // returns and logs if bar failed
+    RETURN_ERROR_IF(res); // returns and logs if bar failed
 
     LOG("Hello, this is a test log"); // Logs a message
 
@@ -107,10 +107,10 @@ err::ErrorCode foo()
     // Then there are 2 ways of createing a non-empty object
 
     String strCommonWay("Hello");
-    RETURN_ERROR(strCommonWay.Error());
+    RETURN_ERROR_IF(strCommonWay.Error());
 
     String strAssign = "Hello";
-    RETURN_ERROR(strAssign.Error());
+    RETURN_ERROR_IF(strAssign.Error());
 
     // Do not forget to check for errors!!!!
 }
@@ -127,12 +127,12 @@ LOG_INIT_CONSOLE();
 int main()
 {
     String a("Hello");
-    RETURN_ERROR(a.Error());
+    RETURN_ERROR_IF(a.Error());
     String b("World");
-    RETURN_ERROR(b).Error();
+    RETURN_ERROR_IF(b).Error();
 
     String c = a + ' ' + b;
-    RETURN_ERROR(c.Error());
+    RETURN_ERROR_IF(c.Error());
 
     std::cout << c << '\n'; //> Hello World
 
@@ -141,11 +141,11 @@ int main()
     for (std::size_t i = 0; i < 50; i++)
     {
         bebra += "bebra";
-        RETURN_ERROR(bebra.Error());
+        RETURN_ERROR_IF(bebra.Error());
     }
 
     err::Result<std::size_t> countRes = bebra.Count("bebra");
-    RETURN_ERROR(countRes);
+    RETURN_ERROR_IF(countRes);
 
     std::cout << countRes.value << '\n'; //> 50
 
@@ -153,10 +153,10 @@ int main()
     "Hello, dear readers of this code " // 6 words
     "I know this is some cursed C++, though, " // 8 words
     "don't be to critical."; // 4 words
-    RETURN_ERROR(wordsStr.Error());
+    RETURN_ERROR_IF(wordsStr.Error());
 
     err::Result<Vector<String<>>> words = wordsStr.Split(" ");
-    RETURN_ERROR(words);
+    RETURN_ERROR_IF(words);
 
     for (const String<>& word : words.value)
         std::cout << word << ' ';
@@ -164,7 +164,7 @@ int main()
     std::cout << '\n';
 
     err::Result<std::size_t> indRes = wordsStr.Find("dear");
-    RETURN_ERROR(indRes);
+    RETURN_ERROR_IF(indRes);
 
     std::cout << indRes.value << '\n'; //> 7
 
@@ -184,14 +184,14 @@ int main()
     Vector<int> vec;
 
     for (std::size_t i = 1; i <= 10; i++)
-        RETURN_ERROR(vec.PushBack(i));
+        RETURN_ERROR_IF(vec.PushBack(i));
 
     for (auto el : vec)
         std::cout << el << ' '; //> 1 2 3 ... 10
     std::cout << '\n';
 
     auto findRes = vec.Find(4);
-    RETURN_ERROR(findRes);
+    RETURN_ERROR_IF(findRes);
 
     std::cout << vec[findRes.value] << '\n'; //> 3
 
@@ -211,14 +211,14 @@ int main()
     // List actually does allocation since it needs a fictional
     // element in the beginning to be valid.
     LinkedList<int> list;
-    RETURN_ERROR(list.Error());
+    RETURN_ERROR_IF(list.Error());
 
-    RETURN_ERROR(list.InitDump("../dump/list"));
+    RETURN_ERROR_IF(list.InitDump("../dump/list"));
 
     for (std::size_t i = 1; i <= 10; i++)
     {
         list.PushBack(i);
-        RETURN_ERROR(list.Error());
+        RETURN_ERROR_IF(list.Error());
     }
 
     list.Dump(); // Dumps a list to an html file
@@ -226,7 +226,7 @@ int main()
     for (std::size_t i = 1; i <= 10; i++)
     {
         err::Result<int> res = list.PopBack();
-        RETURN_ERROR(res);
+        RETURN_ERROR_IF(res);
 
         std::cout << res.value << ' '; //> 10 9 ... 1
     }
@@ -251,26 +251,26 @@ LOG_INIT_CONSOLE();
 int main()
 {
     BinaryTree<int> tree(0); // Constructs a tree with 0 in root
-    RETURN_ERROR(tree.Error());
+    RETURN_ERROR_IF(tree.Error());
 
     BinaryTree<int> emptyTree; // Constructs a tree without any root
 
-    RETURN_ERROR(tree.InitDump("../dump/tree"));
+    RETURN_ERROR_IF(tree.InitDump("../dump/tree"));
 
     BinaryTreeNode<int>* root = tree.root;
 
     // Creates a new node
     auto leftRes  = BinaryTreeNode<int>::New(1);
-    RETURN_ERROR(leftRes);
+    RETURN_ERROR_IF(leftRes);
     auto rightRes = BinaryTreeNode<int>::New(2);
-    RETURN_ERROR(rightRes, leftRes.value->Delete());
+    RETURN_ERROR_IF(rightRes, leftRes.value->Delete());
 
-    RETURN_ERROR(root->SetLeft (leftRes. value), leftRes .value->Delete());
-    RETURN_ERROR(root->SetRight(rightRes.value), rightRes.value->Delete());
+    RETURN_ERROR_IF(root->SetLeft (leftRes. value), leftRes .value->Delete());
+    RETURN_ERROR_IF(root->SetRight(rightRes.value), rightRes.value->Delete());
 
-    RETURN_ERROR(tree.Dump());
+    RETURN_ERROR_IF(tree.Dump());
 
-    RETURN_ERROR(tree.Finish());
+    RETURN_ERROR_IF(tree.Finish());
 
     return err::EVERYTHING_FINE;
 }
@@ -288,15 +288,15 @@ int main()
 {
     HashTable<String<>, int> table;
 
-    RETURN_ERROR(table.Add({ "Hello", 1 }));
-    RETURN_ERROR(table.Add({ "World", 2 }));
+    RETURN_ERROR_IF(table.Add({ "Hello", 1 }));
+    RETURN_ERROR_IF(table.Add({ "World", 2 }));
 
     // table[key] = pointer to val or nullptr
     std::cout << *table["Hello"] << '\n'; //> 1
     std::cout << *table["World"] << '\n'; //> 2
 
     err::Result<int> res1 = table.Pop("Hello");
-    RETURN_ERROR(res1);
+    RETURN_ERROR_IF(res1);
 
     std::cout << res1.value << '\n'; //> 1
 

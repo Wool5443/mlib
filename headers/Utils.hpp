@@ -69,7 +69,7 @@ struct File
 static inline bool DoubleEqual(const double x1, const double x2)
 {
     const double absoluteTolerance = 1e-5;
-    return abs(x1 - x2) < absoluteTolerance;
+    return std::fabs(x1 - x2) < absoluteTolerance;
 }
 
 /**
@@ -148,6 +148,8 @@ struct Timer
     using Clock     = std::chrono::high_resolution_clock;
     using Duration  = Clock::duration;
     using TimePoint = Clock::time_point;
+
+    static constexpr int NS_TO_MS = 1000;
 public:
     /**
      * @brief Starts the timer
@@ -165,6 +167,22 @@ public:
         m_end = Clock::now();
 
         return m_end - m_start;
+    }
+
+    static void PrintDuration(std::ostream& out, Duration duration)
+    {
+        using secs = std::chrono::seconds;
+        using ms   = std::chrono::milliseconds;
+        using ns   = std::chrono::nanoseconds;
+
+        secs seconds = duration_cast<secs>(duration);
+        ms   millis  = duration_cast<ms>(duration -= seconds);
+        ns   nanos   = duration_cast<ns>(duration -= millis);
+
+        out
+        << seconds.count() << " seconds, "
+        << millis.count()  << " ms, "
+        << nanos.count()   << " ns\n";
     }
 private:
     static Clock m_clock;

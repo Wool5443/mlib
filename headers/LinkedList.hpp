@@ -38,15 +38,6 @@ class LinkedList final
 //                              FIELDS
 //
 ///////////////////////////////////////////////////////////////////////////////
-private:
-    Buffer<T>           m_data{1};
-    Buffer<std::size_t> m_next{1};
-    Buffer<std::size_t> m_prev{1};
-
-    str           m_dumpFolder{};
-    std::ofstream m_htmlDumpFile{};
-
-    std::size_t   m_freeHead = 0;
 public:
     std::size_t   length = 1; ///< length
                               ///< Notice that there is always a fictional
@@ -62,24 +53,41 @@ public:
      *
      * @return std::size_t index of the head
      */
-     std::size_t  Head()    const noexcept { return m_next[0]; }
+    std::size_t  Head() const noexcept { return m_next[0]; }
     /**
      * @brief Return the tail
      *
      * @return std::size_t index of the tail
      */
-     std::size_t  Tail()    const noexcept { return m_prev[0]; }
+    std::size_t  Tail() const noexcept { return m_prev[0]; }
 
     /**
      * @brief Return error of the underlying buffers
      *
      * @return err::ErrorCode error
      */
-     err::ErrorCode Error() const noexcept
+    err::ErrorCode Error() const noexcept
     {
         if (m_data.error) return m_data.error;
         if (m_next.error) return m_next.error;
         return m_prev.error;
+    }
+
+    /**
+     * @brief Return capacity
+     *
+     * @return std::size_t
+     */
+    std::size_t GetCapacity() const noexcept
+    {
+        err::ErrorCode error = Error();
+        if (error)
+        {
+            LOG_ERROR(error);
+            return SIZE_MAX;
+        }
+
+        return m_data.GetCapacity();
     }
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -147,7 +155,7 @@ public:
             }
             else
             {
-                RETURN_ERROR_IF(realloc(length + 1));
+                RETURN_ERROR_IF(Realloc(length + 1));
             }
         }
 
@@ -302,6 +310,12 @@ public:
         return PopFront(Head());
     }
 
+    /**
+     * @brief Moves the element to the front
+     *
+     * @param index
+     * @return err::ErrorCode
+     */
     err::ErrorCode MoveToFront(std::size_t index) noexcept
     {
         if (index >= m_data.GetCapacity())
@@ -410,6 +424,40 @@ public:
 
         return err::EVERYTHING_FINE;
     }
+
+    /**
+     * @brief Reallocates the list
+     *
+     * @param newCapacity
+     * @return err::ErrorCode
+     */
+    #define REALLOC_CODE(reallocFunction)                                   \
+    {                                                                       \
+        std::size_t oldCapacity = m_data.GetCapacity();                     \
+                                                                            \
+        RETURN_ERROR_IF(m_data.reallocFunction(newCapacity));               \
+        RETURN_ERROR_IF(m_next.reallocFunction(newCapacity));               \
+        RETURN_ERROR_IF(m_prev.reallocFunction(newCapacity));               \
+                                                                            \
+        std::size_t newCapcity = m_data.GetCapacity();                      \
+                                                                            \
+        for (std::size_t i = oldCapacity; i < newCapacity - 1; i++)         \
+            m_next[i] = i + 1;                                              \
+        for (std::size_t i = oldCapacity; i < newCapcity; i++)              \
+            m_prev[i] = FREE_ELEM;                                          \
+                                                                            \
+        m_freeHead = oldCapacity;                                           \
+                                                                            \
+        return err::EVERYTHING_FINE;                                        \
+    }
+    err::ErrorCode Realloc(std::size_t newCapacity)
+    REALLOC_CODE(Realloc)
+
+    err::ErrorCode LiteralRealloc(std::size_t newCapacity)
+    REALLOC_CODE(LiteralRealloc)
+
+    #undef REALLOC_CODE
+
 
     /**
      * @brief Ends dumping
@@ -558,14 +606,14 @@ public:
      *
      * @return iterator
      */
-    iterator      begin()        & noexcept { return { *this, Head() }; }
+    iterator      begin() & noexcept { return { *this, Head() }; }
 
     /**
      * @brief Returns the start of a const list
      *
      * @return constIterator
      */
-    constIterator begin()  const & noexcept { return { *this, Head() }; }
+    constIterator begin() const & noexcept { return { *this, Head() }; }
 
     /**
      * @brief Returns the start of a const list
@@ -579,42 +627,22 @@ public:
      *
      * @return iterator
      */
-    iterator      end()          & noexcept { return { *this, 0 }; }
+    iterator      end() & noexcept { return { *this, 0 }; }
 
     /**
      * @brief Returns the end of a const list
      *
      * @return constIterator
      */
-    constIterator end()    const & noexcept { return { *this, 0 }; }
+    constIterator end() const & noexcept { return { *this, 0 }; }
 
     /**
      * @brief Returns the end of a const list
      *
      * @return constIterator
      */
-    constIterator cend()   const & noexcept { return { *this, 0 }; }
+    constIterator cend() const & noexcept { return { *this, 0 }; }
 private:
-    err::ErrorCode realloc(std::size_t newLength)
-    {
-        std::size_t oldCapacity = m_data.GetCapacity();
-
-        RETURN_ERROR_IF(m_data.Realloc(newLength));
-        RETURN_ERROR_IF(m_next.Realloc(newLength));
-        RETURN_ERROR_IF(m_prev.Realloc(newLength));
-
-        std::size_t newCapcity = m_data.GetCapacity();
-
-        for (std::size_t i = oldCapacity; i < newCapcity - 1; i++)
-            m_next[i] = i + 1;
-        for (std::size_t i = oldCapacity; i < newCapcity; i++)
-            m_prev[i] = FREE_ELEM;
-
-        m_freeHead = oldCapacity;
-
-        return err::EVERYTHING_FINE;
-    }
-
     #define PRINT_DUMP(...)                 \
     do                                      \
     {                                       \
@@ -760,6 +788,16 @@ private:
     #undef NODE_FRAME_COLOR
     #undef ROOT_COLOR
     #undef FREE_HEAD_COLOR
+
+private:
+    Buffer<T>           m_data{1};
+    Buffer<std::size_t> m_next{1};
+    Buffer<std::size_t> m_prev{1};
+
+    str           m_dumpFolder{};
+    std::ofstream m_htmlDumpFile{};
+
+    std::size_t   m_freeHead = 0;
 };
 
 } // namespace mlib

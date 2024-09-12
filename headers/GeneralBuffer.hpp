@@ -191,6 +191,18 @@ public:
      */
     err::ErrorCode Realloc(std::size_t newCapacity) noexcept
     {
+        return LiteralRealloc(calculateCapacity(m_capacity, newCapacity));
+    }
+
+    /**
+     * @brief Reallocates the buffer to new capacity
+     *
+     * @param [in] newCapacity
+     *
+     * @return err::ErrorCode
+     */
+    err::ErrorCode LiteralRealloc(std::size_t newCapacity)
+    {
         if (error == err::ERROR_UNINITIALIZED)
             error = err::EVERYTHING_FINE;
         else
@@ -199,9 +211,7 @@ public:
         if (m_capacity >= newCapacity)
             return err::EVERYTHING_FINE;
 
-        std::size_t capacity = calculateCapacity(m_capacity, newCapacity);
-
-        T* newData = new T[capacity]{};
+        T* newData = new T[newCapacity]{};
 
         if (!newData)
             RETURN_ERROR_IF(err::ERROR_NO_MEMORY, error = err::ERROR_NO_MEMORY);
@@ -211,7 +221,7 @@ public:
         delete[] m_data;
 
         m_data     = newData;
-        m_capacity = capacity;
+        m_capacity = newCapacity;
 
         return err::EVERYTHING_FINE;
     }

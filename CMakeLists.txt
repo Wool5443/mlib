@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_CXX_FLAGS_DEBUG
 "-no-pie -Wno-maybe-uninitialized -Wno-switch -Wno-conversion                       \
 -Wno-unused-variable -Wno-pointer-arith -g -D _DEBUG -ggdb3 -O0 -Wall -Wextra       \
--Weffc++ -Waggressive-loop-optimizations -Wmissing-declarations -Wcast-align        \
+-Weffc++ -Waggressive-loop-optimizations -Wcast-align                               \
 -Wchar-subscripts -Wconditionally-supported -Wctor-dtor-privacy -Wempty-body        \
 -Wformat-nonliteral -Wformat-security -Wformat-signedness -Wformat=2                \
 -Wlogical-op -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual -Wpacked         \

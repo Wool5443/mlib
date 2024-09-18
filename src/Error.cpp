@@ -31,7 +31,7 @@ void SetConsoleColor(FILE* file, ConsoleColor color)
     fprintf(file, "\033[0;%dm", static_cast<int>(color));
 }
 
-void SetConsoleColor(std::ostream& out, ConsoleColor color)
+void __attribute__((unused)) SetConsoleColor(std::ostream& out, ConsoleColor color)
 {
     out << "\033[0;" << (int)color << "m";
 }

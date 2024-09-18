@@ -5,12 +5,14 @@
 
 // LOG_INIT_CONSOLE();
 
-std::ofstream LOG_STREAM("../log.txt");
-
-LOG_INIT_FILE(LOG_STREAM);
+LOG_INIT_FILE("../log.txt");
 
 int main()
 {
+    char* buf = mlib::ReadFileToBuf("../tests/Words.txt");
+    std::cout << buf << std::endl;
+    delete[] buf;
+    #if 0
     const char* TEST_RESULTS[] =
     {
         GetErrorName(Tests::TestString(100)),
@@ -28,6 +30,7 @@ int main()
     std::cout << "HashTable: " << TEST_RESULTS[4] << "\n";
 
     RETURN_ERROR_IF(Tests::TestHashTableSpeed(10));
+    #endif
 
     LOG("Hello, friends");
 

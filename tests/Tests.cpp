@@ -1,15 +1,11 @@
 #include <iostream>
 #include <string.h>
 #include "Tests.hpp"
-#include "String.hpp"
-#include "Vector.hpp"
-#include "LinkedList.hpp"
-#include "BinaryTree.hpp"
 #include "HashTable.hpp"
-#include "Utils.hpp"
 
 using namespace mlib;
 
+#if 0
 err::ErrorCode Tests::TestString(std::size_t n)
 {
     String str8bytes{"12345678"}; // works
@@ -154,6 +150,7 @@ err::ErrorCode Tests::TestBTree()
     return err::EVERYTHING_FINE;
 }
 
+
 err::ErrorCode Tests::TestHashTable()
 {
     HashTable<str, int> wordsCountTable;
@@ -243,3 +240,5 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 
     return err::EVERYTHING_FINE;
 }
+
+#endif

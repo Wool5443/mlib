@@ -56,7 +56,7 @@ struct Error
     const char* message   = nullptr; ///<
     bool        isMessage = false;
 
-    Error() noexcept {}
+    Error() noexcept = default;
 
     Error(const char* message)
         : message(message), isMessage(true) {}
@@ -100,6 +100,17 @@ struct Error
      */
 
     void Print(FILE* file = stderr) const noexcept;
+private:
+    static constexpr const char* ERROR_CODE_NAMES[] = {
+
+    #define DEF_ERROR(code) \
+    #code,
+
+    #include "ErrorGen.hpp"
+
+    #undef DEF_ERROR
+
+    };
 };
 
 /** @struct Result

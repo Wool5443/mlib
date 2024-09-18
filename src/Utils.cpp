@@ -22,16 +22,23 @@ char* mlib::ReadFileToBuf(const char* filePath)
 
     std::size_t fileSize = GetFileSize(filePath);
 
-    char* buf = (char*)calloc(fileSize + 2, 1);
+    char* buf = new char[fileSize + 2];
     if (!buf)
         return nullptr;
 
     FILE* file = fopen(filePath, "rb");
     if (!file)
+    {
+        delete[] buf;
         return nullptr;
+    }
 
     if (fread(buf, 1, fileSize, file) != fileSize)
+    {
+        delete[] buf;
+        fclose(file);
         return nullptr;
+    }
 
     return buf;
 }

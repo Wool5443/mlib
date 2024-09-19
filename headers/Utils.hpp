@@ -169,7 +169,8 @@ public:
         out
         << seconds.count() << " seconds, "
         << millis.count()  << " ms, "
-        << nanos.count()   << " ns\n";
+        << nanos.count()   << " ns"
+        << std::endl;
     }
 private:
     static Clock m_clock;

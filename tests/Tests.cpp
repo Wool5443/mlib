@@ -201,26 +201,20 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 err::ErrorCode Tests::TestHashTable()
 {
     using Table = HashTable<std::string_view, int>;
-    Table wordsCountTable{500000};
+    Table wordsCountTable{};
 
     auto textOptional = ReadFileToBuf("../tests/Words.txt");
     if (!textOptional)
         RETURN_ERROR_IF(err::ERROR_BAD_FILE);
-    std::string& text = textOptional.value();
 
+    std::string& text = textOptional.value();
     std::vector words = SplitString(text, "\n");
 
     for (std::string_view word : words)
     {
-        Table::Iterator count = wordsCountTable.Find(word);
-
-        if (count != wordsCountTable.end())
-            count->value += 1;
-        else
-            wordsCountTable.Insert(word, 1);
+        int& count = wordsCountTable[word];
+        count++;
     }
-
-    std::cout << "DONE!!!!" << std::endl;
 
     std::ofstream out{"../tests/HashTableResult.txt"};
     if (!out)

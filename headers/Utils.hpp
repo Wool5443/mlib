@@ -4,9 +4,11 @@
 //! @file
 
 #include <cstdint>
-#include <ostream>
 #include <chrono>
+#include <vector>
 #include <cmath>
+#include <string>
+#include <optional>
 
 namespace mlib {
 
@@ -23,13 +25,6 @@ enum class ConsoleColor
     MAGENTA,
     CYAN,
     WHITE,
-};
-
-template<typename T1, typename T2>
-struct Pair
-{
-    T1 val1;
-    T2 val2;
 };
 
 struct File
@@ -73,31 +68,23 @@ static inline bool DoubleEqual(const double x1, const double x2)
 }
 
 /**
- * @brief Get the file size
- *
- * @param [in] path to the file
- *
- * @return size
- */
-std::size_t GetFileSize(const char* path);
-
-/**
  * @brief Reads a file to a buffer and returns it
  *
  * @param [in] filePath path to the file
  *
- * @return char* buffer
+ * @return std::optional<std::string>
  */
-char* ReadFileToBuf(const char* filePath);
+std::optional<std::string> ReadFileToBuf(const char* filePath);
 
 /**
- * @brief Writes several spaces to a stream
+ * @brief Splits string by delimiters
  *
- * @param [in] out - where to emit spaces
- *
- * @param [in] spacesCount - how much spaces to emit
+ * @param string
+ * @param delimiters
+ * @return std::vector<std::string_view>
  */
-void WriteSpaces(std::ostream& out, std::size_t spacesCount);
+std::vector<std::string_view> SplitString(std::string_view string,
+                                          std::string_view delimiters);
 
 /**
  * @brief Set the console color
@@ -175,9 +162,9 @@ public:
         using ms   = std::chrono::milliseconds;
         using ns   = std::chrono::nanoseconds;
 
-        secs seconds = duration_cast<secs>(duration);
-        ms   millis  = duration_cast<ms>(duration -= seconds);
-        ns   nanos   = duration_cast<ns>(duration -= millis);
+        secs seconds = std::chrono::duration_cast<secs>(duration);
+        ms   millis  = std::chrono::duration_cast<ms>(duration -= seconds);
+        ns   nanos   = std::chrono::duration_cast<ns>(duration -= millis);
 
         out
         << seconds.count() << " seconds, "

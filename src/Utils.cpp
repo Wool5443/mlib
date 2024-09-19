@@ -1,46 +1,54 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <time.h>
-#include <string.h>
-#include <sys/stat.h>
+#include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <fstream>
 #include "Utils.hpp"
+#include "Error.hpp"
 
-std::size_t mlib::GetFileSize(const char* path)
-{
-    struct stat result = {};
-    stat(path, &result);
-
-    return (std::size_t)result.st_size;
-}
-
-char* mlib::ReadFileToBuf(const char* filePath)
+std::optional<std::string> mlib::ReadFileToBuf(const char* filePath)
 {
     if (!filePath)
-        return nullptr;
+        return std::nullopt;
 
-    std::size_t fileSize = GetFileSize(filePath);
+    std::ifstream file{filePath, std::ios_base::in};
 
-    char* buf = new char[fileSize + 2];
-    if (!buf)
-        return nullptr;
-
-    FILE* file = fopen(filePath, "rb");
-    if (!file)
+    if (!file.is_open())
     {
-        delete[] buf;
-        return nullptr;
+        LOG_ERROR(err::ERROR_BAD_FILE);
+        return std::nullopt;
     }
 
-    if (fread(buf, 1, fileSize, file) != fileSize)
+    std::stringstream buf;
+    buf << file.rdbuf();
+
+    return buf.str();
+}
+
+std::vector<std::string_view> mlib::SplitString(std::string_view string,
+                                                std::string_view delimiters)
+{
+    std::size_t numOfL  = std::count(string.begin(), string.end(), '\n');
+
+    std::vector<std::string_view> words;
+    words.reserve(numOfL);
+
+    std::size_t curr = 0;
+    std::size_t next = string.find(delimiters);
+    words.push_back(string.substr(curr, next));
+
+    curr = next + 1;
+    next = string.find(delimiters, curr);
+
+    while (next != string.npos)
     {
-        delete[] buf;
-        fclose(file);
-        return nullptr;
+        std::string_view word = string.substr(curr, next - curr);
+        words.push_back(word);
+
+        curr = next + 1;
+        next = string.find(delimiters, curr);
     }
 
-    return buf;
+    return words;
 }
 
 void mlib::SetConsoleColor(std::ostream& out, ConsoleColor color)

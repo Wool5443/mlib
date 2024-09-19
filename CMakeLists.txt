@@ -1,24 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
-set(projectName "mlib")
-project(${projectName} CXX ASM_NASM)
+set(projectName "test")
+project(${projectName} CXX)
 
-set(default_build_type "Release")
-
-if(LINUX)
-
-set(CMAKE_NASM_LINK_EXECUTABLE "ld <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
-set(CAN_USE_ASSEMBLER TRUE)
-set(CMAKE_ASM_NASM_OBJECT_FORMAT elf64)
-
-enable_language(ASM_NASM)
-
-endif()
-
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 set(CMAKE_CXX_FLAGS_DEBUG
-"-no-pie -Wno-maybe-uninitialized -Wno-switch -Wno-conversion                       \
+"-Wno-maybe-uninitialized -Wno-switch -Wno-conversion -Wno-parentheses              \
 -Wno-unused-variable -Wno-pointer-arith -g -D _DEBUG -ggdb3 -O0 -Wall -Wextra       \
 -Weffc++ -Waggressive-loop-optimizations -Wcast-align                               \
 -Wchar-subscripts -Wconditionally-supported -Wctor-dtor-privacy -Wempty-body        \
@@ -37,19 +25,12 @@ object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,\
 undefined,unreachable,vla-bound,vptr")
 
 set(CMAKE_CXX_FLAGS_RELEASE
-"-no-pie -Wall -Wno-maybe-uninitialized -Wno-switch -Wno-unused                     \
+"-Wall -Wno-maybe-uninitialized -Wno-switch -Wno-unused                             \
 -Wno-conversion -Wno-unused-variable -Wno-pointer-arith -Wextra -march=native       \
 -mavx512f -O3 -DNDEBUG")
 
 FILE(GLOB SOURCES_CPP src/*.cpp example/main.cpp
                       tests/Tests.cpp)
-FILE(GLOB SOURCES_HPP headers/*.hpp tests/Tests.hpp)
-
-if(LINUX)
-FILE(GLOB SOURCES_ASM src/*.asm)
-else()
-set(SOURCES_ASM "")
-endif()
 
 file(MAKE_DIRECTORY "dump/list")
 file(MAKE_DIRECTORY "dump/list/txt")
@@ -60,14 +41,18 @@ file(MAKE_DIRECTORY "dump/tree")
 file(MAKE_DIRECTORY "dump/tree/dot")
 file(MAKE_DIRECTORY "dump/tree/img")
 
-set(SOURCES
+set(MLIB_SOURCES
     ${SOURCES_CPP}
-    ${SOURCES_ASM}
-    ${SOURCES_HPP}
 )
 
-include_directories(headers tests libs/Utils)
+set(SOURCES
+    example/main.cpp
+    tests/Tests.cpp
+)
+
+add_library(mlib STATIC ${MLIB_SOURCES})
+target_include_directories(mlib PUBLIC headers tests)
 
 add_executable(${projectName} ${SOURCES})
 
-target_link_libraries(${projectName})
+target_link_libraries(${projectName} mlib)

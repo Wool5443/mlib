@@ -1,9 +1,10 @@
 #include <iostream>
-#include <string.h>
+#include <fstream>
+#include <string>
 #include "Tests.hpp"
-#include "HashTable.hpp"
 
 using namespace mlib;
+using namespace err;
 
 #if 0
 err::ErrorCode Tests::TestString(std::size_t n)
@@ -150,52 +151,6 @@ err::ErrorCode Tests::TestBTree()
     return err::EVERYTHING_FINE;
 }
 
-
-err::ErrorCode Tests::TestHashTable()
-{
-    HashTable<str, int> wordsCountTable;
-    RETURN_ERROR_IF(wordsCountTable.Error());
-
-    char* text = mlib::ReadFileToBuf("../tests/Words.txt");
-    if (!text)
-        RETURN_ERROR_IF(err::ERROR_NO_MEMORY);
-
-    auto wordsRes = Split(text);
-    RETURN_ERROR_IF(wordsRes);
-
-    Vector<str>& words = wordsRes.value;
-    for (str word : words)
-    {
-        int* count = wordsCountTable[word];
-
-        if (count)
-            *count += 1;
-        else
-            RETURN_ERROR_IF(wordsCountTable.Add(str{word}, 1));
-    }
-
-    std::ofstream out("../tests/HashTableResult.txt");
-    if (!out)
-        RETURN_ERROR_IF(err::ERROR_BAD_FILE);
-
-    for (str word : wordsRes.value)
-    {
-        int* count = wordsCountTable[word];
-
-        if (count)
-            out << word << ": " << *count << '\n';
-        else
-            RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
-    }
-
-    free(text);
-    out.close();
-
-    system("diff ../tests/HashTableResult.txt ../tests/ResultsPython.txt");
-
-    return err::EVERYTHING_FINE;
-}
-
 err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 {
     static const std::size_t to_ms = 1000000;
@@ -242,3 +197,48 @@ err::ErrorCode Tests::TestHashTableSpeed(std::size_t numberOfTests)
 }
 
 #endif
+
+err::ErrorCode Tests::TestHashTable()
+{
+    using Table = HashTable<std::string_view, int>;
+    Table wordsCountTable{500000};
+
+    auto textOptional = ReadFileToBuf("../tests/Words.txt");
+    if (!textOptional)
+        RETURN_ERROR_IF(err::ERROR_BAD_FILE);
+    std::string& text = textOptional.value();
+
+    std::vector words = SplitString(text, "\n");
+
+    for (std::string_view word : words)
+    {
+        Table::Iterator count = wordsCountTable.Find(word);
+
+        if (count != wordsCountTable.end())
+            count->value += 1;
+        else
+            wordsCountTable.Insert(word, 1);
+    }
+
+    std::cout << "DONE!!!!" << std::endl;
+
+    std::ofstream out{"../tests/HashTableResult.txt"};
+    if (!out)
+        RETURN_ERROR_IF(err::ERROR_BAD_FILE);
+
+    for (std::string_view word : words)
+    {
+        Table::Iterator count = wordsCountTable.Find(word);
+
+        if (count != wordsCountTable.end())
+            out << word << ": " << count->value << '\n';
+        else
+            RETURN_ERROR_IF(err::ERROR_BAD_VALUE);
+    }
+
+    out.close();
+
+    system("diff ../tests/HashTableResult.txt ../tests/ResultsPython.txt");
+
+    return err::EVERYTHING_FINE;
+}

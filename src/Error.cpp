@@ -14,26 +14,9 @@ const char* ERROR_CODE_NAMES[] = {
 
 };
 
-enum class ConsoleColor
-{
-    BLACK = 30,
-    RED,
-    GREEN,
-    YELLOW,
-    BLUE,
-    MAGENTA,
-    CYAN,
-    WHITE,
-};
-
-void SetConsoleColor(FILE* file, ConsoleColor color)
+void SetConsoleColor(FILE* file, mlib::ConsoleColor color)
 {
     fprintf(file, "\033[0;%dm", static_cast<int>(color));
-}
-
-void __attribute__((unused)) SetConsoleColor(std::ostream& out, ConsoleColor color)
-{
-    out << "\033[0;" << (int)color << "m";
 }
 
 } // namespace
@@ -51,8 +34,8 @@ const char* err::Error::GetErrorName() const noexcept
 void err::Error::Print(FILE* file) const noexcept
 {
     if (file == stderr || file == stdout)
-        SetConsoleColor(file, code ? ConsoleColor::RED :
-                                     ConsoleColor::GREEN);
+        SetConsoleColor(file, code ? mlib::ConsoleColor::RED :
+                                     mlib::ConsoleColor::GREEN);
 
     fprintf(file, "%s in %s:%zu in %s\n",
             GetErrorName(),
@@ -62,7 +45,7 @@ void err::Error::Print(FILE* file) const noexcept
     );
 
     if (file == stderr || file == stdout)
-        SetConsoleColor(file, ConsoleColor::WHITE);
+        SetConsoleColor(file, mlib::ConsoleColor::WHITE);
 }
 
 void err::Logger::PushErrorLogPleaseUseMacro(Error&& error)

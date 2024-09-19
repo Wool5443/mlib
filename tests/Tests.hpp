@@ -1,6 +1,7 @@
 #ifndef MLIB_TESTS_HPP
 #define MLIB_TESTS_HPP
 
+#include "HashTable.hpp"
 #include "Error.hpp"
 
 namespace Tests {

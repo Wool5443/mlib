@@ -156,6 +156,12 @@ public:
         return m_end - m_start;
     }
 
+    void PrintDuration(std::ostream& out) noexcept
+    {
+        Duration dur = Stop();
+        PrintDuration(out, dur);
+    }
+
     static void PrintDuration(std::ostream& out, Duration duration)
     {
         using secs = std::chrono::seconds;

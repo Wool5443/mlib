@@ -14,7 +14,7 @@ int main()
 {
     Timer time;
     std::cout << GetErrorName(Tests::TestHashTable()) << std::endl;
-    Timer::PrintDuration(std::cout, time.Stop());
+    time.PrintDuration(std::cout);
 
     return 0;
 }

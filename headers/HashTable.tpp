@@ -163,8 +163,6 @@ void HashTable<KeyT, ValueT>::realloc() noexcept
     if (static_cast<double>(m_size) / m_data.capacity() < MAX_LOAD_FACTOR)
         return;
 
-    Timer timer;
-
     Vec temp{std::move(m_data)};
     temp.resize(temp.capacity() * 3 / 2);
 
@@ -180,11 +178,6 @@ void HashTable<KeyT, ValueT>::realloc() noexcept
             m_size++;
         }
     }
-
-    auto dur = timer.Stop();
-    std::stringstream ss;
-    Timer::PrintDuration(ss, dur);
-    LOG("%zu:%zu\n%s\n\n", m_size, m_data.capacity(), ss.str().c_str());
 }
 
 template<typename KeyT, typename ValueT>

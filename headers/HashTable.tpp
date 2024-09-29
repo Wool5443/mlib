@@ -1,3 +1,6 @@
+#ifndef MLIB_HASHTABLE_TPP
+#define MLIB_HASHTABLE_TPP
+;
 #include "HashTable.hpp"
 
 namespace mlib {
@@ -187,3 +190,5 @@ std::size_t HashTable<KeyT, ValueT>::probe(std::size_t index) const noexcept
 }
 
 } // namespace mlib
+
+#endif // MLIB_HASHTABLE_TPP

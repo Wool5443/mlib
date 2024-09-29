@@ -2,9 +2,6 @@
 #define MLIB_HASHTABLE_HPP
 
 #include <vector>
-#include <optional>
-#include <sstream>
-#include "Error.hpp"
 
 namespace mlib {
 

@@ -12,7 +12,6 @@
  */
 
 #include <ostream>
-#include <fstream>
 #include <compare>
 #include <cstring>
 #include <sys/stat.h>
@@ -65,9 +64,9 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 public:
     /**
-     * @brief Construct a new str object
+     * @brief Construct a str
      */
-    constexpr str() noexcept = default;
+    str() noexcept = default;
 
     /**
      * @brief Construct a new str object
@@ -75,7 +74,7 @@ public:
      *
      * @param [in] string
      */
-    constexpr str(const char* string) noexcept
+    str(const char* string) noexcept
         : m_data(string), length(strlen(string)) {}
 
     /**
@@ -134,7 +133,7 @@ public:
      *
      * @return std::strong_ordering
      */
-    constexpr std::strong_ordering operator<=>(const str& other) const noexcept
+    std::strong_ordering operator<=>(const str& other) const noexcept
     {
         int result = std::memcmp(
             m_data, other.m_data, std::min(length, other.length)
@@ -155,11 +154,11 @@ public:
      * @return true equal
      * @return false not equal
      */
-    constexpr bool operator==(const str& other) const noexcept
+    bool operator==(const str& other) const noexcept
     {
         return *this <=> other == std::strong_ordering::equal;
     }
-    constexpr bool operator==(const char* other) const noexcept
+    bool operator==(const char* other) const noexcept
     {
         return *this == str(other);
     }
@@ -170,7 +169,7 @@ public:
 private:
     constexpr str getNextWord(const str& delimiters) noexcept
     {
-        std::size_t i;
+        std::size_t i = 0;
         for (i = 0; i < length; i++)
         {
             for (std::size_t di = 0; di < delimiters.length; di++)
@@ -244,7 +243,7 @@ public:
     /**
      * @brief Construct a new String object
      */
-    constexpr String() noexcept = default;
+    String() noexcept = default;
 
     /**
      * @brief Construct a String with set capacity

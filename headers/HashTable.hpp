@@ -5,6 +5,7 @@
 
 #include "Utils.hpp"
 #include "Hash.hpp"
+#include "LinkedList.hpp"
 
 namespace mlib {
 

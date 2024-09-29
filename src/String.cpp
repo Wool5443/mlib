@@ -1,3 +1,4 @@
+#include <fstream>
 #include "String.hpp"
 
 using namespace err;

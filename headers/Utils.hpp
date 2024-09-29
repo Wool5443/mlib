@@ -46,7 +46,7 @@ struct Pair
 static inline bool DoubleEqual(const double x1, const double x2)
 {
     const double absoluteTolerance = 1e-5;
-    return abs(x1 - x2) < absoluteTolerance;
+    return fabs(x1 - x2) < absoluteTolerance;
 }
 
 /**

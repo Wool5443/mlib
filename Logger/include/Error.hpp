@@ -34,11 +34,13 @@
 #define LOG(...)                                                    \
 do                                                                  \
 {                                                                   \
-    if (err::LOGGER_ && err::LOGGER_->m_logFile)                    \
-    {                                                               \
-        fprintf(err::LOGGER_->m_logFile, __VA_ARGS__);              \
-        err::LOGGER_->m_countItems++;                               \
-    }                                                               \
+    if (!err::LOGGER_) break;                                       \
+    FILE* _logFile_ = err::LOGGER_->m_logFile;                      \
+    if (!_logFile_) break;                                          \
+    SetConsoleColor(_logFile_, err::ConsoleColor::RED);             \
+    fprintf(err::LOGGER_->m_logFile, __VA_ARGS__);                  \
+    SetConsoleColor(_logFile_, err::ConsoleColor::WHITE);           \
+    err::LOGGER_->m_countItems++;                                   \
 } while (0)
 
 /**
@@ -240,7 +242,8 @@ enum class ConsoleColor
 static void SetConsoleColor(FILE* file, ConsoleColor color) noexcept
 {
     assert(file);
-    fprintf(file, "\033[0;%dm", static_cast<int>(color));
+    if (file == stderr || file == stdout)
+        fprintf(file, "\033[0;%dm", static_cast<int>(color));
 }
 
 /**
@@ -251,7 +254,8 @@ static void SetConsoleColor(FILE* file, ConsoleColor color) noexcept
  */
 static void SetConsoleColor(std::ostream& out, ConsoleColor color) noexcept
 {
-    out << "\033[0;" << static_cast<int>(color) << "m";
+    if (&out == &std::cerr || &out == &std::cout)
+        out << "\033[0;" << static_cast<int>(color) << "m";
 }
 
 /**
@@ -345,9 +349,8 @@ public:
     {
         assert(file);
 
-        if (file == stderr || file == stdout)
-            SetConsoleColor(file, m_code ? ConsoleColor::RED :
-                                           ConsoleColor::GREEN);
+        SetConsoleColor(file, m_code ? ConsoleColor::RED :
+                                       ConsoleColor::GREEN);
 
         if (m_message) fprintf(file, "%s\n", m_message);
         fprintf(file, "%s in %s:%zu in %s\n",
@@ -357,8 +360,7 @@ public:
                 m_function
         );
 
-        if (file == stderr || file == stdout)
-            SetConsoleColor(file, ConsoleColor::WHITE);
+        SetConsoleColor(file, ConsoleColor::WHITE);
     }
 private:
     ErrorCode   m_code = EVERYTHING_FINE;

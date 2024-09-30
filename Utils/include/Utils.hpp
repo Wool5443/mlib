@@ -122,9 +122,9 @@ static std::vector<std::string_view> SplitString(std::string_view string,
 static inline __attribute__((always_inline)) u64 GetCPUTicks()
 {
     u64 lo, hi;
-    asm("lfence");
-    asm("rdtsc" : "=a" (lo), "=d" (hi));
-    asm("lfence");
+    asm volatile("lfence");
+    asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
+    asm volatile("lfence");
     return (hi << 32) + lo;
 }
 

@@ -76,8 +76,8 @@ static err::Result<std::string> ReadFileToBuf(const char* filePath)
  * @param delimiters
  * @return std::vector<std::string_view>
  */
-static std::vector<std::string_view> SplitString(std::string_view string,
-                                                              std::string_view delimiters)
+static std::vector<std::string_view>
+SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f")
 {
     auto filterFunc = [delimiters](char c)
     {

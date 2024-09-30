@@ -16,7 +16,6 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdio>
-#include <stdio.h>
 #include <iostream>
 #include "File.hpp"
 

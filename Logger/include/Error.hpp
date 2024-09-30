@@ -37,7 +37,7 @@ do                                                                  \
     if (err::LOGGER_ && err::LOGGER_->m_logFile)                    \
     {                                                               \
         fprintf(err::LOGGER_->m_logFile, __VA_ARGS__);              \
-        LOGGER_->m_countItems++;                                    \
+        err::LOGGER_->m_countItems++;                               \
     }                                                               \
 } while (0)
 

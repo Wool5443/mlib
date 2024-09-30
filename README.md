@@ -1,13 +1,14 @@
-# MLIB Logger
-
+# MLIB
 ## What?
 MLIB stands for ***Misha's Library***. Here I collect all very useful and
 reusable code I wrote and I like.
 
+# Logger
+
 ## Features
 * **Error handling as value**
 * **Logging system**
-* **Coloring console, reading from files and spliting strings**
+* **Wrapper of C FILE***
 
 ### Error handling & logging system
 ```c++
@@ -47,8 +48,18 @@ This is some funny message!!!
 <span style="color: red;">2 items were dumped</span><br>
 <span style="color: red;">ERROR_ZERO_DIVISION in /home/twenty/Programming/Logger/examples/Errors.cpp:11 in err::ErrorCode divideAndPrint(int, int)</span>
 
+# Utils
+
+## Features
+* **Short int types**
+* **Split string**
+* **Read from file**
+* **Comparing doubles**
+* **Performance measuring using TickTimer or Timer**
+
 ### Reading from file
 ```c++
+#include <iostream>
 #include "Utils.hpp"
 
 using namespace err;

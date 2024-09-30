@@ -6,8 +6,8 @@
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief Simple error and logging system
  *
- * @version 2.0
- * @date 20-07-2024
+ * @version 3.0
+ * @date 30.09.2024
  *
  * @copyright Copyright (c) 2024
  *

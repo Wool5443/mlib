@@ -13,4 +13,5 @@ implicit-conversion,signed-integer-overflow\
 ")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g -DNDEBUG")
 
-add_subdirectory(examples)
+add_subdirectory(Logger)
+add_subdirectory(Utils)

@@ -1,7 +1,17 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-//! @file
+/**
+ * @file Error.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief Utilities
+ *
+ * @version 3.0
+ * @date 30.09.2024
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
 
 #include <chrono>
 #include <algorithm>

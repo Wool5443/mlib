@@ -59,14 +59,14 @@ This is some funny message!!!
 
 ### Reading from file
 ```c++
-#include <iostream>
+#include "Error.hpp"
 #include "Utils.hpp"
 
 using namespace err;
 using namespace mlib;
 using namespace std;
 
-LOG_INIT_FILE("../../log.txt");
+LOG_INIT_FILE("../../logIO.txt");
 
 int main()
 {
@@ -76,12 +76,14 @@ int main()
 
     RETURN_ERROR_IF(text);
 
-    Result<vector<string_view>> lines = SplitString(*text, "\n");
+    Result<vector<string_view>> words = SplitString(*text);
 
-    RETURN_ERROR_IF(lines);
+    RETURN_ERROR_IF(words);
 
-    for (auto it = lines->rbegin(), end = lines->rend();
-        it != end; ++it)
+    if (words->size() != 923)
+        LOG("Wrong number of words!!!: %zu\n", words->size());
+
+    for (auto it = words->rbegin(), end = words->rend(); it != end; ++it)
         std::cout << *it << '\n';
 
     return 0;

@@ -15,6 +15,7 @@
 
 #include <chrono>
 #include <algorithm>
+#include <cstdint>
 #include <ostream>
 #include <vector>
 #include <cmath>
@@ -25,7 +26,6 @@
 #include <iostream>
 
 #include "Error.hpp"
-#include "Types.hpp"
 
 #define ArrayLength(array) sizeof(array) / sizeof(*(array))
 
@@ -87,28 +87,29 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
         return false;
     };
 
-    size_t numOfWords = std::count_if(string.begin(), string.end(), filterFunc);
+    size_t numOfWords = std::count_if(string.begin(), string.end(), filterFunc) + 1;
 
-    if (numOfWords == 0)
+    if (numOfWords == 1)
         return std::vector{string};
 
     std::vector<std::string_view> words;
     words.reserve(numOfWords);
 
     size_t curr = 0;
-    size_t next = string.find(delimiters);
+    size_t next = string.find_first_of(delimiters);
     words.push_back(string.substr(curr, next));
 
     curr = next + 1;
-    next = string.find(delimiters, curr);
+    next = string.find_first_of(delimiters, curr);
 
     while (next != string.npos)
     {
         std::string_view word = string.substr(curr, next - curr);
-        words.push_back(word);
+        if (word.length() > 0)
+            words.push_back(word);
 
         curr = next + 1;
-        next = string.find(delimiters, curr);
+        next = string.find_first_of(delimiters, curr);
     }
 
     return words;
@@ -119,9 +120,9 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
  *
  * @return u64 - number of ticks
  */
-static inline __attribute__((always_inline)) u64 GetCPUTicks()
+static inline __attribute__((always_inline)) uint64_t GetCPUTicks()
 {
-    u64 lo, hi;
+    uint64_t  lo, hi;
     asm volatile("lfence");
     asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
     asm volatile("lfence");
@@ -142,14 +143,14 @@ public:
      *
      * @return u64 ticks
      */
-    u64 Stop() noexcept
+    uint64_t Stop() noexcept
     {
         m_endTicks = GetCPUTicks();
         return m_endTicks - m_startTicks;
     }
 private:
-    u64 m_startTicks = 0;
-    u64 m_endTicks   = 0;
+    uint64_t m_startTicks = 0;
+    uint64_t m_endTicks   = 0;
 };
 
 struct Timer
@@ -157,8 +158,6 @@ struct Timer
     using Clock     = std::chrono::high_resolution_clock;
     using Duration  = Clock::duration;
     using TimePoint = Clock::time_point;
-
-    static constexpr int NS_TO_MS = 1000;
 public:
     /**
      * @brief Starts the timer

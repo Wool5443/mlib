@@ -1,3 +1,5 @@
+//NOLINTBEGIN
+
 #ifndef MLIB_TYPES_HPP
 #define MLIB_TYPES_HPP
 
@@ -18,3 +20,5 @@ using sz   = size_t;
 using ssz  = ssize_t;
 
 #endif // MLIB_TYPES_HPP
+
+//NOLINTEND

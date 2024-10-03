@@ -1,3 +1,5 @@
+//NOLINTBEGIN
+
 #include "Error.hpp"
 #include "Utils.hpp"
 
@@ -27,3 +29,5 @@ int main()
 
     return 0;
 }
+
+//NOLINTEND

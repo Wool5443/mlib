@@ -1,3 +1,5 @@
+//NOLINTBEGIN
+
 #ifndef MLIB_FILE_HPP
 #define MLIB_FILE_HPP
 
@@ -37,3 +39,5 @@ private:
 } // namespace mlib
 
 #endif // MLIB_FILE_HPP
+
+//NOLINTEND

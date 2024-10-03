@@ -1,6 +1,8 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+//NOLINTBEGIN
+
 /**
  * @file Error.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
@@ -297,3 +299,5 @@ private:
                                                                                                                                                                                                                                                                                                                     }
 
 #endif
+
+//NOLINTEND

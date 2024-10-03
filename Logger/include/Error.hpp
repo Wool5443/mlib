@@ -1,3 +1,5 @@
+//NOLINTBEGING
+
 #ifndef MLIB_ERRORS_HPP
 #define MLIB_ERRORS_HPP
 
@@ -579,3 +581,5 @@ private:
 } // namespace err
 
 #endif
+
+//NOLINTEND

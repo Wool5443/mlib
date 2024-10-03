@@ -11,7 +11,10 @@ class File
 {
 public:
     File(FILE* file)
-        : m_file(file) {}
+        : m_file(file)
+    {
+        setbuf(file, NULL);
+    }
 
     File(const char* path, const char* readMode = "r")
         : m_file(fopen(path, readMode)) {}

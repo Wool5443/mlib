@@ -37,11 +37,12 @@
 do                                                                  \
 {                                                                   \
     if (!err::LOGGER_) break;                                       \
-    FILE* _logFile_ = err::LOGGER_->m_logFile;                      \
+    mlib::File& _logFile_ = err::LOGGER_->m_logFile;                \
     if (!_logFile_) break;                                          \
     SetConsoleColor(_logFile_, err::ConsoleColor::RED);             \
-    fprintf(err::LOGGER_->m_logFile, __VA_ARGS__);                  \
+    fprintf(_logFile_, __VA_ARGS__);                                \
     SetConsoleColor(_logFile_, err::ConsoleColor::WHITE);           \
+    _logFile_.Dump();                                               \
     err::LOGGER_->m_countItems++;                                   \
 } while (0)
 

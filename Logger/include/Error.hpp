@@ -16,9 +16,11 @@
  */
 
 #include <cassert>
+#include <type_traits>
+#include <utility>
+#include <new> // IWYU pragma: keep
 #include <cstddef>
 #include <cstdio>
-#include <iostream>
 #include <unistd.h>
 #include "File.hpp"
 
@@ -29,7 +31,7 @@
                                 GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
 #ifdef LOG_IMMEDIATE
-#define MAX_ERRORS 0
+#define MAX_ERRORS 1
 #else
 #define MAX_ERRORS 32
 #endif
@@ -43,7 +45,7 @@ do                                                                  \
     SetConsoleColor(_logFile_, err::ConsoleColor::RED);             \
     fprintf(_logFile_, __VA_ARGS__);                                \
     SetConsoleColor(_logFile_, err::ConsoleColor::WHITE);           \
-    _logFile_.Dump();                                               \
+    _logFile_.Flush();                                              \
     err::LOGGER_->m_countItems++;                                   \
 } while (0)
 
@@ -374,7 +376,10 @@ public:
      * @param [in] logFile
      */
     Logger(FILE* logFile) noexcept
-        : m_logFile(logFile) {}
+        : m_logFile(logFile)
+    {
+        setbuf(m_logFile, NULL);
+    }
 
     /**
      * @brief Construct a Logger
@@ -382,7 +387,10 @@ public:
      * @param [in] filePath
      */
     Logger(const char* filePath) noexcept
-        : m_logFile(filePath, "w") {}
+        : m_logFile(filePath, "w")
+    {
+        setbuf(m_logFile, NULL);
+    }
 
     /**
      * @brief Dump logger
@@ -392,7 +400,7 @@ public:
         for (size_t i = 0; i < m_length; i++)
             m_errorStack[i].Print(m_logFile);
         m_length = 0;
-        m_logFile.Dump();
+        m_logFile.Flush();
     }
 
     ~Logger() noexcept
@@ -420,11 +428,11 @@ public:
 
     void m_pushErrorLogPleaseUseMacro(Error error) noexcept
     {
-        if (m_length == MAX_ERRORS)
-            Dump();
-
         m_errorStack[m_length++] = error;
         m_countItems++;
+
+        if (m_length == MAX_ERRORS)
+            Dump();
     }
 
     Error      m_errorStack[MAX_ERRORS]{};

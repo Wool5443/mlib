@@ -10,18 +10,15 @@ namespace mlib {
 class File
 {
 public:
-    File(FILE* file)
-        : m_file(file)
-    {
-        setbuf(file, NULL);
-    }
+    File(FILE* file, bool noBuffering = false) noexcept
+        : m_file(file) {}
 
-    File(const char* path, const char* readMode = "r")
+    File(const char* path, const char* readMode = "r") noexcept
         : m_file(fopen(path, readMode)) {}
 
     operator FILE*() noexcept { return m_file; }
 
-    void Dump() noexcept
+    void Flush() noexcept
     {
         fflush(m_file);
     }

@@ -1,6 +1,7 @@
 //NOLINTBEGIN
 
 #include <iostream>
+//#define LOG_IMMEDIATE
 #include "Error.hpp"
 
 using namespace err;

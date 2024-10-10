@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
+#include <unistd.h>
 #include "File.hpp"
 
 #define GET_FILE_NAME() __FILE__
@@ -245,20 +246,8 @@ enum class ConsoleColor
 static void SetConsoleColor(FILE* file, ConsoleColor color) noexcept
 {
     assert(file);
-    if (file == stderr || file == stdout)
+    if (isatty(fileno(file)))
         fprintf(file, "\033[0;%dm", static_cast<int>(color));
-}
-
-/**
- * @brief Set the console color
- *
- * @param [in] out std::cout or std::cerr
- * @param [in] color
- */
-static void SetConsoleColor(std::ostream& out, ConsoleColor color) noexcept
-{
-    if (&out == &std::cerr || &out == &std::cout)
-        out << "\033[0;" << static_cast<int>(color) << "m";
 }
 
 /**
@@ -410,21 +399,21 @@ public:
     {
         if (m_countItems > 0)
         {
-            SetConsoleColor(std::cerr, ConsoleColor::RED);
-            std::cerr << '\n' << m_countItems;
+            SetConsoleColor(stderr, ConsoleColor::RED);
+            fprintf(stderr, "\n%zu ", m_countItems);
 
             if (m_countItems == 1)
-                std::cerr << " item ";
+                fprintf(stderr, "item ");
             else
-                std::cerr << " items ";
+                fprintf(stderr, "items ");
 
-            std::cerr << "were dumped\n";
-            SetConsoleColor(std::cerr, ConsoleColor::WHITE);
+            fprintf(stderr, "were dumped\n");
+            SetConsoleColor(stderr, ConsoleColor::WHITE);
         }
         else
         {
-            SetConsoleColor(std::cerr, ConsoleColor::GREEN);
-            std::cerr << "\nNothing was dumped!\n";
+            SetConsoleColor(stderr, ConsoleColor::GREEN);
+            fprintf(stderr, "\nNothing was dumped!\n");
         }
         Dump();
     }

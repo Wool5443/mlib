@@ -45,7 +45,6 @@ do                                                                  \
     SetConsoleColor(_logFile_, err::ConsoleColor::RED);             \
     fprintf(_logFile_, __VA_ARGS__);                                \
     SetConsoleColor(_logFile_, err::ConsoleColor::WHITE);           \
-    _logFile_.Flush();                                              \
     err::LOGGER_->m_countItems++;                                   \
 } while (0)
 

@@ -1,12 +1,12 @@
 //NOLINTBEGIN
 
 #include <iostream>
-//#define LOG_IMMEDIATE
+#define LOG_IMMEDIATE
 #include "Error.hpp"
 
 using namespace err;
 
-LOG_INIT_CONSOLE();
+LOG_INIT_FILE("../../../logErrors.txt");
 
 err::ErrorCode divideAndPrint(int a, int b)
 {
@@ -25,6 +25,8 @@ int main()
     divideAndPrint(42, 0);
 
     LOG("This is some funny message!!!\n");
+
+    getchar();
 
     return 0;
 }

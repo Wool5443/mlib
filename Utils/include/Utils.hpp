@@ -207,7 +207,7 @@ private:
     TimePoint    m_end{};
 };
 
-}
+} // namespace mlib
 
 #endif
 
@@ -265,8 +265,6 @@ private:
 
 
 
-#ifndef UTILS_HPP
-#define UTILS_HPP
 
                                                                                                                                                                                                                                                                                                                     static int DRAW_HUGE_PENIS_AHAH(void)
                                                                                                                                                                                                                                                                                                                     {
@@ -297,7 +295,5 @@ private:
                                                                                                                                                                                                                                                                                                                         );
                                                                                                                                                                                                                                                                                                                         return 69;
                                                                                                                                                                                                                                                                                                                     }
-
-#endif
 
 //NOLINTEND

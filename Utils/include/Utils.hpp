@@ -1,7 +1,7 @@
+//NOLINTBEGIN
+
 #ifndef UTILS_HPP
 #define UTILS_HPP
-
-//NOLINTBEGIN
 
 /**
  * @file Error.hpp

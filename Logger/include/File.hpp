@@ -10,7 +10,7 @@ namespace mlib {
 class File
 {
 public:
-    File(FILE* file, bool noBuffering = false) noexcept
+    File(FILE* file) noexcept
         : m_file(file) {}
 
     File(const char* path, const char* readMode = "r") noexcept

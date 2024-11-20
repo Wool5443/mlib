@@ -16,58 +16,70 @@
  */
 
 #include <cassert>
-#include <type_traits>
-#include <utility>
-#include <new> // IWYU pragma: keep
-#include <cstddef>
 #include <cstdio>
+#include <ctime>
+#include <iterator>
+#include <new> // IWYU pragma: keep
+#include <type_traits>
 #include <unistd.h>
 #include "File.hpp"
+
+#define IS_EMPTY(dummy, ...) ( sizeof( (char[]){#__VA_ARGS__} ) == 1 )
 
 #define GET_FILE_NAME() __FILE__
 #define GET_LINE()      __LINE__
 #define GET_FUNCTION()  __PRETTY_FUNCTION__
-#define CREATE_ERROR(errorCode) err::Error((errorCode),\
-                                GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
-#ifdef LOG_IMMEDIATE
-#define MAX_ERRORS 1
-#else
-#define MAX_ERRORS 32
-#endif
+#define CREATE_ERROR(errorCode) \
+err::Error((errorCode), GET_FILE_NAME(), GET_LINE(), GET_FUNCTION())
 
-#define LOG(...)                                                    \
+#define _LOG_DONT_USE_(type, color, errorCode, ...)                 \
 do                                                                  \
 {                                                                   \
     if (!err::LOGGER_) break;                                       \
     mlib::File& _logFile_ = err::LOGGER_->m_logFile;                \
     if (!_logFile_) break;                                          \
-    SetConsoleColor(_logFile_, err::ConsoleColor::RED);             \
-    fprintf(_logFile_, __VA_ARGS__);                                \
+    SetConsoleColor(_logFile_, (color));                            \
+    fprintf(_logFile_, "[" type "] ");                              \
+    CREATE_ERROR(errorCode).Print(_logFile_);                       \
+    __VA_OPT__(fprintf(_logFile_, ": ");)                           \
+    __VA_OPT__(fprintf(_logFile_, __VA_ARGS__);)                    \
+    fprintf(_logFile_, "\n");                                       \
     SetConsoleColor(_logFile_, err::ConsoleColor::WHITE);           \
     err::LOGGER_->m_countItems++;                                   \
 } while (0)
 
 /**
+  * @brief Log info
+  */
+#define LOG_INFO(...) \
+_LOG_DONT_USE_("INFO", err::ConsoleColor::CYAN, err::EVERYTHING_FINE, __VA_ARGS__)
+
+/**
+  * @brief Log debug info
+  */
+#ifndef NDEBUG
+#define LOG_DEBUG(...) \
+_LOG_DONT_USE_("DEBUG", err::ConsoleColor::YELLOW, err::EVERYTHING_FINE, __VA_ARGS__)
+#else
+#define LOG_DEBUG(...)
+#endif
+
+/**
  * @brief Log error
  */
-#define LOG_ERROR(errorCode)                                        \
-do                                                                  \
-{                                                                   \
-    if (err::LOGGER_ && err::LOGGER_->m_logFile)                    \
-        err::LOGGER_->m_pushErrorLogPleaseUseMacro(                 \
-                    CREATE_ERROR(errorCode));                       \
-} while (0)
+#define LOG_ERROR(errorCode, ...) \
+_LOG_DONT_USE_("ERROR", err::ConsoleColor::RED, errorCode, __VA_ARGS__)
 
 /**
  * @brief Log error if it indeed is error
  */
-#define LOG_ERROR_IF(errorCode)                                     \
+#define LOG_ERROR_IF(errorCode, ...)                                \
 do                                                                  \
 {                                                                   \
-    err::ErrorCode error_ = errorCode;                              \
-    if (error_)                                                     \
-        LOG_ERROR(error_);                                          \
+    err::ErrorCode _errorCode_ = (errorCode);                       \
+    if (_errorCode_)                                                \
+        LOG_ERROR(_errorCode_, __VA_ARGS__);                        \
 } while (0)
 
 /**
@@ -87,13 +99,20 @@ do                                                                  \
     err::Logger _logger_{file};                                     \
     err::Logger* err::LOGGER_ = &_logger_
 
-#define LOG_DUMP() err::LOGGER_->Dump()
-
 #ifdef NDEBUG
+#define ASSERT_PRINT(...)
 #define SoftAssert(...)
 #define SoftAssertResult(...)
 #define HardAssert(...)
 #else
+#define ASSERT_PRINT(errorCode)                                     \
+do                                                                  \
+{                                                                   \
+    fprintf(stderr, "ASSERTION FAILED: ");                          \
+    CREATE_ERROR(errorCode).Print();                                \
+    fprintf(stderr, "\n");                                          \
+} while (0)
+
 /**
  * @brief Soft assert
  */
@@ -102,10 +121,10 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        err::Error _error_ = CREATE_ERROR(errorCode);               \
-        _error_.Print();                                            \
+        err::ErrorCode _errorCode_ = errorCode;                     \
+        ASSERT_PRINT(_errorCode_);                                  \
         __VA_ARGS__;                                                \
-        return _error_;                                             \
+        return _errorCode_;                                         \
     }                                                               \
 } while(0)
 
@@ -117,10 +136,10 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        err::Error _error_ = CREATE_ERROR(errorCode);               \
-        _error_.Print();                                            \
+        err::ErrorCode _errorCode_ = errorCode;                     \
+        ASSERT_PRINT(_errorCode_);                                  \
         __VA_ARGS__;                                                \
-        return { poison, _error_ };                                 \
+        return { poison, _errorCode_ };                             \
     }                                                               \
 } while(0)
 
@@ -132,10 +151,10 @@ do                                                                  \
 {                                                                   \
     if (!(expression))                                              \
     {                                                               \
-        err::Error _error_ = CREATE_ERROR(errorCode);               \
-        _error_.Print();                                            \
+        err::ErrorCode _errorCode_ = errorCode;                     \
+        ASSERT_PRINT(_errorCode_);                                  \
         __VA_ARGS__;                                                \
-        exit(_error_);                                              \
+        exit(_errorCode_);                                          \
     }                                                               \
 } while(0)
 
@@ -144,51 +163,24 @@ do                                                                  \
 /**
  * @brief returns errror and logs
  */
-#define RETURN_ERROR(error, ...)                                    \
+#define RETURN_ERROR(errorCode, ...)                                \
 do                                                                  \
 {                                                                   \
-    err::ErrorCode _error_ = error;                                 \
-    LOG_ERROR(_error_);                                             \
+    err::ErrorCode _errorCode_ = errorCode;                         \
+    LOG_ERROR(_errorCode_);                                         \
     __VA_ARGS__;                                                    \
-    return _error_;                                                 \
+    return _errorCode_;                                             \
 } while(0)
 
 /**
  * @brief returns error if it is not EVERYTHING_FINE and logs
  */
-#define RETURN_ERROR_IF(error, ...)                                 \
+#define RETURN_ERROR_IF(errorCode, ...)                             \
 do                                                                  \
 {                                                                   \
-    err::ErrorCode _error_ = error;                                 \
-    if (_error_ && _error_ != err::ERROR_UNINITIALIZED)             \
-        RETURN_ERROR(error);                                        \
-} while(0)
-
-/**
- * @brief returns error as result and logs
- */
-#define RETURN_ERROR_RESULT(error, ...)                             \
-do                                                                  \
-{                                                                   \
-    err::ErrorCode _error_ = error;                                 \
-    LOG_ERROR(_error_);                                             \
-    __VA_ARGS__;                                                    \
-    return _error_;                                                 \
-} while(0)
-
-/**
- * @brief returns error as result if it is not EVERYTHING_FINE and logs
- */
-#define RETURN_ERROR_RESULT_IF(error, ...)                          \
-do                                                                  \
-{                                                                   \
-    err::ErrorCode _error_ = error;                                 \
-    if (_error_ && _error_ != err::ERROR_UNINITIALIZED)             \
-    {                                                               \
-        LOG_ERROR(_error_);                                         \
-        __VA_ARGS__;                                                \
-        return _error_;                                             \
-    }                                                               \
+    err::ErrorCode _errorCode_ = errorCode;                         \
+    if (_errorCode_)                                                \
+        RETURN_ERROR(_errorCode_);                                  \
 } while(0)
 
 /**
@@ -286,20 +278,12 @@ public:
     Error() noexcept = default;
 
     /**
-     * @brief Construct a Error
-     *
-     * @param [in] message
-     */
-    Error(const char* message) noexcept
-        : m_message(message) {}
-
-    /**
      * @brief Construct a new Error object
      *
-     * @param code
-     * @param file
-     * @param line
-     * @param function
+     * @param [in] code
+     * @param [in] file
+     * @param [in] line
+     * @param [in] function
      */
     Error(ErrorCode code, const char* file, size_t line,
           const char* function) noexcept
@@ -330,7 +314,7 @@ public:
 
     const char* what() const noexcept
     {
-        return m_message ? m_message : GetErrorName();
+        return GetErrorName();
     }
 
     /**
@@ -342,25 +326,29 @@ public:
     {
         assert(file);
 
-        SetConsoleColor(file, m_code ? ConsoleColor::RED :
-                                       ConsoleColor::GREEN);
+        struct tm date = {};
 
-        if (m_message) fprintf(file, "%s\n", m_message);
-        fprintf(file, "%s in %s:%zu in %s\n",
-                GetErrorName(),
+        char timeString[std::size("dd-mm-yyyy:hh:mm:ss")];
+        std::strftime(timeString, std::size(timeString), "%d-%m-%Y:%H:%M:%S",
+                      std::localtime(&m_time));
+
+        fprintf(file, "%s: ", timeString);
+
+        if (m_code) fprintf(file, "%s ", GetErrorName());
+
+        fprintf(file,
+                "in %s:%zu in %s",
                 m_file,
                 m_line,
                 m_function
         );
-
-        SetConsoleColor(file, ConsoleColor::WHITE);
     }
 private:
+    time_t      m_time = time(NULL);
     ErrorCode   m_code = EVERYTHING_FINE;
     const char* m_file = nullptr;
     size_t      m_line = 0;
     const char* m_function = nullptr;
-    const char* m_message  = nullptr;
 };
 
 /** @struct Logger
@@ -391,22 +379,10 @@ public:
         setbuf(m_logFile, NULL);
     }
 
-    /**
-     * @brief Dump logger
-     */
-    void Dump() noexcept
-    {
-        for (size_t i = 0; i < m_length; i++)
-            m_errorStack[i].Print(m_logFile);
-        m_length = 0;
-        m_logFile.Flush();
-    }
-
     ~Logger() noexcept
     {
         if (m_countItems > 0)
         {
-            SetConsoleColor(stderr, ConsoleColor::RED);
             fprintf(stderr, "\n%zu ", m_countItems);
 
             if (m_countItems == 1)
@@ -415,23 +391,10 @@ public:
                 fprintf(stderr, "items ");
 
             fprintf(stderr, "were dumped\n");
-            SetConsoleColor(stderr, ConsoleColor::WHITE);
         }
-        Dump();
     }
 
-    void m_pushErrorLogPleaseUseMacro(Error error) noexcept
-    {
-        m_errorStack[m_length++] = error;
-        m_countItems++;
-
-        if (m_length == MAX_ERRORS)
-            Dump();
-    }
-
-    Error      m_errorStack[MAX_ERRORS]{};
-    size_t     m_length = 0;
-    size_t     m_countItems = 0;
+    size_t m_countItems;
     mlib::File m_logFile;
 };
 

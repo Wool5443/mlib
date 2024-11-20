@@ -6,7 +6,7 @@
 
 using namespace err;
 
-LOG_INIT_FILE("../../../logErrors.txt");
+LOG_INIT_FILE("../../logErrors.txt");
 
 err::ErrorCode divideAndPrint(int a, int b)
 {
@@ -24,9 +24,7 @@ int main()
     divideAndPrint(56, 8);
     divideAndPrint(42, 0);
 
-    LOG("This is some funny message!!!\n");
-
-    getchar();
+    LOG_INFO("This is some funny message!!!");
 
     return 0;
 }

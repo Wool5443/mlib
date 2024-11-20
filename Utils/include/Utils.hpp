@@ -15,17 +15,12 @@
  *
  */
 
-#include <chrono>
 #include <algorithm>
-#include <cstdint>
-#include <ostream>
-#include <vector>
+#include <chrono>
 #include <cmath>
-#include <string>
 #include <fstream>
-#include <string>
-#include <stdio.h>
 #include <iostream>
+#include <vector>
 
 #include "Error.hpp"
 
@@ -58,12 +53,12 @@ static inline bool DoubleEqual(const double x1, const double x2)
 static err::Result<std::string> ReadFileToBuf(const char* filePath)
 {
     if (!filePath)
-        RETURN_ERROR_RESULT(err::ERROR_BAD_FILE);
+        RETURN_ERROR(err::ERROR_BAD_FILE);
 
     std::ifstream file{filePath};
 
     if (!file.is_open())
-        RETURN_ERROR_RESULT(err::ERROR_BAD_FILE);
+        RETURN_ERROR(err::ERROR_BAD_FILE);
 
     std::string str{std::istreambuf_iterator<char>{file},
                     std::istreambuf_iterator<char>{}};

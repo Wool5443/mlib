@@ -35,7 +35,7 @@ int main()
     divideAndPrint(56, 8);
     divideAndPrint(42, 0);
 
-    LOG("This is some funny message!!!\n");
+    LOG_INFO("This is some funny message!!!\n");
 
     return 0;
 }

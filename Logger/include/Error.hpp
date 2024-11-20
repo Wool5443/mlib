@@ -417,11 +417,6 @@ public:
             fprintf(stderr, "were dumped\n");
             SetConsoleColor(stderr, ConsoleColor::WHITE);
         }
-        else
-        {
-            SetConsoleColor(stderr, ConsoleColor::GREEN);
-            fprintf(stderr, "\nNothing was dumped!\n");
-        }
         Dump();
     }
 

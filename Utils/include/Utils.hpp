@@ -37,7 +37,7 @@ namespace mlib {
  * @return true equal
  * @return false not equal
  */
-static inline bool DoubleEqual(const double x1, const double x2)
+static inline bool DoubleEqual(const double x1, const double x2) noexcept
 {
     const double absoluteTolerance = 1e-5;
     return std::fabs(x1 - x2) < absoluteTolerance;
@@ -117,7 +117,7 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
  *
  * @return u64 - number of ticks
  */
-static inline __attribute__((always_inline)) uint64_t GetCPUTicks()
+static inline __attribute__((always_inline)) uint64_t GetCPUTicks() noexcept
 {
     uint64_t  lo, hi;
     asm volatile("lfence");

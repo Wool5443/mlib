@@ -1,3 +1,5 @@
-set(ERR_SOURCES "IO.cpp")
-add_executable(IO ${ERR_SOURCES})
-target_include_directories(IO PRIVATE "include" "../Logger/include")
+set(LIB_NAME MLIB_UTILS)
+
+add_library(${LIB_NAME} INTERFACE )
+target_include_directories(${LIB_NAME} INTERFACE include)
+target_link_libraries(${LIB_NAME} INTERFACE MLIB_LOGGER)

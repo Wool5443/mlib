@@ -1,4 +1,16 @@
-//NOLINTBEGIN
+/**
+ * @file ErrorGen.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief Simple error and logging system
+ *
+ * @version 2.0
+ * @date 21.11.2024
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+// NOLINTBEGIN
 
 // DEF_ERROR(code)
 
@@ -18,4 +30,4 @@ DEF_ERROR(ERROR_BAD_RECURSION)
 DEF_ERROR(ERROR_UNINITIALIZED)
 DEF_ERROR(EXIT)
 
-//NOLINTEND
+// NOLINTEND

@@ -1,3 +1,4 @@
-set(ERR_SOURCES "Errors.cpp")
-add_executable(Errors ${ERR_SOURCES})
-target_include_directories(Errors PRIVATE "include")
+set(LIB_NAME MLIB_LOGGER)
+
+add_library(${LIB_NAME} INTERFACE)
+target_include_directories(${LIB_NAME} INTERFACE include)

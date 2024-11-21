@@ -1,4 +1,16 @@
-//NOLINTBEGIN
+/**
+ * @file ErrorGen.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief Simple error and logging system
+ *
+ * @version 2.0
+ * @date 21.11.2024
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+// NOLINTBEGIN
 
 #ifndef MLIB_FILE_HPP
 #define MLIB_FILE_HPP
@@ -40,4 +52,4 @@ private:
 
 #endif // MLIB_FILE_HPP
 
-//NOLINTEND
+// NOLINTEND

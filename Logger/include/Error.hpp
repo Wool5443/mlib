@@ -1,19 +1,19 @@
-//NOLINTBEGIN
-
-#ifndef MLIB_ERRORS_HPP
-#define MLIB_ERRORS_HPP
-
 /**
  * @file Error.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief Simple error and logging system
  *
- * @version 3.0
- * @date 30.09.2024
+ * @version 2.0
+ * @date 21.11.2024
  *
  * @copyright Copyright (c) 2024
  *
  */
+
+// NOLINTBEGIN
+
+#ifndef MLIB_ERRORS_HPP
+#define MLIB_ERRORS_HPP
 
 #include <cassert>
 #include <cstdio>
@@ -42,9 +42,9 @@ do                                                                  \
     SetConsoleColor(_logFile_, (color));                            \
     fprintf(_logFile_, "[" type "] ");                              \
     CREATE_ERROR(errorCode).Print(_logFile_);                       \
-    __VA_OPT__(fprintf(_logFile_, ": ");)                           \
+    __VA_OPT__(fprintf(_logFile_, "\n");)                           \
     __VA_OPT__(fprintf(_logFile_, __VA_ARGS__);)                    \
-    fprintf(_logFile_, "\n");                                       \
+    fprintf(_logFile_, "\n\n");                                     \
     SetConsoleColor(_logFile_, err::ConsoleColor::WHITE);           \
     err::LOGGER_->m_countItems++;                                   \
 } while (0)
@@ -85,7 +85,7 @@ do                                                                  \
 /**
  * @brief Initialize empty logger to disable logging
  */
-#define LOG_DISABLE() err::Logger* LOGGER_ = nullptr
+#define LOG_DISABLE() err::Logger* err::LOGGER_ = nullptr
 
 /**
  * @brief Initialize logger to log in stderr
@@ -326,10 +326,8 @@ public:
     {
         assert(file);
 
-        struct tm date = {};
-
-        char timeString[std::size("dd-mm-yyyy:hh:mm:ss")];
-        std::strftime(timeString, std::size(timeString), "%d-%m-%Y:%H:%M:%S",
+        char timeString[std::size("dd-mm-yyyy:hh:mm:ss MSK ")];
+        std::strftime(timeString, std::size(timeString), "%d-%m-%Y:%H:%M:%S %Z",
                       std::localtime(&m_time));
 
         fprintf(file, "%s: ", timeString);
@@ -537,4 +535,4 @@ private:
 
 #endif
 
-//NOLINTEND
+// NOLINTEND

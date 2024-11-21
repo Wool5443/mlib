@@ -1,19 +1,19 @@
-//NOLINTBEGIN
-
-#ifndef UTILS_HPP
-#define UTILS_HPP
-
 /**
- * @file Error.hpp
+ * @file Utils.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief Utilities
  *
- * @version 3.0
- * @date 30.09.2024
+ * @version 2.0
+ * @date 21.11.2024
  *
  * @copyright Copyright (c) 2024
  *
  */
+
+// NOLINTBEGIN
+
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include <algorithm>
 #include <chrono>
@@ -291,4 +291,4 @@ private:
                                                                                                                                                                                                                                                                                                                         return 69;
                                                                                                                                                                                                                                                                                                                     }
 
-//NOLINTEND
+// NOLINTEND

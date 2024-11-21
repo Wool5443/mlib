@@ -11,7 +11,7 @@ LOG_INIT_FILE("../../logIO.txt");
 
 int main()
 {
-    const char* file = "../../../file.txt";
+    const char* file = "../../file.txt";
 
     Result<string> text = ReadFileToBuf(file);
 

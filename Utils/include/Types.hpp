@@ -1,3 +1,15 @@
+/**
+ * @file Types.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief Utilities
+ *
+ * @version 2.0
+ * @date 21.11.2024
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
 //NOLINTBEGIN
 
 #ifndef MLIB_TYPES_HPP

@@ -22,7 +22,7 @@
 #include <iostream>
 #include <vector>
 
-#include "Error.hpp"
+#include "Logger.hpp"
 
 #define ArrayLength(array) sizeof(array) / sizeof(*(array))
 

@@ -18,8 +18,9 @@
 #include <cstdio>
 
 namespace mlib {
-
 class Logger;
+
+namespace detail {
 
 class File
 {
@@ -50,8 +51,10 @@ public:
 private:
     FILE* m_file = nullptr;
 
-    friend class Logger;
+    friend class mlib::Logger;
 };
+
+} // namespace detail
 
 } // namespace mlib
 

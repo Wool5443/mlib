@@ -20,10 +20,10 @@
 #include <iomanip>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
-#include "include/File.hpp"
-#include "include/ConsoleColor.hpp"
-#include "include/SourcePosition.hpp"
-#include "include/ErrorCode.hpp"
+#include "details/File.hpp"
+#include "details/ConsoleColor.hpp"
+#include "details/SourcePosition.hpp"
+#include "details/ErrorCode.hpp"
 
 namespace mlib {
 
@@ -55,8 +55,8 @@ public:
         : Logger(fopen(logFilePath, "w")) {}
 
     template<class... Args>
-    void Log(LogType type, err::ErrorCode errorCode, SourcePosition position,
-             TimePoint time,
+    void Log(LogType type, err::ErrorCode errorCode,
+             detail::SourcePosition position, TimePoint time,
              const char* formatString = nullptr, Args&&... args) noexcept
     {
         printType(type);
@@ -85,7 +85,7 @@ public:
 
         fmt::print(m_logFile, "\n");
 
-        SetConsoleColor(m_logFile, ConsoleColor::WHITE);
+        SetConsoleColor(m_logFile, detail::ConsoleColor::WHITE);
     }
 
     static Logger& GetGlobalLogger() noexcept
@@ -114,22 +114,22 @@ public:
     }
 
 private:
-    File m_logFile = nullptr;
+    detail::File m_logFile = nullptr;
 
     void printType(LogType type) noexcept
     {
         switch (type)
         {
             case INFO:
-                SetConsoleColor(m_logFile, ConsoleColor::CYAN);
+                SetConsoleColor(m_logFile, detail::ConsoleColor::CYAN);
                 fmt::print(m_logFile, "[INFO]");
                 break;
             case DEBUG:
-                SetConsoleColor(m_logFile, ConsoleColor::YELLOW);
+                SetConsoleColor(m_logFile, detail::ConsoleColor::YELLOW);
                 fmt::print(m_logFile, "[DEBUG]");
                 break;
             case ERROR:
-                SetConsoleColor(m_logFile, ConsoleColor::RED);
+                SetConsoleColor(m_logFile, detail::ConsoleColor::RED);
                 fmt::print(m_logFile, "[ERROR]");
                 break;
             default:

@@ -15,13 +15,13 @@
 #ifndef MLIB_LOGGER_EXCEPTION_HPP
 #define MLIB_LOGGER_EXCEPTION_HPP
 
-#include "include/SourcePosition.hpp"
-#include "include/ErrorCode.hpp"
+#include "details/SourcePosition.hpp"
+#include "details/ErrorCode.hpp"
 
 namespace mlib {
 namespace err {
 
-class Exception : public SourcePosition
+class Exception : public detail::SourcePosition
 {
 public:
     explicit Exception(ErrorCode errorCode, SourcePosition position = {}) noexcept

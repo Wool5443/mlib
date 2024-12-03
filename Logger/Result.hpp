@@ -37,7 +37,7 @@ public:
      *
      * @param error
      */
-    Result(ErrorCode error, SourcePosition pos = {}) noexcept
+    Result(ErrorCode error, detail::SourcePosition pos = {}) noexcept
         : m_error(error, pos), m_ok(false)
     {
         new(&m_error) ErrorCode{error};

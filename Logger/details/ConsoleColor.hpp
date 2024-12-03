@@ -21,6 +21,7 @@
 #endif
 
 namespace mlib {
+namespace detail {
 
 /** @enum ConsoleColor
  * @brief Represents colors for @see SetConsoleColor
@@ -65,6 +66,7 @@ static inline void SetConsoleColor(FILE* file, ConsoleColor color)
         fprintf(file, "\033[0;%dm", static_cast<int>(color));
 }
 
+} // namespace detail
 } // namespace mlib
 
 #endif // MLIB_LOGGER_CONSOLE_COLOR_HPP

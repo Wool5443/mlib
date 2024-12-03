@@ -1,20 +1,20 @@
 //NOLINTBEGIN
 
-#include <iostream>
-#define LOG_IMMEDIATE
-#include "Error.hpp"
+#include "Logger.hpp"
 
+using namespace mlib;
 using namespace err;
 
-LOG_INIT_FILE("../../logErrors.txt");
-
-err::ErrorCode divideAndPrint(int a, int b)
+ErrorCode divideAndPrint(int a, int b)
 {
     if (b == 0)
-        RETURN_ERROR(ERROR_ZERO_DIVISION);
+    {
+        GlobalLogError(ERROR_ZERO_DIVISION, "Don't divide by zero!!!");
+        return ERROR_ZERO_DIVISION;
+    }
 
     int c = a / b;
-    std::cout << a << " / " << b << " = " << c << std::endl;
+    fmt::print("{} / {} = {}\n", a, b, c);
 
     return EVERYTHING_FINE;
 }
@@ -24,7 +24,15 @@ int main()
     divideAndPrint(56, 8);
     divideAndPrint(42, 0);
 
-    LOG_INFO("This is some funny message!!!");
+    GlobalLogInfo("Funny message");
+
+    Logger logger{"log.txt"};
+
+    logger.LogInfo("Here is a log file");
+
+    SetGlobalLoggerLogFile("globalLog.txt");
+
+    GlobalLogInfo("This message will be in globalLog.txt!");
 
     return 0;
 }

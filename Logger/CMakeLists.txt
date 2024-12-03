@@ -1,4 +1,4 @@
 set(LIB_NAME mlibLogger)
 
 add_library(${LIB_NAME} INTERFACE)
-target_include_directories(${LIB_NAME} INTERFACE include)
+target_include_directories(${LIB_NAME} INTERFACE .)

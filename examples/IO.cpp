@@ -1,13 +1,12 @@
 //NOLINTBEGIN
 
-#include "Error.hpp"
+#include "Result.hpp"
 #include "Utils.hpp"
+#include "Logger.hpp"
 
-using namespace err;
 using namespace mlib;
+using namespace err;
 using namespace std;
-
-LOG_INIT_FILE("../../logIO.txt");
 
 int main()
 {
@@ -15,14 +14,22 @@ int main()
 
     Result<string> text = ReadFileToBuf(file);
 
-    RETURN_ERROR_IF(text);
+    if (!text)
+    {
+        GlobalLogError(text.Error());
+        return text.Error();
+    }
 
     Result<vector<string_view>> words = SplitString(*text);
 
-    RETURN_ERROR_IF(words);
+    if (!words)
+    {
+        GlobalLogError(words.Error());
+        return words.Error();
+    }
 
     if (words->size() != 923)
-        LOG_ERROR(ERROR_BAD_VALUE, "Wrong number of words!!!: %zu\n", words->size());
+        GlobalLogError(ERROR_BAD_VALUE, "Wrong number of words!!!: %zu\n", words->size());
 
     for (auto it = words->rbegin(), end = words->rend(); it != end; ++it)
         std::cout << *it << '\n';

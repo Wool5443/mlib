@@ -1,7 +1,7 @@
 /**
  * @file ErrorGen.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
- * @brief Simple error and logging system
+ * @brief Error code generation
  *
  * @version 2.0
  * @date 21.11.2024

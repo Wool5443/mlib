@@ -22,7 +22,7 @@
 #include <iostream>
 #include <vector>
 
-#include "Logger.hpp"
+#include "Result.hpp"
 
 #define ArrayLength(array) sizeof(array) / sizeof(*(array))
 
@@ -53,12 +53,12 @@ static inline bool DoubleEqual(const double x1, const double x2) noexcept
 static err::Result<std::string> ReadFileToBuf(const char* filePath)
 {
     if (!filePath)
-        RETURN_ERROR(err::ERROR_BAD_FILE);
+        return err::ERROR_BAD_FILE;
 
     std::ifstream file{filePath};
 
     if (!file.is_open())
-        RETURN_ERROR(err::ERROR_BAD_FILE);
+        return err::ERROR_BAD_FILE;
 
     std::string str{std::istreambuf_iterator<char>{file},
                     std::istreambuf_iterator<char>{}};

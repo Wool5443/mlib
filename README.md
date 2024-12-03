@@ -12,22 +12,23 @@ reusable code I wrote and I like.
 
 ### Error handling & logging system
 ```c++
-#include <iostream>
-#include "Error.hpp"
+#include "Logger.hpp"
 
+using namespace mlib;
 using namespace err;
 
-LOG_INIT_CONSOLE();
-
-err::ErrorCode divideAndPrint(int a, int b)
+ErrorCode divideAndPrint(int a, int b)
 {
     if (b == 0)
-        RETURN_ERROR(ERROR_ZERO_DIVISION);
+    {
+        GlobalLogError(ERROR_ZERO_DIVISION, "Don't divide by zero!!!");
+        return ERROR_ZERO_DIVISION;
+    }
 
     int c = a / b;
-    std::cout << a << " / " << b << " = " << c << std::endl;
+    fmt::print("{} / {} = {}\n", a, b, c);
 
-    return err::EVERYTHING_FINE;
+    return EVERYTHING_FINE;
 }
 
 int main()
@@ -35,18 +36,37 @@ int main()
     divideAndPrint(56, 8);
     divideAndPrint(42, 0);
 
-    LOG_INFO("This is some funny message!!!\n");
+    GlobalLogInfo("Funny message");
+
+    Logger logger{"log.txt"};
+
+    logger.LogInfo("Here is a log file");
+
+    SetGlobalLoggerLogFile("globalLog.txt");
+
+    GlobalLogInfo("This message will be in globalLog.txt!");
 
     return 0;
 }
 ```
 Output:
 
-56 / 8 = 7
-This is some funny message!!!
+56 / 8 = 7<br>
+<span style="color: red;">[ERROR] ERROR_ZERO_DIVISION:6 /home/twenty/Programming/mlib/examples/Errors.cpp:12 in ErrorCode divideAndPrint(int, int)
+Don't divide by zero!!!</span><br>
 
-<span style="color: red;">2 items were dumped</span><br>
-<span style="color: red;">ERROR_ZERO_DIVISION in /home/twenty/Programming/Logger/examples/Errors.cpp:11 in err::ErrorCode divideAndPrint(int, int)</span>
+<span style="color: cyan;">[INFO] /home/twenty/Programming/mlib/examples/Errors.cpp:27 in int main()</span><br>
+Funny message<br>
+
+```bash
+cat log.txt
+[INFO] /home/twenty/Programming/mlib/examples/Errors.cpp:31 in int main()
+Here is a log file
+
+cat globalLog.txt
+[INFO] /home/twenty/Programming/mlib/examples/Errors.cpp:35 in int main()
+This message will be in globalLog.txt!
+```
 
 # Utils
 
@@ -59,14 +79,13 @@ This is some funny message!!!
 
 ### Reading from file
 ```c++
-#include "Error.hpp"
+#include "Result.hpp"
 #include "Utils.hpp"
+#include "Logger.hpp"
 
-using namespace err;
 using namespace mlib;
+using namespace err;
 using namespace std;
-
-LOG_INIT_FILE("../../logIO.txt");
 
 int main()
 {
@@ -74,14 +93,22 @@ int main()
 
     Result<string> text = ReadFileToBuf(file);
 
-    RETURN_ERROR_IF(text);
+    if (!text)
+    {
+        GlobalLogError(text.Error());
+        return text.Error();
+    }
 
     Result<vector<string_view>> words = SplitString(*text);
 
-    RETURN_ERROR_IF(words);
+    if (!words)
+    {
+        GlobalLogError(words.Error());
+        return words.Error();
+    }
 
     if (words->size() != 923)
-        LOG("Wrong number of words!!!: %zu\n", words->size());
+        GlobalLogError(ERROR_BAD_VALUE, "Wrong number of words!!!: %zu\n", words->size());
 
     for (auto it = words->rbegin(), end = words->rend(); it != end; ++it)
         std::cout << *it << '\n';

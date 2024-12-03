@@ -1,8 +1,25 @@
+/**
+ * @file Logger.hpp
+ * @author Misha Solodilov (mihsolodilov2015@gmail.com)
+ * @brief Simple logger
+ *
+ * @version 3.0
+ * @date 03.12.2024
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+// NOLINTBEGIN
+
 #ifndef MLIB_LOGGER_HPP
 #define MLIB_LOGGER_HPP
 
 #include <cassert>
+#include <chrono>
+#include <iomanip>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include "include/File.hpp"
 #include "include/ConsoleColor.hpp"
 #include "include/SourcePosition.hpp"
@@ -12,6 +29,7 @@ namespace mlib {
 
 class Logger
 {
+    using TimePoint = std::chrono::system_clock::time_point;
 public:
     enum LogType
     {
@@ -38,17 +56,23 @@ public:
 
     template<class... Args>
     void Log(LogType type, err::ErrorCode errorCode, SourcePosition position,
-             const char* formatString = nullptr, Args... args) noexcept
+             TimePoint time,
+             const char* formatString = nullptr, Args&&... args) noexcept
     {
         printType(type);
+
+        std::time_t t = std::chrono::system_clock::to_time_t(time);
+        std::tm tm = *std::localtime(&t);
+
+        fmt::print(m_logFile, " {}:", fmt::streamed(std::put_time(&tm, "%d/%m/%Y %T %Z")));
 
         if (errorCode)
         {
             fmt::print(m_logFile, " {}:{}", err::GetErrorName(errorCode), static_cast<int>(errorCode));
         }
 
-        fmt::print(m_logFile,
-                  " {}:{} in {}\n",
+        fmt::println(m_logFile,
+                  " {}:{} in {}",
                   position.GetFileName(),
                   position.GetLine(),
                   position.GetFunctionName()
@@ -56,8 +80,7 @@ public:
 
         if (formatString)
         {
-            fmt::print(m_logFile, formatString, std::forward<Args>(args)...);
-            fmt::print(m_logFile, "\n");
+            fmt::println(m_logFile, formatString, std::forward<Args>(args)...);
         }
 
         fmt::print(m_logFile, "\n");
@@ -134,7 +157,9 @@ static inline void SetGlobalLoggerLogFile(FILE* newLogFile)
 
 } // namespace mlib
 
-#define Log(type, errorCode, ...) Log(type, errorCode, CURRENT_SOURCE_POSITION() __VA_OPT__(, __VA_ARGS__))
+#define Log(type, errorCode, ...) \
+Log(type, errorCode, CURRENT_SOURCE_POSITION(), std::chrono::system_clock::now() __VA_OPT__(, __VA_ARGS__))
+
 #define LogInfo(...) Log(mlib::Logger::INFO, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
 #define LogDebug(...) Log(mlib::Logger::DEBUG, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
 #define LogError(errorCode, ...) Log(mlib::Logger::ERROR, errorCode __VA_OPT__(, __VA_ARGS__))
@@ -145,3 +170,5 @@ static inline void SetGlobalLoggerLogFile(FILE* newLogFile)
 #define GlobalLogError(errorCode, ...) mlib::Logger::GetGlobalLogger(). LogError(errorCode __VA_OPT__(, __VA_ARGS__))
 
 #endif // MLIB_LOGGER_HPP
+
+// NOLINTEND

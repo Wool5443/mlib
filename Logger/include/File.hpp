@@ -1,7 +1,7 @@
 /**
  * @file File.hpp
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
- * @brief Simple error and logging system
+ * @brief Simple RAII file
  *
  * @version 3.0
  * @date 03.12.2024

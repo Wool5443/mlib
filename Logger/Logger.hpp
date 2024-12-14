@@ -18,6 +18,7 @@
 #include <cassert>
 #include <chrono>
 #include <iomanip>
+#include <mutex>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include "details/File.hpp"
@@ -38,10 +39,7 @@ public:
         ERROR,
     };
 
-    virtual ~Logger()
-    {
-        std::fflush(m_logFile);
-    }
+    virtual ~Logger() = default;
 
     Logger() = default;
 
@@ -51,14 +49,20 @@ public:
         std::setbuf(m_logFile, nullptr);
     }
 
-    Logger(const char* logFilePath) noexcept
-        : Logger(fopen(logFilePath, "w")) {}
+    explicit Logger(const char* logFilePath) noexcept
+        : Logger(std::fopen(logFilePath, "w")) {}
+
+    explicit Logger(std::nullptr_t) noexcept {}
 
     template<class... Args>
     void Log(LogType type, err::ErrorCode errorCode,
              detail::SourcePosition position, TimePoint time,
              const char* formatString = nullptr, Args&&... args) noexcept
     {
+        if (!m_logFile) return;
+
+        std::unique_lock lock(m_mutex);
+
         printType(type);
 
         std::time_t t = std::chrono::system_clock::to_time_t(time);
@@ -72,10 +76,10 @@ public:
         }
 
         fmt::println(m_logFile,
-                  " {}:{} in {}",
-                  position.GetFileName(),
-                  position.GetLine(),
-                  position.GetFunctionName()
+                     " {}:{} in {}",
+                     position.GetFileName(),
+                     position.GetLine(),
+                     position.GetFunctionName()
         );
 
         if (formatString)
@@ -97,24 +101,31 @@ public:
 
     static void SetGlobalLoggerLogFile(FILE* newLogFile) noexcept
     {
-        assert(newLogFile && "Bad log file!!!");
-
         Logger& glogger = GetGlobalLogger();
 
         glogger.~Logger();
 
         glogger.m_logFile.m_file = newLogFile;
 
-        std::setbuf(glogger.m_logFile, nullptr);
+        if (newLogFile)
+        {
+            std::setbuf(newLogFile, nullptr);
+        }
     }
 
     static void SetGlobalLoggerLogFile(const char* newLogFilePath) noexcept
     {
-        SetGlobalLoggerLogFile(fopen(newLogFilePath, "w"));
+        SetGlobalLoggerLogFile(std::fopen(newLogFilePath, "w"));
+    }
+
+    static void SetGlobalLoggerLogFile(std::nullptr_t) noexcept
+    {
+        SetGlobalLoggerLogFile(static_cast<FILE*>(nullptr));
     }
 
 private:
-    detail::File m_logFile = nullptr;
+    detail::File m_logFile{nullptr};
+    std::mutex m_mutex{};
 
     void printType(LogType type) noexcept
     {
@@ -139,20 +150,25 @@ private:
     }
 };
 
-static inline Logger& GetGlobalLogger()
+inline Logger& GetGlobalLogger()
 {
     return Logger::GetGlobalLogger();
 }
 
 
-static inline void SetGlobalLoggerLogFile(const char* newLogFilePath)
+inline void SetGlobalLoggerLogFile(const char* newLogFilePath)
 {
-    return Logger::SetGlobalLoggerLogFile(newLogFilePath);
+    Logger::SetGlobalLoggerLogFile(newLogFilePath);
 }
 
-static inline void SetGlobalLoggerLogFile(FILE* newLogFile)
+inline void SetGlobalLoggerLogFile(FILE* newLogFile)
 {
-    return Logger::SetGlobalLoggerLogFile(newLogFile);
+    Logger::SetGlobalLoggerLogFile(newLogFile);
+}
+
+inline void SetGlobalLoggerLogFile(std::nullptr_t)
+{
+    Logger::SetGlobalLoggerLogFile(nullptr);
 }
 
 } // namespace mlib

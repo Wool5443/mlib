@@ -28,6 +28,15 @@
 
 namespace mlib {
 
+/**
+ * @class Logger
+ *
+ * @brief Simple class for logging. Thread-safe
+ *
+ * It is possible to create local instances of Logger
+ * or one can use a singleton global logger.
+ *
+ */
 class Logger
 {
     using TimePoint = std::chrono::system_clock::time_point;
@@ -43,21 +52,85 @@ public:
 
     Logger() = default;
 
+    /**
+     * @brief Logger(FILE* logFile = stderr)
+     *
+     * @param [in] logFile
+     */
     explicit Logger(FILE* logFile = stderr) noexcept
         : m_logFile(logFile)
     {
         std::setbuf(m_logFile, nullptr);
     }
 
+    /**
+     * @brief Logger(const char* logFilePath)
+     * opens a file at the given path
+     *
+     * @param [in] logFilePath
+     */
     explicit Logger(const char* logFilePath) noexcept
         : Logger(std::fopen(logFilePath, "w")) {}
 
+
+    /**
+     * @brief Disable logger
+     */
     explicit Logger(std::nullptr_t) noexcept {}
 
+    /**
+     * @brief Sets log file
+     *
+     * @param [in] newLogFile
+     */
+    void SetLogFile(FILE* newLogFile) noexcept
+    {
+        m_logFile.Flush();
+
+        m_logFile.m_file = newLogFile;
+
+        if (newLogFile)
+        {
+            std::setbuf(newLogFile, nullptr);
+        }
+    }
+
+    /**
+     * @brief Opens a file and sets the logger log file
+     *
+     * @param [in] newLogFilePath
+     */
+    void SetLogFile(const char* newLogFilePath) noexcept
+    {
+        SetLogFile(fopen(newLogFilePath, "w"));
+    }
+
+    /**
+     * @brief Disable logger
+     */
+    void SetLogFile(std::nullptr_t) noexcept
+    {
+        SetLogFile(static_cast<FILE*>(nullptr));
+    }
+
+    /**
+     * @brief Function that actually logs stuff.
+     * Do not use it because source position and time are collected
+     * using macros
+     *
+     * @tparam Args
+     *
+     * @param [in] type
+     * @param [in] errorCode
+     * @param [in] position
+     * @param [in] time
+     * @param [in] formatString
+     * @param [in] args
+     */
     template<class... Args>
     void Log(LogType type, err::ErrorCode errorCode,
              detail::SourcePosition position, TimePoint time,
-             const char* formatString = nullptr, Args&&... args) noexcept
+             const char* formatString = nullptr, Args&&... args)
     {
         if (!m_logFile) return;
 
@@ -92,37 +165,6 @@ public:
         SetConsoleColor(m_logFile, detail::ConsoleColor::WHITE);
     }
 
-    static Logger& GetGlobalLogger() noexcept
-    {
-        static Logger globalLogger{stderr};
-
-        return globalLogger;
-    }
-
-    static void SetGlobalLoggerLogFile(FILE* newLogFile) noexcept
-    {
-        Logger& glogger = GetGlobalLogger();
-
-        glogger.~Logger();
-
-        glogger.m_logFile.m_file = newLogFile;
-
-        if (newLogFile)
-        {
-            std::setbuf(newLogFile, nullptr);
-        }
-    }
-
-    static void SetGlobalLoggerLogFile(const char* newLogFilePath) noexcept
-    {
-        SetGlobalLoggerLogFile(std::fopen(newLogFilePath, "w"));
-    }
-
-    static void SetGlobalLoggerLogFile(std::nullptr_t) noexcept
-    {
-        SetGlobalLoggerLogFile(static_cast<FILE*>(nullptr));
-    }
-
 private:
     detail::File m_logFile{nullptr};
     std::mutex m_mutex{};
@@ -150,25 +192,44 @@ private:
     }
 };
 
+/**
+ * @brief Get global logger instance. By default logs to stderr
+ *
+ * @return Logger& global logger
+ */
 inline Logger& GetGlobalLogger()
 {
-    return Logger::GetGlobalLogger();
+    static Logger globalLogger{stderr};
+
+    return globalLogger;
 }
 
-
-inline void SetGlobalLoggerLogFile(const char* newLogFilePath)
-{
-    Logger::SetGlobalLoggerLogFile(newLogFilePath);
-}
-
+/**
+ * @brief Sets global logger log file
+ *
+ * @param [in] newLogFile
+ */
 inline void SetGlobalLoggerLogFile(FILE* newLogFile)
 {
-    Logger::SetGlobalLoggerLogFile(newLogFile);
+    GetGlobalLogger().SetLogFile(newLogFile);
 }
 
+/**
+ * @brief Opens a file and sets the globall logger log file
+ *
+ * @param [in] newLogFilePath
+ */
+inline void SetGlobalLoggerLogFile(const char* newLogFilePath)
+{
+    GetGlobalLogger().SetLogFile(newLogFilePath);
+}
+
+/**
+ * @brief Disables global logger
+ */
 inline void SetGlobalLoggerLogFile(std::nullptr_t)
 {
-    Logger::SetGlobalLoggerLogFile(nullptr);
+    GetGlobalLogger().SetLogFile(nullptr);
 }
 
 } // namespace mlib
@@ -180,10 +241,10 @@ Log(type, errorCode, CURRENT_SOURCE_POSITION(), std::chrono::system_clock::now()
 #define LogDebug(...) Log(mlib::Logger::DEBUG, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
 #define LogError(errorCode, ...) Log(mlib::Logger::ERROR, errorCode __VA_OPT__(, __VA_ARGS__))
 
-#define GlobalLog(...) mlib::Logger::GetGlobalLogger(). Log(__VA_ARGS__)
-#define GlobalLogInfo(...) mlib::Logger::GetGlobalLogger(). LogInfo(__VA_ARGS__)
-#define GlobalLogDebug(...) mlib::Logger::GetGlobalLogger(). LogDebug(__VA_ARGS__)
-#define GlobalLogError(errorCode, ...) mlib::Logger::GetGlobalLogger(). LogError(errorCode __VA_OPT__(, __VA_ARGS__))
+#define GlobalLog(...) mlib::GetGlobalLogger(). Log(__VA_ARGS__)
+#define GlobalLogInfo(...) mlib::GetGlobalLogger(). LogInfo(__VA_ARGS__)
+#define GlobalLogDebug(...) mlib::GetGlobalLogger(). LogDebug(__VA_ARGS__)
+#define GlobalLogError(errorCode, ...) mlib::GetGlobalLogger(). LogError(errorCode __VA_OPT__(, __VA_ARGS__))
 
 #endif // MLIB_LOGGER_HPP
 

@@ -40,7 +40,7 @@ public:
     Result(ErrorCode error, detail::SourcePosition pos = {}) noexcept
         : m_error(error, pos), m_ok(false)
     {
-        new(&m_error) ErrorCode{error};
+        new(&m_error) Exception{error, pos};
     }
 
     /**
@@ -56,8 +56,8 @@ public:
         new(&m_value) T{std::forward<U>(value)};
     }
 
-    operator bool() const noexcept { return IsValue(); }
-    operator T() = delete;
+    [[nodiscard]] operator bool() const noexcept { return IsValue(); }
+    [[nodiscard]] operator T() = delete;
 
     /**
      * @brief Check if it has value
@@ -65,7 +65,7 @@ public:
      * @return true
      * @return false
      */
-    bool IsValue() const noexcept { return m_ok; }
+    [[nodiscard]] bool IsValue() const noexcept { return m_ok; }
 
     /**
      * @brief Check if it is error
@@ -73,14 +73,14 @@ public:
      * @return true
      * @return false
      */
-    bool IsError() const noexcept { return !m_ok; }
+    [[nodiscard]] bool IsError() const noexcept { return !m_ok; }
 
     /**
      * @brief Get value. UB if error
      *
      * @return T&
      */
-    T& operator*() noexcept
+    [[nodiscard]] T& operator*() noexcept
     {
         return m_value;
     }
@@ -90,7 +90,7 @@ public:
      *
      * @return T*
      */
-    T* operator->() noexcept
+    [[nodiscard]] T* operator->() noexcept
     {
         return &m_value;
     }
@@ -100,7 +100,7 @@ public:
      *
      * @return T&
      */
-    T& Value()
+    [[nodiscard]] T& Value()
     {
         if (IsError())
         {
@@ -117,7 +117,7 @@ public:
      * @return T
      */
     template<typename U = T>
-    T ValueOr(U&& defaultValue) const
+    [[nodiscard]] T ValueOr(U&& defaultValue) const
     {
         if (IsValue())
             return m_value;
@@ -129,7 +129,7 @@ public:
      *
      * @return ErrorCode
      */
-    ErrorCode Error() const noexcept
+    [[nodiscard]] ErrorCode Error() const noexcept
     {
         if (IsValue())
             return EVERYTHING_FINE;

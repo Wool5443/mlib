@@ -27,15 +27,17 @@ public:
     explicit Exception(ErrorCode errorCode, SourcePosition position = {}) noexcept
         : SourcePosition(position), m_errorCode(errorCode) {}
 
-    operator bool() const noexcept { return m_errorCode != ErrorCode::EVERYTHING_FINE; }
+    [[nodiscard]] operator bool() const noexcept { return m_errorCode != ErrorCode::EVERYTHING_FINE; }
 
-    constexpr ErrorCode GetError() const noexcept { return m_errorCode; }
+    [[nodiscard]] constexpr ErrorCode GetError() const noexcept { return m_errorCode; }
 private:
     ErrorCode m_errorCode;
 };
 
 } // namespace err
 } // namespace mlib
+
+#define MLIB_MAKE_EXCEPTION(errorCode) err::Exception(errorCode, CURRENT_SOURCE_POSITION())
 
 #endif // MLIB_LOGGER_EXCEPTION_HPP
 

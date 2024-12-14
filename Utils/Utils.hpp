@@ -37,9 +37,8 @@ namespace mlib {
  * @return true equal
  * @return false not equal
  */
-static inline bool DoubleEqual(const double x1, const double x2) noexcept
+inline bool DoubleEqual(const double x1, const double x2, const double absoluteTolerance = 1e-5) noexcept
 {
-    const double absoluteTolerance = 1e-5;
     return std::fabs(x1 - x2) < absoluteTolerance;
 }
 
@@ -50,15 +49,15 @@ static inline bool DoubleEqual(const double x1, const double x2) noexcept
  *
  * @return std::optional<std::string>
  */
-static err::Result<std::string> ReadFileToBuf(const char* filePath)
+inline err::Result<std::string> ReadFileToBuf(const char* filePath)
 {
     if (!filePath)
-        return err::ERROR_BAD_FILE;
+        return MLIB_MAKE_EXCEPTION(err::ERROR_BAD_FILE);
 
     std::ifstream file{filePath};
 
     if (!file.is_open())
-        return err::ERROR_BAD_FILE;
+        return MLIB_MAKE_EXCEPTION(err::ERROR_BAD_FILE);
 
     std::string str{std::istreambuf_iterator<char>{file},
                     std::istreambuf_iterator<char>{}};
@@ -73,7 +72,7 @@ static err::Result<std::string> ReadFileToBuf(const char* filePath)
  * @param delimiters
  * @return std::vector<std::string_view>
  */
-static std::vector<std::string_view>
+inline std::vector<std::string_view>
 SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f")
 {
     auto filterFunc = [delimiters](char c)
@@ -140,7 +139,7 @@ public:
      *
      * @return u64 ticks
      */
-    uint64_t Stop() noexcept
+    [[nodiscard]] uint64_t Stop() noexcept
     {
         m_endTicks = GetCPUTicks();
         return m_endTicks - m_startTicks;
@@ -167,7 +166,7 @@ public:
      *
      * @return Duration time
      */
-    Duration Stop() noexcept
+    [[nodiscard]] Duration Stop() noexcept
     {
         m_end = Clock::now();
 

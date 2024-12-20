@@ -11,4 +11,3 @@ target_link_libraries(mlibLogger INTERFACE fmt::fmt)
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
-

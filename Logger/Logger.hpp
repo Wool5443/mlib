@@ -17,7 +17,7 @@
 
 #include <cassert>
 #include <chrono>
-#include <iomanip>
+#include <iomanip> // IWYU pragma: keep
 #include <mutex>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -60,7 +60,9 @@ public:
     explicit Logger(FILE* logFile = stderr) noexcept
         : m_logFile(logFile)
     {
+#ifndef DISABLE_LOGGING
         std::setbuf(m_logFile, nullptr);
+#endif // ifndef DISABLE LOGGING
     }
 
     /**
@@ -85,6 +87,7 @@ public:
      */
     void SetLogFile(FILE* newLogFile) noexcept
     {
+#ifndef DISABLE_LOGGING
         m_logFile.Flush();
 
         m_logFile.m_file = newLogFile;
@@ -93,6 +96,7 @@ public:
         {
             std::setbuf(newLogFile, nullptr);
         }
+#endif // ifndef DISABLE LOGGING
     }
 
     /**
@@ -102,7 +106,9 @@ public:
      */
     void SetLogFile(const char* newLogFilePath) noexcept
     {
+#ifndef DISABLE_LOGGING
         SetLogFile(fopen(newLogFilePath, "w"));
+#endif // ifndef DISABLE LOGGING
     }
 
     /**
@@ -110,7 +116,9 @@ public:
      */
     void SetLogFile(std::nullptr_t) noexcept
     {
+#ifndef DISABLE_LOGGING
         SetLogFile(static_cast<FILE*>(nullptr));
+#endif // ifndef DISABLE LOGGING
     }
 
     /**
@@ -132,6 +140,7 @@ public:
              detail::SourcePosition position, TimePoint time,
              const char* formatString = nullptr, Args&&... args)
     {
+#ifndef DISABLE_LOGGING
         if (!m_logFile) return;
 
         std::unique_lock lock(m_mutex);
@@ -163,6 +172,7 @@ public:
         fmt::print(m_logFile, "\n");
 
         SetConsoleColor(m_logFile, detail::ConsoleColor::WHITE);
+#endif
     }
 
 private:
@@ -171,6 +181,7 @@ private:
 
     void printType(LogType type) noexcept
     {
+#ifndef DISABLE_LOGGING
         switch (type)
         {
             case INFO:
@@ -189,6 +200,7 @@ private:
                 fmt::print(m_logFile, "[UNKNOWN LOG TYPE]");
                 break;
         }
+#endif // ifndef DISABLE LOGGING
     }
 };
 
@@ -199,9 +211,11 @@ private:
  */
 inline Logger& GetGlobalLogger()
 {
+#ifndef DISABLE_LOGGING
     static Logger globalLogger{stderr};
 
     return globalLogger;
+#endif // ifndef DISABLE LOGGING
 }
 
 /**
@@ -211,7 +225,9 @@ inline Logger& GetGlobalLogger()
  */
 inline void SetGlobalLoggerLogFile(FILE* newLogFile)
 {
+#ifndef DISABLE_LOGGING
     GetGlobalLogger().SetLogFile(newLogFile);
+#endif // ifndef DISABLE LOGGING
 }
 
 /**
@@ -221,7 +237,9 @@ inline void SetGlobalLoggerLogFile(FILE* newLogFile)
  */
 inline void SetGlobalLoggerLogFile(const char* newLogFilePath)
 {
+#ifndef DISABLE_LOGGING
     GetGlobalLogger().SetLogFile(newLogFilePath);
+#endif // ifndef DISABLE LOGGING
 }
 
 /**
@@ -229,7 +247,9 @@ inline void SetGlobalLoggerLogFile(const char* newLogFilePath)
  */
 inline void SetGlobalLoggerLogFile(std::nullptr_t)
 {
+#ifndef DISABLE_LOGGING
     GetGlobalLogger().SetLogFile(nullptr);
+#endif // ifndef DISABLE LOGGING
 }
 
 } // namespace mlib
@@ -241,10 +261,21 @@ Log(type, errorCode, CURRENT_SOURCE_POSITION(), std::chrono::system_clock::now()
 #define LogDebug(...) Log(mlib::Logger::DEBUG, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
 #define LogError(errorCode, ...) Log(mlib::Logger::ERROR, errorCode __VA_OPT__(, __VA_ARGS__))
 
+#ifndef DISABLE_LOGGING
+
 #define GlobalLog(...) mlib::GetGlobalLogger(). Log(__VA_ARGS__)
 #define GlobalLogInfo(...) mlib::GetGlobalLogger(). LogInfo(__VA_ARGS__)
 #define GlobalLogDebug(...) mlib::GetGlobalLogger(). LogDebug(__VA_ARGS__)
 #define GlobalLogError(errorCode, ...) mlib::GetGlobalLogger(). LogError(errorCode __VA_OPT__(, __VA_ARGS__))
+
+#else
+
+#define GlobalLog(...)
+#define GlobalLogInfo(...)
+#define GlobalLogDebug(...)
+#define GlobalLogError(...)
+
+#endif // ifndef DISABLE_LOGGING
 
 #endif // MLIB_LOGGER_HPP
 

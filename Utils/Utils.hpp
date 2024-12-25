@@ -114,32 +114,50 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
 template<class Integer, class = std::enable_if_t<std::is_integral_v<Integer>>>
 err::Result<Integer> ParseNumber(std::string_view string, int base = 10)
 {
-    constexpr std::string_view ALPHABET{"0123456789abcdefghijklmnopqrstuvwxyz"};
-
     if (string.length() == 0)
     {
         return err::Result<Integer>(err::ERROR_EMPTY_STRING);
     }
 
-    Integer result = 0;
+    Integer result{};
+    size_t pos = 0;
 
-    for (auto c : string)
+    if (std::is_unsigned_v<Integer>)
     {
-        if (isspace(c))
-        {
-            return err::Result<Integer>{result};
-        }
-        if (!isalnum(c))
-        {
-            return err::Result<Integer>{err::ERROR_BAD_VALUE};
-        }
-        c = tolower(c);
-        result = result * base + ALPHABET.find(c);
+        result = std::stoull(string.cbegin(), &pos, base);
+    }
+    else
+    {
+        result = std::stoll(string.cbegin(), &pos, base);
     }
 
-    return err::Result<Integer>{result};
+    if (pos == string.length() || std::isspace(string[pos]))
+    {
+        return err::Result<Integer>{result};
+    }
+
+    return err::Result<Integer>{err::ERROR_BAD_VALUE};
 }
 
+template<class Float, class = std::enable_if_t<std::is_floating_point_v<Float>>>
+err::Result<Float> ParseNumber(std::string_view string)
+{
+    if (string.length() == 0)
+    {
+        return err::Result<Float>(err::ERROR_EMPTY_STRING);
+    }
+
+    Float result{};
+    size_t pos = 0;
+    result = std::stold(string.cbegin(), &pos);
+
+    if (std::isnan(result))
+    {
+        return err::Result<Float>{err::ERROR_BAD_VALUE};
+    }
+
+    return err::Result<Float>{result};
+}
 
 /**
  * @brief Returns ticks passed since CPU start

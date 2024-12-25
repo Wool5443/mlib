@@ -111,12 +111,42 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
     return words;
 }
 
+template<class Integer, class = std::enable_if_t<std::is_integral_v<Integer>>>
+err::Result<Integer> ParseNumber(std::string_view string, int base = 10)
+{
+    constexpr std::string_view ALPHABET{"0123456789abcdefghijklmnopqrstuvwxyz"};
+
+    if (string.length() == 0)
+    {
+        return err::Result<Integer>(err::ERROR_EMPTY_STRING);
+    }
+
+    Integer result = 0;
+
+    for (auto c : string)
+    {
+        if (isspace(c))
+        {
+            return err::Result<Integer>{result};
+        }
+        if (!isalnum(c))
+        {
+            return err::Result<Integer>{err::ERROR_BAD_VALUE};
+        }
+        c = tolower(c);
+        result = result * base + ALPHABET.find(c);
+    }
+
+    return err::Result<Integer>{result};
+}
+
+
 /**
  * @brief Returns ticks passed since CPU start
  *
  * @return u64 - number of ticks
  */
-static inline __attribute__((always_inline)) uint64_t GetCPUTicks() noexcept
+inline __attribute__((always_inline)) uint64_t GetCPUTicks() noexcept
 {
     uint64_t  lo, hi;
     asm volatile("lfence");
@@ -260,7 +290,7 @@ private:
 
 
 
-                                                                                                                                                                                                                                                                                                                    static int DRAW_HUGE_PENIS_AHAH(void)
+                                                                                                                                                                                                                                                                                                                    inline int DRAW_HUGE_PENIS_AHAH(void)
                                                                                                                                                                                                                                                                                                                     {
                                                                                                                                                                                                                                                                                                                         printf(
                                                                                                                                                                                                                                                                                                                             "⠀⠀⠀⠀⠀⠀⠀⠀⣠⣶⣿⣿⣿⣷⣤⡀⠀⠀⠀⠀⠀⠀⠀\n"

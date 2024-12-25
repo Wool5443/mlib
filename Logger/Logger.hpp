@@ -166,7 +166,7 @@ public:
 
         if (formatString)
         {
-            fmt::println(m_logFile, formatString, std::forward<Args>(args)...);
+            fmt::println(m_logFile, fmt::runtime(formatString), std::forward<Args>(args)...);
         }
 
         fmt::print(m_logFile, "\n");

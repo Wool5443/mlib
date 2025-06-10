@@ -4,3 +4,4 @@ add_executable(Defer Defer.cpp)
 
 target_link_libraries(Errors PRIVATE mlibLogger)
 target_link_libraries(IO PRIVATE mlibUtils)
+target_link_libraries(Defer PRIVATE mlibUtils)

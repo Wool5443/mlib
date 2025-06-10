@@ -1,5 +1,3 @@
-//NOLINTBEGIN
-
 #include "Logger.hpp"
 
 using namespace mlib;
@@ -36,5 +34,3 @@ int main()
 
     return 0;
 }
-
-//NOLINTEND

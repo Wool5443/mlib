@@ -10,8 +10,6 @@
  *
  */
 
-// NOLINTBEGIN
-
 #ifndef MLIB_LOGGER_FILE_HPP
 #define MLIB_LOGGER_FILE_HPP
 
@@ -64,5 +62,3 @@ private:
 } // namespace mlib
 
 #endif // MLIB_LOGGER_FILE_HPP
-
-// NOLINTEND

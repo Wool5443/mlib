@@ -10,8 +10,6 @@
  *
  */
 
-// NOLINTBEGIN
-
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
@@ -337,5 +335,3 @@ private:
                                                                                                                                                                                                                                                                                                                         );
                                                                                                                                                                                                                                                                                                                         return 69;
                                                                                                                                                                                                                                                                                                                     }
-
-// NOLINTEND

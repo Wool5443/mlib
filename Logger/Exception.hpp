@@ -10,8 +10,6 @@
  *
  */
 
-// NOLINTBEGIN
-
 #ifndef MLIB_LOGGER_EXCEPTION_HPP
 #define MLIB_LOGGER_EXCEPTION_HPP
 
@@ -40,5 +38,3 @@ private:
 #define MLIB_MAKE_EXCEPTION(errorCode) err::Exception(errorCode, CURRENT_SOURCE_POSITION())
 
 #endif // MLIB_LOGGER_EXCEPTION_HPP
-
-// NOLINTEND

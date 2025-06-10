@@ -10,8 +10,6 @@
  *
  */
 
-// NOLINTBEGIN
-
 #ifndef MLIB_RESULT_HPP
 #define MLIB_RESULT_HPP
 
@@ -158,5 +156,3 @@ private:
 } // namespace mlib
 
 #endif // MLIB_RESULT_HPP
-
-// NOLINTEND

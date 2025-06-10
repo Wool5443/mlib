@@ -10,8 +10,6 @@
  *
  */
 
-// NOLINTBEGIN
-
 #ifndef MLIB_LOGGER_HPP
 #define MLIB_LOGGER_HPP
 
@@ -278,5 +276,3 @@ Log(type, errorCode, CURRENT_SOURCE_POSITION(), std::chrono::system_clock::now()
 #endif // ifndef DISABLE_LOGGING
 
 #endif // MLIB_LOGGER_HPP
-
-// NOLINTEND

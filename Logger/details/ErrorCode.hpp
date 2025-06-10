@@ -9,8 +9,6 @@
  * @copyright Copyright (c) 2024
  */
 
-// NOLINTBEGIN
-
 #ifndef MLIB_LOGGER_ERROR_CODE_HPP
 #define MLIB_LOGGER_ERROR_CODE_HPP
 
@@ -58,5 +56,3 @@ static constexpr const char* GetErrorName(ErrorCode code)
 } // namespace mlib
 
 #endif // MLIB_LOGGER_ERROR_CODE_HPP
-
-// NOLINTEND

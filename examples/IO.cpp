@@ -1,5 +1,3 @@
-//NOLINTBEGIN
-
 #include "Result.hpp"
 #include "Utils.hpp"
 #include "Logger.hpp"
@@ -55,5 +53,3 @@ int main()
 
     return 0;
 }
-
-//NOLINTEND

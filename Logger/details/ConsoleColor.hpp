@@ -9,8 +9,6 @@
  * @copyright Copyright (c) 2024
  */
 
-// NOLINTBEGIN
-
 #ifndef MLIB_LOGGER_CONSOLE_COLOR_HPP
 #define MLIB_LOGGER_CONSOLE_COLOR_HPP
 
@@ -70,5 +68,3 @@ static inline void SetConsoleColor(FILE* file, ConsoleColor color)
 } // namespace mlib
 
 #endif // MLIB_LOGGER_CONSOLE_COLOR_HPP
-
-// NOLINTEND

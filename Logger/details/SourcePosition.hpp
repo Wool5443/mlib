@@ -10,8 +10,6 @@
  *
  */
 
-// NOLINTBEGIN
-
 #ifndef MLIB_LOGGER_SOURCE_POSITION_HPP
 #define MLIB_LOGGER_SOURCE_POSITION_HPP
 
@@ -57,5 +55,3 @@ mlib::detail::SourcePosition(GET_FILE_NAME(), GET_FUNCTION_NAME(), GET_LINE())
 } // namespace mlib
 
 #endif
-
-// NOLINTEND

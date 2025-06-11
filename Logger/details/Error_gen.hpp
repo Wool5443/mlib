@@ -3,10 +3,10 @@
  * @author Misha Solodilov (mihsolodilov2015@gmail.com)
  * @brief Error code generation
  *
- * @version 3.0
- * @date 03.12.2024
+ * @version 1.0
+ * @date 12.06.2025
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2025
  *
  */
 

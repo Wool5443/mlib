@@ -39,12 +39,29 @@ public:
         fflush(m_file);
     }
 
-    virtual ~File()
+    void close() noexcept
     {
         if (m_file && m_file != stdout && m_file != stderr && m_file != stdin)
         {
             fclose(m_file);
         }
+    }
+
+    void reset(FILE* file) noexcept
+    {
+        close();
+        m_file = file;
+    }
+
+    void reset(const char* path, const char* read_mode = "r") noexcept
+    {
+        close();
+        m_file = fopen(path, read_mode);
+    }
+
+    virtual ~File()
+    {
+        close();
     }
 
     File(const File& other) = delete;

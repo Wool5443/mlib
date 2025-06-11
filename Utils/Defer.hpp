@@ -22,7 +22,7 @@ class Deferer
 {
     Func m_func;
 public:
-    Deferer(Func&& func)
+    Deferer(Func func)
         : m_func(std::move(func)) {}
 
     ~Deferer() noexcept(noexcept(m_func()))

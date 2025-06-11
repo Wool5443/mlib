@@ -33,6 +33,7 @@ public:
     const char* get_function_name() const noexcept { return m_func_name; }
 
     size_t get_line() const noexcept { return m_line; }
+
 private:
     const char* m_file_name = nullptr;
     const char* m_func_name = nullptr;

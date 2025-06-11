@@ -34,25 +34,31 @@ public:
      * @brief Construct an error Result
      *
      * @param [in] error
+     *
+     * @see mlib::err::Exception
      */
     Result(Error_code error, detail::Source_position pos = {}) noexcept
-        : m_error(error, pos), m_ok(false)
-    {
-        new(&m_error) Exception{error, pos};
-    }
+        : m_error{error, pos}, m_ok{true} {}
+
+    /**
+     * @brief Construct an error Result
+     *
+     * @param [in] error
+     *
+     * @see mlib::err::Exception
+     */
+    Result(Exception error) noexcept
+        : m_error{error}, m_ok{true} {}
 
     /**
      * @brief Construct a valid Result
      *
      * @tparam U perfect forwarding
-     * @param value
+     * @param [in] value
      */
     template<typename U = T>
-    Result(U&& value)
-        : m_ok(true)
-    {
-        new(&m_value) T{std::forward<U>(value)};
-    }
+    Result(U&& value) noexcept(noexcept(T()))
+        : m_value{std::forward<U>(value)}, m_ok{true} {}
 
     [[nodiscard]] operator bool() const noexcept { return is_value(); }
     [[nodiscard]] operator T() = delete;
@@ -115,11 +121,11 @@ public:
      * @return T
      */
     template<typename U = T>
-    [[nodiscard]] T value_or(U&& defaultValue) const
+    [[nodiscard]] T value_or(U&& default_value) const
     {
         if (is_value())
             return m_value;
-        return std::forward<U>(defaultValue);
+        return std::forward<U>(default_value);
     }
 
     /**
@@ -130,7 +136,9 @@ public:
     [[nodiscard]] Error_code error() const noexcept
     {
         if (is_value())
+        {
             return EVERYTHING_FINE;
+        }
         return m_error.get_error();
     }
 
@@ -140,7 +148,9 @@ public:
     ~Result()
     {
         if (is_value())
+        {
             m_value.~T();
+        }
     }
 private:
     union

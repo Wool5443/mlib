@@ -15,8 +15,8 @@
 
 #include <cassert>
 #include <chrono>
-#include <iomanip> // IWYU pragma: keep
 #include <mutex>
+#include <iomanip>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include "details/File.hpp"
@@ -59,7 +59,7 @@ public:
         : m_log_file(log_file)
     {
 #ifndef DISABLE_LOGGING
-        std::setbuf(m_log_file, nullptr);
+        setbuf(m_log_file, nullptr);
 #endif // ifndef DISABLE LOGGING
     }
 
@@ -147,8 +147,8 @@ public:
 
         printType(type);
 
-        std::time_t t = std::chrono::system_clock::to_time_t(time);
-        std::tm tm = *std::localtime(&t);
+        time_t t = std::chrono::system_clock::to_time_t(time);
+        tm tm = *std::localtime(&t);
 
         fmt::print(m_log_file, " {}:", fmt::streamed(std::put_time(&tm, "%d/%m/%Y %T %Z")));
 

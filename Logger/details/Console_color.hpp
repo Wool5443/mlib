@@ -24,7 +24,7 @@ namespace detail {
 /** @enum ConsoleColor
  * @brief Represents colors for @see SetConsoleColor
  */
-enum class ConsoleColor
+enum class Console_color
 {
     BLACK = 30,
     RED,
@@ -44,7 +44,7 @@ enum class ConsoleColor
  * @return true
  * @return false
  */
-static inline bool SupportsColors(FILE* file) noexcept
+inline bool supports_colors(FILE* file) noexcept
 {
 #ifdef __linux
     return isatty(fileno(file));
@@ -58,9 +58,9 @@ static inline bool SupportsColors(FILE* file) noexcept
  * @param [in] out stream
  * @param [in] color
  */
-static inline void SetConsoleColor(FILE* file, ConsoleColor color)
+inline void set_console_color(FILE* file, Console_color color)
 {
-    if (SupportsColors(file))
+    if (supports_colors(file))
         fprintf(file, "\033[0;%dm", static_cast<int>(color));
 }
 

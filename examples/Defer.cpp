@@ -9,6 +9,7 @@ int main()
 
     for (int i = 0; i < 100; i++)
     {
+        numbers[i] = i;
         fmt::println("{}", numbers[i]);
     }
 }

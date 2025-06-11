@@ -20,9 +20,9 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include "details/File.hpp"
-#include "details/ConsoleColor.hpp"
-#include "details/SourcePosition.hpp"
-#include "details/ErrorCode.hpp"
+#include "details/Console_color.hpp"
+#include "details/Source_position.hpp"
+#include "details/Error_code.hpp"
 
 namespace mlib {
 
@@ -55,11 +55,11 @@ public:
      *
      * @param [in] logFile
      */
-    explicit Logger(FILE* logFile = stderr) noexcept
-        : m_logFile(logFile)
+    explicit Logger(FILE* log_file = stderr) noexcept
+        : m_log_file(log_file)
     {
 #ifndef DISABLE_LOGGING
-        std::setbuf(m_logFile, nullptr);
+        std::setbuf(m_log_file, nullptr);
 #endif // ifndef DISABLE LOGGING
     }
 
@@ -69,8 +69,8 @@ public:
      *
      * @param [in] logFilePath
      */
-    explicit Logger(const char* logFilePath) noexcept
-        : Logger(std::fopen(logFilePath, "w")) {}
+    explicit Logger(const char* log_file_path) noexcept
+        : Logger(std::fopen(log_file_path, "w")) {}
 
 
     /**
@@ -83,16 +83,16 @@ public:
      *
      * @param [in] newLogFile
      */
-    void SetLogFile(FILE* newLogFile) noexcept
+    void set_log_file(FILE* new_log_file) noexcept
     {
 #ifndef DISABLE_LOGGING
-        m_logFile.Flush();
+        m_log_file.flush();
 
-        m_logFile.m_file = newLogFile;
+        m_log_file.m_file = new_log_file;
 
-        if (newLogFile)
+        if (new_log_file)
         {
-            std::setbuf(newLogFile, nullptr);
+            setbuf(new_log_file, nullptr);
         }
 #endif // ifndef DISABLE LOGGING
     }
@@ -100,22 +100,22 @@ public:
     /**
      * @brief Opens a file and sets the logger log file
      *
-     * @param [in] newLogFilePath
+     * @param [in] new_log_file_path
      */
-    void SetLogFile(const char* newLogFilePath) noexcept
+    void set_log_file(const char* new_log_file_path) noexcept
     {
 #ifndef DISABLE_LOGGING
-        SetLogFile(fopen(newLogFilePath, "w"));
+        set_log_file(fopen(new_log_file_path, "w"));
 #endif // ifndef DISABLE LOGGING
     }
 
     /**
      * @brief Disable logger
      */
-    void SetLogFile(std::nullptr_t) noexcept
+    void set_log_file(std::nullptr_t) noexcept
     {
 #ifndef DISABLE_LOGGING
-        SetLogFile(static_cast<FILE*>(nullptr));
+        set_log_file(static_cast<FILE*>(nullptr));
 #endif // ifndef DISABLE LOGGING
     }
 
@@ -134,12 +134,14 @@ public:
      * @param [in] args
      */
     template<class... Args>
-    void Log(LogType type, err::ErrorCode errorCode,
-             detail::SourcePosition position, TimePoint time,
-             const char* formatString = nullptr, Args&&... args)
+    void log(
+        LogType type, err::Error_code error_code,
+        detail::Source_position position, TimePoint time,
+        const char* format_string = nullptr, Args&&... args
+    )
     {
 #ifndef DISABLE_LOGGING
-        if (!m_logFile) return;
+        if (!m_log_file) return;
 
         std::unique_lock lock(m_mutex);
 
@@ -148,33 +150,33 @@ public:
         std::time_t t = std::chrono::system_clock::to_time_t(time);
         std::tm tm = *std::localtime(&t);
 
-        fmt::print(m_logFile, " {}:", fmt::streamed(std::put_time(&tm, "%d/%m/%Y %T %Z")));
+        fmt::print(m_log_file, " {}:", fmt::streamed(std::put_time(&tm, "%d/%m/%Y %T %Z")));
 
-        if (errorCode)
+        if (error_code)
         {
-            fmt::print(m_logFile, " {}:{}", err::GetErrorName(errorCode), static_cast<int>(errorCode));
+            fmt::print(m_log_file, " {}:{}", err::get_error_name(error_code), static_cast<int>(error_code));
         }
 
-        fmt::println(m_logFile,
+        fmt::println(m_log_file,
                      " {}:{} in {}",
-                     position.GetFileName(),
-                     position.GetLine(),
-                     position.GetFunctionName()
+                     position.get_file_name(),
+                     position.get_line(),
+                     position.get_function_name()
         );
 
-        if (formatString)
+        if (format_string)
         {
-            fmt::println(m_logFile, fmt::runtime(formatString), std::forward<Args>(args)...);
+            fmt::println(m_log_file, fmt::runtime(format_string), std::forward<Args>(args)...);
         }
 
-        fmt::print(m_logFile, "\n");
+        fmt::print(m_log_file, "\n");
 
-        SetConsoleColor(m_logFile, detail::ConsoleColor::WHITE);
+        set_console_color(m_log_file, detail::Console_color::WHITE);
 #endif
     }
 
 private:
-    detail::File m_logFile{nullptr};
+    detail::File m_log_file{nullptr};
     std::mutex m_mutex{};
 
     void printType(LogType type) noexcept
@@ -183,19 +185,19 @@ private:
         switch (type)
         {
             case INFO:
-                SetConsoleColor(m_logFile, detail::ConsoleColor::CYAN);
-                fmt::print(m_logFile, "[INFO]");
+                set_console_color(m_log_file, detail::Console_color::CYAN);
+                fmt::print(m_log_file, "[INFO]");
                 break;
             case DEBUG:
-                SetConsoleColor(m_logFile, detail::ConsoleColor::YELLOW);
-                fmt::print(m_logFile, "[DEBUG]");
+                set_console_color(m_log_file, detail::Console_color::YELLOW);
+                fmt::print(m_log_file, "[DEBUG]");
                 break;
             case ERROR:
-                SetConsoleColor(m_logFile, detail::ConsoleColor::RED);
-                fmt::print(m_logFile, "[ERROR]");
+                set_console_color(m_log_file, detail::Console_color::RED);
+                fmt::print(m_log_file, "[ERROR]");
                 break;
             default:
-                fmt::print(m_logFile, "[UNKNOWN LOG TYPE]");
+                fmt::print(m_log_file, "[UNKNOWN LOG TYPE]");
                 break;
         }
 #endif // ifndef DISABLE LOGGING
@@ -207,12 +209,12 @@ private:
  *
  * @return Logger& global logger
  */
-inline Logger& GetGlobalLogger()
+inline Logger& get_global_logger()
 {
 #ifndef DISABLE_LOGGING
-    static Logger globalLogger{stderr};
+    static Logger global_logger{stderr};
 
-    return globalLogger;
+    return global_logger;
 #endif // ifndef DISABLE LOGGING
 }
 
@@ -221,10 +223,10 @@ inline Logger& GetGlobalLogger()
  *
  * @param [in] newLogFile
  */
-inline void SetGlobalLoggerLogFile(FILE* newLogFile)
+inline void set_global_logger_log_file(FILE* newLogFile)
 {
 #ifndef DISABLE_LOGGING
-    GetGlobalLogger().SetLogFile(newLogFile);
+    get_global_logger().set_log_file(newLogFile);
 #endif // ifndef DISABLE LOGGING
 }
 
@@ -233,45 +235,45 @@ inline void SetGlobalLoggerLogFile(FILE* newLogFile)
  *
  * @param [in] newLogFilePath
  */
-inline void SetGlobalLoggerLogFile(const char* newLogFilePath)
+inline void set_global_logger_log_file(const char* newLogFilePath)
 {
 #ifndef DISABLE_LOGGING
-    GetGlobalLogger().SetLogFile(newLogFilePath);
+    get_global_logger().set_log_file(newLogFilePath);
 #endif // ifndef DISABLE LOGGING
 }
 
 /**
  * @brief Disables global logger
  */
-inline void SetGlobalLoggerLogFile(std::nullptr_t)
+inline void set_global_logger_log_file(std::nullptr_t)
 {
 #ifndef DISABLE_LOGGING
-    GetGlobalLogger().SetLogFile(nullptr);
+    get_global_logger().set_log_file(nullptr);
 #endif // ifndef DISABLE LOGGING
 }
 
 } // namespace mlib
 
-#define Log(type, errorCode, ...) \
-Log(type, errorCode, CURRENT_SOURCE_POSITION(), std::chrono::system_clock::now() __VA_OPT__(, __VA_ARGS__))
+#define log(type, error_code, ...) \
+log(type, error_code, CURRENT_SOURCE_POSITION(), std::chrono::system_clock::now() __VA_OPT__(, __VA_ARGS__))
 
-#define LogInfo(...) Log(mlib::Logger::INFO, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
-#define LogDebug(...) Log(mlib::Logger::DEBUG, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
-#define LogError(errorCode, ...) Log(mlib::Logger::ERROR, errorCode __VA_OPT__(, __VA_ARGS__))
+#define log_info(...) log(mlib::Logger::INFO, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
+#define log_debug(...) log(mlib::Logger::DEBUG, mlib::err::EVERYTHING_FINE __VA_OPT__(, __VA_ARGS__))
+#define log_error(error_code, ...) log(mlib::Logger::ERROR, error_code __VA_OPT__(, __VA_ARGS__))
 
 #ifndef DISABLE_LOGGING
 
-#define GlobalLog(...) mlib::GetGlobalLogger(). Log(__VA_ARGS__)
-#define GlobalLogInfo(...) mlib::GetGlobalLogger(). LogInfo(__VA_ARGS__)
-#define GlobalLogDebug(...) mlib::GetGlobalLogger(). LogDebug(__VA_ARGS__)
-#define GlobalLogError(errorCode, ...) mlib::GetGlobalLogger(). LogError(errorCode __VA_OPT__(, __VA_ARGS__))
+#define global_log(...) mlib::get_global_logger(). log(__VA_ARGS__)
+#define global_log_info(...) mlib::get_global_logger(). log_info(__VA_ARGS__)
+#define global_log_debug(...) mlib::get_global_logger(). log_debug(__VA_ARGS__)
+#define global_log_error(error_code, ...) mlib::get_global_logger(). log_error(error_code __VA_OPT__(, __VA_ARGS__))
 
 #else
 
-#define GlobalLog(...)
-#define GlobalLogInfo(...)
-#define GlobalLogDebug(...)
-#define GlobalLogError(...)
+#define global_log(...)
+#define global_log_info(...)
+#define global_log_debug(...)
+#define global_log_error(...)
 
 #endif // ifndef DISABLE_LOGGING
 

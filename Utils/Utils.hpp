@@ -22,7 +22,7 @@
 
 #include "Result.hpp"
 
-#define ArrayLength(array) sizeof(array) / sizeof(*(array))
+#define array_length(array) sizeof(array) / sizeof(*(array))
 
 namespace mlib {
 
@@ -35,7 +35,7 @@ namespace mlib {
  * @return true equal
  * @return false not equal
  */
-inline bool DoubleEqual(const double x1, const double x2, const double absoluteTolerance = 1e-5) noexcept
+inline bool double_equal(const double x1, const double x2, const double absoluteTolerance = 1e-5) noexcept
 {
     return std::fabs(x1 - x2) < absoluteTolerance;
 }
@@ -45,20 +45,28 @@ inline bool DoubleEqual(const double x1, const double x2, const double absoluteT
  *
  * @param [in] filePath path to the file
  *
- * @return std::optional<std::string>
+ * @return err::Result<std::string>
+ *
+ * @see err::Result
  */
-inline err::Result<std::string> ReadFileToBuf(const char* filePath)
+inline err::Result<std::string> read_file(const char* filePath)
 {
     if (!filePath)
+    {
         return MLIB_MAKE_EXCEPTION(err::ERROR_BAD_FILE);
+    }
 
     std::ifstream file{filePath};
 
     if (!file.is_open())
+    {
         return MLIB_MAKE_EXCEPTION(err::ERROR_BAD_FILE);
+    }
 
-    std::string str{std::istreambuf_iterator<char>{file},
-                    std::istreambuf_iterator<char>{}};
+    std::string str {
+        std::istreambuf_iterator<char>{file},
+        std::istreambuf_iterator<char>{}
+    };
 
     return str;
 }
@@ -66,14 +74,15 @@ inline err::Result<std::string> ReadFileToBuf(const char* filePath)
 /**
  * @brief Splits string by delimiters
  *
- * @param string
- * @param delimiters
+ * @param [in] string
+ * @param [in] delimiters
+ *
  * @return std::vector<std::string_view>
  */
 inline std::vector<std::string_view>
-SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f")
+split_string(std::string_view string, std::string_view delimiters = " \r\t\n\v\f")
 {
-    auto filterFunc = [delimiters](char c)
+    auto filter_func = [delimiters](char c)
     {
         for (char delim : delimiters)
             if (c == delim)
@@ -81,13 +90,17 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
         return false;
     };
 
-    size_t numOfWords = std::count_if(string.begin(), string.end(), filterFunc) + 1;
+    size_t num_of_words = static_cast<size_t>(
+        std::count_if(string.begin(), string.end(), filter_func) + 1
+    );
 
-    if (numOfWords == 1)
+    if (num_of_words == 1)
+    {
         return std::vector{string};
+    }
 
     std::vector<std::string_view> words;
-    words.reserve(numOfWords);
+    words.reserve(num_of_words);
 
     size_t curr = 0;
     size_t next = string.find_first_of(delimiters);
@@ -100,7 +113,9 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
     {
         std::string_view word = string.substr(curr, next - curr);
         if (word.length() > 0)
+        {
             words.push_back(word);
+        }
 
         curr = next + 1;
         next = string.find_first_of(delimiters, curr);
@@ -109,8 +124,20 @@ SplitString(std::string_view string, std::string_view delimiters = " \r\t\n\v\f"
     return words;
 }
 
+/**
+ * @brief Parses string as an integer
+ *
+ * @tparam Integer
+ *
+ * @param [in] string
+ * @param [in] base
+ *
+ * @return Result
+ *
+ * @see err::Result
+ */
 template<class Integer, class = std::enable_if_t<std::is_integral_v<Integer>>>
-err::Result<Integer> ParseNumber(std::string_view string, int base = 10)
+err::Result<Integer> parse_integer(std::string_view string, int base = 10)
 {
     if (string.length() == 0)
     {
@@ -137,8 +164,19 @@ err::Result<Integer> ParseNumber(std::string_view string, int base = 10)
     return err::Result<Integer>{err::ERROR_BAD_VALUE};
 }
 
+/**
+ * @brief Parses string as a float
+ *
+ * @tparam Float
+ *
+ * @param [in] string
+ *
+ * @return err::Result<Float>
+ *
+ * @see err::Result
+ */
 template<class Float, class = std::enable_if_t<std::is_floating_point_v<Float>>>
-err::Result<Float> ParseNumber(std::string_view string)
+err::Result<Float> parse_float(std::string_view string)
 {
     if (string.length() == 0)
     {
@@ -162,7 +200,7 @@ err::Result<Float> ParseNumber(std::string_view string)
  *
  * @return u64 - number of ticks
  */
-inline __attribute__((always_inline)) uint64_t GetCPUTicks() noexcept
+inline __attribute__((always_inline)) uint64_t get_cpu_ticks() noexcept
 {
     uint64_t  lo, hi;
     asm volatile("lfence");
@@ -171,28 +209,28 @@ inline __attribute__((always_inline)) uint64_t GetCPUTicks() noexcept
     return (hi << 32) + lo;
 }
 
-struct TickTimer
+struct Tick_timer
 {
 public:
     /**
      * @brief Starts the timer
      */
-    TickTimer() noexcept
-        : m_startTicks(GetCPUTicks()) {}
+    Tick_timer() noexcept
+        : m_start_ticks(get_cpu_ticks()) {}
 
     /**
      * @brief Stops the timer and return how much ticks passed
      *
      * @return u64 ticks
      */
-    [[nodiscard]] uint64_t Stop() noexcept
+    [[nodiscard]] uint64_t stop() noexcept
     {
-        m_endTicks = GetCPUTicks();
-        return m_endTicks - m_startTicks;
+        m_end_ticks = get_cpu_ticks();
+        return m_end_ticks - m_start_ticks;
     }
 private:
-    uint64_t m_startTicks = 0;
-    uint64_t m_endTicks   = 0;
+    uint64_t m_start_ticks = 0;
+    uint64_t m_end_ticks   = 0;
 };
 
 struct Timer
@@ -212,20 +250,20 @@ public:
      *
      * @return Duration time
      */
-    [[nodiscard]] Duration Stop() noexcept
+    [[nodiscard]] Duration stop() noexcept
     {
         m_end = Clock::now();
 
         return m_end - m_start;
     }
 
-    void PrintDuration(std::ostream& out) noexcept
+    void print_duration(std::ostream& out) noexcept
     {
-        Duration dur = Stop();
-        PrintDuration(out, dur);
+        Duration dur = stop();
+        print_duration(out, dur);
     }
 
-    static void PrintDuration(std::ostream& out, Duration duration) noexcept
+    static void print_duration(std::ostream& out, Duration duration) noexcept
     {
         using secs = std::chrono::seconds;
         using ms   = std::chrono::milliseconds;

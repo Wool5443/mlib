@@ -18,24 +18,24 @@
 namespace mlib {
 namespace detail {
 
-class SourcePosition {
+class Source_position {
 public:
-    virtual ~SourcePosition() = default;
+    virtual ~Source_position() = default;
 
-    SourcePosition() = default;
+    Source_position() = default;
 
-    explicit SourcePosition(const char* fileName, const char* funcName,
+    explicit Source_position(const char* file_name, const char* func_name,
                    size_t line) noexcept
-        : m_fileName(fileName), m_funcName(funcName), m_line(line) {}
+        : m_file_name(file_name), m_func_name(func_name), m_line(line) {}
 
-    const char* GetFileName() const noexcept { return m_fileName; }
+    const char* get_file_name() const noexcept { return m_file_name; }
 
-    const char* GetFunctionName() const noexcept { return m_funcName; }
+    const char* get_function_name() const noexcept { return m_func_name; }
 
-    size_t GetLine() const noexcept { return m_line; }
+    size_t get_line() const noexcept { return m_line; }
 private:
-    const char* m_fileName = nullptr;
-    const char* m_funcName = nullptr;
+    const char* m_file_name = nullptr;
+    const char* m_func_name = nullptr;
     size_t m_line = 0;
 };
 
@@ -49,7 +49,7 @@ private:
 #endif
 
 #define CURRENT_SOURCE_POSITION() \
-mlib::detail::SourcePosition(GET_FILE_NAME(), GET_FUNCTION_NAME(), GET_LINE())
+mlib::detail::Source_position(GET_FILE_NAME(), GET_FUNCTION_NAME(), GET_LINE())
 
 } // namespace detail
 } // namespace mlib

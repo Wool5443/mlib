@@ -33,9 +33,9 @@ public:
     /**
      * @brief Construct an error Result
      *
-     * @param error
+     * @param [in] error
      */
-    Result(ErrorCode error, detail::SourcePosition pos = {}) noexcept
+    Result(Error_code error, detail::Source_position pos = {}) noexcept
         : m_error(error, pos), m_ok(false)
     {
         new(&m_error) Exception{error, pos};
@@ -54,7 +54,7 @@ public:
         new(&m_value) T{std::forward<U>(value)};
     }
 
-    [[nodiscard]] operator bool() const noexcept { return IsValue(); }
+    [[nodiscard]] operator bool() const noexcept { return is_value(); }
     [[nodiscard]] operator T() = delete;
 
     /**
@@ -63,7 +63,7 @@ public:
      * @return true
      * @return false
      */
-    [[nodiscard]] bool IsValue() const noexcept { return m_ok; }
+    [[nodiscard]] bool is_value() const noexcept { return m_ok; }
 
     /**
      * @brief Check if it is error
@@ -71,7 +71,7 @@ public:
      * @return true
      * @return false
      */
-    [[nodiscard]] bool IsError() const noexcept { return !m_ok; }
+    [[nodiscard]] bool is_error() const noexcept { return !m_ok; }
 
     /**
      * @brief Get value. UB if error
@@ -98,9 +98,9 @@ public:
      *
      * @return T&
      */
-    [[nodiscard]] T& Value()
+    [[nodiscard]] T& value()
     {
-        if (IsError())
+        if (is_error())
         {
             throw m_error;
         }
@@ -115,9 +115,9 @@ public:
      * @return T
      */
     template<typename U = T>
-    [[nodiscard]] T ValueOr(U&& defaultValue) const
+    [[nodiscard]] T value_or(U&& defaultValue) const
     {
-        if (IsValue())
+        if (is_value())
             return m_value;
         return std::forward<U>(defaultValue);
     }
@@ -127,11 +127,11 @@ public:
      *
      * @return ErrorCode
      */
-    [[nodiscard]] ErrorCode Error() const noexcept
+    [[nodiscard]] Error_code error() const noexcept
     {
-        if (IsValue())
+        if (is_value())
             return EVERYTHING_FINE;
-        return m_error.GetError();
+        return m_error.get_error();
     }
 
     /**
@@ -139,7 +139,7 @@ public:
      */
     ~Result()
     {
-        if (IsValue())
+        if (is_value())
             m_value.~T();
     }
 private:

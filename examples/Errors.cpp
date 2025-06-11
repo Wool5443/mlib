@@ -3,11 +3,11 @@
 using namespace mlib;
 using namespace err;
 
-ErrorCode divideAndPrint(int a, int b)
+Error_code divideAndPrint(int a, int b)
 {
     if (b == 0)
     {
-        GlobalLogError(ERROR_ZERO_DIVISION, "Don't divide by zero!!!");
+        global_log_error(ERROR_ZERO_DIVISION, "Don't divide by zero!!!");
         return ERROR_ZERO_DIVISION;
     }
 
@@ -22,15 +22,15 @@ int main()
     divideAndPrint(56, 8);
     divideAndPrint(42, 0);
 
-    GlobalLogInfo("Funny message");
+    global_log_info("Funny message");
 
     Logger logger{"log.txt"};
 
-    logger.LogInfo("Here is a log file");
+    logger.log_info("Here is a log file");
 
-    SetGlobalLoggerLogFile("globalLog.txt");
+    set_global_logger_log_file("globalLog.txt");
 
-    GlobalLogInfo("This message will be in globalLog.txt!");
+    global_log_info("This message will be in globalLog.txt!");
 
     return 0;
 }

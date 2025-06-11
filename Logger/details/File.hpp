@@ -26,15 +26,15 @@ public:
     explicit File(FILE* file) noexcept
         : m_file(file) {}
 
-    explicit File(const char* path, const char* readMode = "r") noexcept
-        : m_file(std::fopen(path, readMode)) {}
+    explicit File(const char* path, const char* read_mode = "r") noexcept
+        : m_file(std::fopen(path, read_mode)) {}
 
     explicit File(std::nullptr_t) {}
 
     [[nodiscard]] operator FILE*() noexcept { return m_file; }
     [[nodiscard]] operator bool() noexcept { return m_file; }
 
-    void Flush() noexcept
+    void flush() noexcept
     {
         fflush(m_file);
     }
@@ -58,7 +58,6 @@ private:
 };
 
 } // namespace detail
-
 } // namespace mlib
 
 #endif // MLIB_LOGGER_FILE_HPP

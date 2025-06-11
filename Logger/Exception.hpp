@@ -13,28 +13,28 @@
 #ifndef MLIB_LOGGER_EXCEPTION_HPP
 #define MLIB_LOGGER_EXCEPTION_HPP
 
-#include "details/SourcePosition.hpp"
-#include "details/ErrorCode.hpp"
+#include "details/Source_position.hpp"
+#include "details/Error_code.hpp"
 
 namespace mlib {
 namespace err {
 
-class Exception : public detail::SourcePosition
+class Exception : public detail::Source_position
 {
 public:
-    explicit Exception(ErrorCode errorCode, SourcePosition position = {}) noexcept
-        : SourcePosition(position), m_errorCode(errorCode) {}
+    explicit Exception(Error_code error_code, Source_position position = {}) noexcept
+        : Source_position(position), m_error_code(error_code) {}
 
-    [[nodiscard]] operator bool() const noexcept { return m_errorCode != ErrorCode::EVERYTHING_FINE; }
+    [[nodiscard]] operator bool() const noexcept { return m_error_code != Error_code::EVERYTHING_FINE; }
 
-    [[nodiscard]] constexpr ErrorCode GetError() const noexcept { return m_errorCode; }
+    [[nodiscard]] constexpr Error_code get_error() const noexcept { return m_error_code; }
 private:
-    ErrorCode m_errorCode;
+    Error_code m_error_code;
 };
 
 } // namespace err
 } // namespace mlib
 
-#define MLIB_MAKE_EXCEPTION(errorCode) err::Exception(errorCode, CURRENT_SOURCE_POSITION())
+#define MLIB_MAKE_EXCEPTION(error_code) err::Exception(error_code, CURRENT_SOURCE_POSITION())
 
 #endif // MLIB_LOGGER_EXCEPTION_HPP
